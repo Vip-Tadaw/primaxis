@@ -321,6 +321,9 @@
         .amount-input-wrap input:focus { border-color: var(--neon-light-blue); box-shadow: 0 0 10px rgba(0,210,255,0.2); }
         .currency-badge { position: absolute; left: 12px; display: flex; align-items: center; gap: 4px; font-size: 11px; font-weight: bold; color: #fff; pointer-events: none; }
         .currency-badge img { width: 16px; height: 16px; }
+.amount-input-wrap input:not(:placeholder-shown) + .currency-badge {
+    display: none;
+}
 
         .upload-area { 
             border: 1px dashed rgba(100, 150, 255, 0.45); 
