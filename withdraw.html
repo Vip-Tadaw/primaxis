@@ -403,7 +403,7 @@
 
             let addressInput = currentUserData.walletAddress ? currentUserData.walletAddress.trim() : "";
 
-            if (addressInput === "") return window.showPlatformToast("يرجى ربط المحفظة من صفحة (أنا) أولاً!", "error");
+            if (addressInput === "") return window.showPlatformToast("يرجى ربط المحفظة أولاً!", "error");
             if (isNaN(amountInput) || amountInput <= 0) return window.showPlatformToast("يرجى إدخال مبلغ صحيح للسحب!", "error"); 
             if (passInput === "") return window.showPlatformToast("يرجى إدخال كلمة المرور الأمنية!", "error"); 
 
