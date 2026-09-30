@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Tadawulx - <span data-ar="أنا" data-en="Me">أنا</span></title>
+    <title>primaxis - <span data-ar="أنا" data-en="Me">أنا</span></title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
     
@@ -155,6 +155,17 @@
         .icon-shield { background: rgba(252, 213, 53, 0.1); color: #fcd535; }
         .icon-news { background: rgba(157, 78, 221, 0.1); color: #9d4edd; }
         .icon-support { background: rgba(0, 136, 204, 0.1); color: #0088cc; }
+                /* تصميم أيقونة تحميل التطبيق وشارة جديد */
+        .icon-download { background: rgba(32, 201, 151, 0.1); color: #20c997; }
+        .badge-app { 
+            background: var(--gold-gradient); 
+            color: #000; 
+            font-size: 9px; 
+            font-weight: 800; 
+            padding: 2px 6px; 
+            border-radius: 6px; 
+        }
+
 
         /* Logout */
         .logout-wrap { margin: 0 15px 20px; }
@@ -192,16 +203,50 @@
         .toast.error { background: #f6465d; }
         .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
 
-        /* Bottom Nav - موحد ومطابق للصفحة الرئيسية */
-        .bottom-nav { 
-            position: fixed; bottom: 0; left: 0; right: 0; margin: 0 auto; width: 100%; max-width: 500px; 
-            background-color: #0c101b; display: flex; justify-content: space-around; 
-            padding: 12px 0 20px; border-top: 1px solid rgba(255,255,255,0.05); z-index: 100; backdrop-filter: blur(10px);
-        }
-        .nav-item { display: flex; flex-direction: column; align-items: center; color: var(--text-muted); font-size: 11px; gap: 6px; font-weight: 700; text-decoration: none; transition: 0.3s; }
-        .nav-item.active { color: var(--gold); }
-        .nav-item i { font-size: 22px; }
-        .nav-item.active i { filter: drop-shadow(0 0 8px rgba(252,213,53,0.6)); }
+       /* ---------------- القائمة السفلية الموحدة ---------------- */
+.bottom-nav { 
+    position: fixed; 
+    bottom: 0; 
+    left: 0; 
+    right: 0;
+    margin: 0 auto;
+    width: 100%; 
+    max-width: 500px; /* لضمان عدم تمدد الشريط على شاشات الكمبيوتر الكبيرة */
+    background-color: rgba(5, 5, 15, 0.95); 
+    backdrop-filter: blur(10px); 
+    display: flex; 
+    justify-content: space-around; 
+    padding: 12px 0 15px; 
+    border-top: 1px solid rgba(138,43,226,0.3); 
+    z-index: 1000; 
+    direction: ltr; 
+    box-shadow: 0 -5px 20px rgba(0,0,0,0.8); 
+    box-sizing: border-box;
+}
+
+.nav-item { 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    color: #6b7280; 
+    font-size: 11px; 
+    gap: 6px; 
+    font-weight: bold; 
+    text-decoration: none; 
+    transition: all 0.3s ease; 
+    flex: 1; 
+}
+
+.nav-item.active { 
+    color: #a855f7; 
+    text-shadow: 0 0 10px rgba(168, 85, 247, 0.5); 
+}
+
+.nav-item i { 
+    font-size: 20px; 
+}
+
+        
     </style>
 </head>
 <body>
@@ -309,6 +354,20 @@
                         <span class="menu-subtitle" data-ar="كل ما تحتاجه من معلومات ودعم" data-en="All info & support you need">كل ما تحتاجه من معلومات ودعم</span>
                     </div>
                     <div class="menu-icon-box icon-news"><i class="fa-regular fa-newspaper"></i></div>
+                </div>
+            </div>
+            <!-- حقل تحميل التطبيق -->
+            <div class="menu-item" onclick="window.location.href='download.html'">
+                <i class="fa-solid fa-chevron-left menu-arrow"></i>
+                <div class="menu-content-left">
+                    <div class="menu-text-wrap">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span class="menu-title" data-ar="تحميل التطبيق" data-en="Download App">تحميل التطبيق</span>
+                            <span class="badge-app" data-ar="جديد" data-en="New">جديد</span>
+                        </div>
+                        <span class="menu-subtitle" data-ar="تجربة أسرع وأكثر أماناً على هاتفك" data-en="Faster & safer experience on your phone">تجربة أسرع وأكثر أماناً على هاتفك</span>
+                    </div>
+                    <div class="menu-icon-box icon-download"><i class="fa-solid fa-mobile-screen-button"></i></div>
                 </div>
             </div>
 
