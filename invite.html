@@ -72,7 +72,7 @@
         .small-stats-row .stat-box i { color: var(--neon-gold); font-size: 11px; }
         .small-stats-row .s-val { font-size: 12px; font-weight: bold; direction: ltr; }
 
-        /* --- QR and Link Card (مُعدل للتحكم في العرض) --- */
+        /* --- QR and Link Card --- */
         .qr-link-card { 
             background: var(--card-bg); border: 1px solid rgba(255,255,255,0.1); 
             border-radius: 20px; padding: 12px; display: flex; gap: 10px; align-items: center;
@@ -179,7 +179,7 @@
         .toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(120px); background: rgba(20,20,30,0.95); backdrop-filter: blur(10px); color: #fff; padding: 12px 25px; border-radius: 12px; border-bottom: 3px solid var(--success); font-size: 13px; font-weight: bold; z-index: 2000; opacity: 0; visibility: hidden; transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease, visibility 0.3s; box-shadow: 0 5px 15px rgba(14,203,129,0.3); }
         .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; visibility: visible; }
 
-        /* ---------------- القائمة السفلية ---------------- */
+        /* Bottom Nav */
         .bottom-nav { 
             position: fixed; 
             bottom: 0; 
@@ -222,11 +222,10 @@
             font-size: 20px; 
         }
 
-        /* تحسينات إضافية للشاشات الصغرى جداً */
         @media (max-width: 360px) {
             .qr-section { width: 80px; }
             .qr-box { width: 68px; height: 68px; }
-            .copy-btn span { display: none; } /* إخفاء كلمة نسخ والإبقاء على الأيقونة للشاشات الصغيرة جداً */
+            .copy-btn span { display: none; }
             .copy-btn { padding: 4px 6px; }
         }
     </style>
@@ -423,11 +422,15 @@
     <!-- UI Script -->
     <script>
         function renderInviteData(inviteCode) {
-            let currentDomain = window.location.origin;
-            if(currentDomain === "null" || currentDomain.includes("file://")) {
-                currentDomain = "https://tadawulx-demo.com"; 
+            // النطاق الأساسي الجديد على GitHub Pages
+            let baseUrl = "https://vip-tadaw.github.io/primaxis";
+
+            // إذا كان التصفح أونلاين، نحصل على المسار تلقائياً من الصفحة الحالية لضمان المجلد الفرعي
+            if (window.location.protocol !== 'file:' && window.location.origin !== "null") {
+                baseUrl = window.location.origin + window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/'));
             }
-            let baseRegisterUrl = `${currentDomain}/uIX/index.html?invite=${inviteCode}`;
+
+            let baseRegisterUrl = `${baseUrl}/uIX/index.html?invite=${inviteCode}`;
 
             document.getElementById('code-text').innerText = inviteCode;
             document.getElementById('link-text').innerText = baseRegisterUrl;
