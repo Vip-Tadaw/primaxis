@@ -1,32 +1,67 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tadawulx- تحميل التطبيق</title>
+    <title>primaxis- تحميل التطبيق</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --bg-dark: #05070f;
+            --card-bg: rgba(15, 18, 32, 0.85);
+            --neon-blue: #00d2ff;
+            --neon-purple: #a855f7;
+            --gradient-neon: linear-gradient(135deg, #a855f7 0%, #00d2ff 100%);
+            --text-main: #ffffff;
+            --text-muted: #94a3b8;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: 'Cairo', sans-serif;
+        }
+
         body {
             margin: 0;
             padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #000000;
-            color: #ffffff;
+            background-color: var(--bg-dark);
+            background-image: 
+                radial-gradient(circle at 15% 15%, rgba(168, 85, 247, 0.18) 0%, transparent 45%),
+                radial-gradient(circle at 85% 85%, rgba(0, 210, 255, 0.18) 0%, transparent 45%);
+            background-attachment: fixed;
+            color: var(--text-main);
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
             user-select: none;
+            overflow-x: hidden;
         }
 
         .app-container {
             width: 100%;
-            max-width: 400px;
+            max-width: 420px;
             height: 100vh;
-            background-color: #141517;
+            max-height: 850px;
+            background: var(--card-bg);
+            border: 1px solid rgba(168, 85, 247, 0.3);
+            box-shadow: 0 0 35px rgba(168, 85, 247, 0.25), 0 0 15px rgba(0, 210, 255, 0.15);
             display: flex;
             flex-direction: column;
             position: relative;
+            backdrop-filter: blur(16px);
+            border-radius: 24px;
+            overflow: hidden;
+        }
+
+        @media (max-width: 480px) {
+            .app-container {
+                height: 100vh;
+                max-height: 100vh;
+                border-radius: 0;
+                border: none;
+            }
         }
 
         /* الهيدر العلوي */
@@ -34,13 +69,46 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 20px;
+            padding: 18px 20px;
             font-size: 16px;
-            font-weight: bold;
-            border-bottom: 1px solid #1e2329;
-            background-color: #141517;
+            font-weight: 800;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(5, 7, 15, 0.6);
+            backdrop-filter: blur(10px);
+            position: relative;
+            z-index: 10;
         }
-        .top-header i { cursor: pointer; font-size: 18px; }
+
+        .back-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: #fff;
+        }
+
+        .back-btn:active {
+            transform: scale(0.92);
+            background: rgba(255, 255, 255, 0.12);
+        }
+
+        .header-title {
+            background: var(--gradient-neon);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+        }
+
+        .header-spacer {
+            width: 36px;
+        }
 
         /* محتوى صفحة التحميل */
         .download-content {
@@ -49,36 +117,69 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 30px;
+            padding: 30px 24px;
             text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .logo-wrapper {
+            position: relative;
+            margin-bottom: 24px;
+        }
+
+        .logo-wrapper::before {
+            content: '';
+            position: absolute;
+            inset: -8px;
+            border-radius: 30px;
+            background: var(--gradient-neon);
+            filter: blur(15px);
+            opacity: 0.6;
+            animation: pulseGlow 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes pulseGlow {
+            0% { opacity: 0.4; filter: blur(12px); }
+            100% { opacity: 0.8; filter: blur(20px); }
         }
 
         .app-logo {
-            width: 90px;
-            height: 90px;
-            background-color: #1e2329;
-            border: 2px solid #fcd535;
-            border-radius: 22px;
+            position: relative;
+            width: 95px;
+            height: 95px;
+            background: linear-gradient(145deg, #12172a, #090c17);
+            border: 2px solid rgba(0, 210, 255, 0.6);
+            border-radius: 26px;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 32px;
-            font-weight: bold;
-            color: #fcd535;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 20px rgba(252, 213, 53, 0.15);
+            font-size: 34px;
+            font-weight: 800;
+            color: #ffffff;
+            box-shadow: inset 0 0 15px rgba(168, 85, 247, 0.3);
+            text-shadow: 0 0 12px var(--neon-blue);
         }
 
         .app-name {
-            font-size: 22px;
-            font-weight: bold;
+            font-size: 24px;
+            font-weight: 800;
             margin-bottom: 8px;
+            color: #ffffff;
+            letter-spacing: 0.5px;
         }
 
         .app-version {
-            font-size: 13px;
-            color: #848e9c;
+            font-size: 12px;
+            color: #cbd5e1;
             margin-bottom: 35px;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 5px 16px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
         }
 
         /* أزرار التحميل الاحترافية */
@@ -86,55 +187,78 @@
             width: 100%;
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 16px;
         }
 
         .btn-download {
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 15px;
+            gap: 16px;
             width: 100%;
-            padding: 14px 0;
-            border-radius: 12px;
+            padding: 16px 20px;
+            border-radius: 16px;
             font-size: 15px;
-            font-weight: bold;
+            font-weight: 700;
             text-decoration: none;
-            transition: transform 0.2s, background-color 0.2s;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             box-sizing: border-box;
+            position: relative;
+            overflow: hidden;
         }
 
         .btn-download:active {
-            transform: scale(0.98);
+            transform: scale(0.97);
         }
 
-        /* زر الأندرويد الأساسي */
+        /* زر الأندرويد الأساسي بستايل النيون */
         .btn-android {
-            background-color: #fcd535;
-            color: #000000;
+            background: var(--gradient-neon);
+            color: #ffffff;
+            box-shadow: 0 8px 25px rgba(168, 85, 247, 0.35), 0 0 15px rgba(0, 210, 255, 0.25);
+            border: none;
+        }
+
+        .btn-android:hover {
+            box-shadow: 0 10px 30px rgba(168, 85, 247, 0.5), 0 0 20px rgba(0, 210, 255, 0.4);
         }
 
         /* زر الآيفون */
         .btn-ios {
-            background-color: #1e2329;
+            background: rgba(20, 26, 44, 0.85);
             color: #ffffff;
-            border: 1px solid #333;
+            border: 1px solid rgba(168, 85, 247, 0.4);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(5px);
+        }
+
+        .btn-ios:hover {
+            border-color: var(--neon-blue);
+            box-shadow: 0 0 15px rgba(0, 210, 255, 0.2);
         }
 
         .btn-download i {
-            font-size: 22px;
+            font-size: 26px;
+            filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.3));
         }
 
         .btn-text-wrapper {
             text-align: right;
             display: flex;
             flex-direction: column;
+            gap: 2px;
         }
 
         .btn-subtitle {
             font-size: 10px;
-            font-weight: normal;
-            opacity: 0.8;
+            font-weight: 600;
+            opacity: 0.85;
+            letter-spacing: 0.3px;
+        }
+
+        .btn-title {
+            font-size: 15px;
+            font-weight: 800;
         }
     </style>
 </head>
@@ -143,15 +267,23 @@
     <div class="app-container">
         
         <div class="top-header">
-            <i class="fa-solid fa-chevron-right" onclick="history.back()"></i>
-            <span>تحميل التطبيق</span>
-            <div></div>
+            <div class="back-btn" onclick="history.back()">
+                <i class="fa-solid fa-chevron-right"></i>
+            </div>
+            <span class="header-title">تحميل التطبيق</span>
+            <div class="header-spacer"></div>
         </div>
- <div class="download-content">
-            <div class="app-logo">lx</div>
+
+        <div class="download-content">
+            <div class="logo-wrapper">
+                <div class="app-logo">primx</div>
+            </div>
             
-            <div class="app-name">Tadawulx Mobile</div>
-            <div class="app-version">إصدار v1.0.2 (أحدث نسخة مستقرة)</div>
+            <div class="app-name">primaxis- Mobile</div>
+            <div class="app-version">
+                <i class="fa-solid fa-shield-halved" style="color: var(--neon-blue);"></i>
+                <span>إصدار v1.0.2 (أحدث نسخة مستقرة)</span>
+            </div>
 
             <div class="download-buttons">
                 
@@ -159,7 +291,7 @@
                     <i class="fa-brands fa-android"></i>
                     <div class="btn-text-wrapper">
                         <span class="btn-subtitle">تحميل مباشر لأجهزة</span>
-                        <span>Android (APK)</span>
+                        <span class="btn-title">Android (APK)</span>
                     </div>
                 </a>
 
@@ -167,7 +299,7 @@
                     <i class="fa-brands fa-apple"></i>
                     <div class="btn-text-wrapper">
                         <span class="btn-subtitle">قريباً على متجر</span>
-                        <span>App Store (iOS)</span>
+                        <span class="btn-title">App Store (iOS)</span>
                     </div>
                 </a>
 
