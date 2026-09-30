@@ -7,6 +7,11 @@
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
+    <!-- Firebase SDK (تمت إضافة مكتبة Auth) -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+
     <style>
         :root {
             --bg-dark: #020811;
@@ -34,8 +39,8 @@
         body {
             background-color: var(--bg-dark);
             color: var(--text-white);
-            display: block; /* تغيير ليناسب شاشة الهاتف بشكل طبيعي */
-            padding-bottom: 75px; /* مساحة سفلية لشريط التنقل */
+            display: block;
+            padding-bottom: 75px;
         }
 
         .phone-container {
@@ -49,7 +54,6 @@
             min-height: 100vh;
         }
 
-        /* 1. الشريط العلوي */
         .top-header {
             display: flex;
             justify-content: space-between;
@@ -57,7 +61,6 @@
             padding: 2px 4px;
         }
 
-        /* زر الرجوع */
         .back-btn {
             display: flex;
             align-items: center;
@@ -78,7 +81,6 @@
             box-shadow: 0 0 12px var(--neon-glow);
         }
 
-        /* 👑 تصميم شارة الـ VIP في الأعلى 👑 */
         .header-vip-badge {
             padding: 5px 12px;
             border-radius: 12px;
@@ -113,7 +115,6 @@
             cursor: pointer;
         }
 
-        /* 2. شبكة الإحصائيات */
         .stats-grid {
             border: 2px solid var(--neon-cyan);
             border-radius: 16px;
@@ -161,7 +162,6 @@
         .stat-val.white { color: #ffffff; }
         .stat-val.gold { color: var(--gold); text-shadow: 0 0 8px var(--gold-glow); }
 
-        /* 3. شاشة السؤال */
         .question-section {
             display: flex;
             flex-direction: column;
@@ -304,7 +304,6 @@
             box-shadow: 0 0 25px var(--neon-cyan);
         }
 
-        /* شاشة النتيجة */
         #result-view, #wrong-view {
             display: none;
             flex-direction: column;
@@ -464,7 +463,6 @@
             animation: fadeIn 0.3s ease-out;
         }
 
-        /* 4. قسم الاشتراكات */
         .vip-section { display: flex; flex-direction: column; gap: 12px; }
         .vip-header-title { display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 18px; font-weight: 800; color: #ffffff; text-align: center; }
         .vip-header-title i { color: var(--gold); filter: drop-shadow(0 0 6px rgba(255, 204, 0, 0.8)); }
@@ -474,7 +472,6 @@
         .vip-card { border-radius: 16px; background: rgba(2, 10, 20, 0.92); padding: 14px 8px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 8px; position: relative; transition: transform 0.25s, box-shadow 0.25s; }
         .vip-card:hover { transform: translateY(-4px); }
 
-        /* ألوان الباقات */
         .vip-card.card-free { border: 2px solid var(--neon-cyan); box-shadow: 0 0 16px rgba(0, 243, 166, 0.35), inset 0 0 10px rgba(0, 243, 166, 0.1); }
         .vip-card.card-free .vip-title, .vip-card.card-free .vip-reward { color: var(--neon-cyan); }
         .vip-card.card-free .vip-crown { color: var(--neon-cyan); filter: drop-shadow(0 0 6px var(--neon-cyan)); }
@@ -566,7 +563,6 @@
             filter: drop-shadow(0 0 6px var(--neon-cyan));
         }
 
-        /* 5. البانر */
         .hero-banner {
             border-radius: 20px;
             background: radial-gradient(circle at 50% 25%, #082032 0%, #020914 90%);
@@ -723,37 +719,44 @@
             transform: translateX(-50%) translateY(0);
         }
 
-        /* 6. تنسيقات شريط التنقل السفلي */ 
-        .bottom-nav {  
+        .bottom-nav { 
             position: fixed; 
             bottom: 0; 
             left: 0; 
+            right: 0;
+            margin: 0 auto;
             width: 100%; 
-            background-color: #000000; 
+            max-width: 500px; 
+            background-color: rgba(5, 5, 15, 0.95); 
+            backdrop-filter: blur(10px); 
             display: flex; 
             justify-content: space-around; 
-            padding: 10px 0 15px; 
-            border-top: 1px solid #2b3139; 
+            padding: 12px 0 15px; 
+            border-top: 1px solid rgba(138,43,226,0.3); 
             z-index: 1000; 
             direction: ltr; 
-        } 
-        
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.8); 
+            box-sizing: border-box;
+        }
+
         .nav-item { 
             display: flex; 
             flex-direction: column; 
             align-items: center; 
-            color: #848e9c; 
+            color: #6b7280; 
             font-size: 11px; 
             gap: 6px; 
             font-weight: bold; 
             text-decoration: none; 
-            transition: color 0.3s;
-        } 
-        
+            transition: all 0.3s ease; 
+            flex: 1; 
+        }
+
         .nav-item.active { 
-            color: #fcd535; 
-        } 
-        
+            color: #a855f7; 
+            text-shadow: 0 0 10px rgba(168, 85, 247, 0.5); 
+        }
+
         .nav-item i { 
             font-size: 20px; 
         }
@@ -766,15 +769,14 @@
     <div class="phone-container">
         <!-- 1. الهيدر -->
         <div class="top-header">
-            <!-- زر الرجوع (تم استبداله بزر اللغة) -->
-            <div class="back-btn" onclick="history.back()">
+            <div class="back-btn" onclick="handleBack()">
                 <i class="fa-solid fa-arrow-right"></i>
             </div>
             
             <div class="user-profile">
                 <div class="header-vip-badge free-level" id="header-vip-badge">
                     <i class="fa-solid fa-user-shield"></i>
-                    <span id="header-vip-text">مجاني</span>
+                    <span id="header-vip-text">غير مفعل</span>
                 </div>
             </div>
         </div>
@@ -784,7 +786,7 @@
             <div class="stat-box">
                 <i class="fa-solid fa-crown stat-icon"></i>
                 <div class="stat-title">المستوى الحالي</div>
-                <div class="stat-val" id="val-level">مجاني</div>
+                <div class="stat-val" id="val-level">جاري التحميل...</div>
             </div>
             <div class="stat-box">
                 <i class="fa-solid fa-wallet stat-icon"></i>
@@ -794,17 +796,17 @@
             <div class="stat-box">
                 <i class="fa-regular fa-gem stat-icon"></i>
                 <div class="stat-title">أيام العقد</div>
-                <div class="stat-val white">260</div>
+                <div class="stat-val white">120</div>
             </div>
             <div class="stat-box">
                 <i class="fa-solid fa-bullseye stat-icon"></i>
                 <div class="stat-title">الأسئلة اليومية</div>
-                <div class="stat-val white" id="val-qs">0 / 5</div>
+                <div class="stat-val white" id="val-qs">0 / 0</div>
             </div>
             <div class="stat-box">
                 <i class="fa-solid fa-coins stat-icon"></i>
                 <div class="stat-title">ربح كل سؤال</div>
-                <div class="stat-val"><span id="val-reward">0.10</span> <small style="font-size: 9px; color:#fff;">USDT</small></div>
+                <div class="stat-val"><span id="val-reward">0.00</span> <small style="font-size: 9px; color:#fff;">USDT</small></div>
             </div>
             <div class="stat-box">
                 <i class="fa-regular fa-clock stat-icon"></i>
@@ -818,11 +820,11 @@
             <div class="q-header-info">
                 <div class="q-counter">
                     <i class="fa-solid fa-chart-simple" style="color: var(--neon-cyan);"></i>
-                    السؤال رقم <span id="q-curr">1</span> / <span id="q-total">5</span>
+                    السؤال رقم <span id="q-curr">1</span> / <span id="q-total">0</span>
                 </div>
                 <div class="timer-badge">
                     <i class="fa-regular fa-clock"></i>
-                    <span id="q-timer">00:12</span>
+                    <span id="q-timer">00:60</span>
                 </div>
             </div>
 
@@ -911,75 +913,68 @@
                 <span>الاشتراكات</span>
             </div>
 
-           <div class="vip-cards-container">
-                <!-- 1. باقة مجاني -->
+            <div class="vip-cards-container">
                 <div class="vip-card card-free">
                     <div class="vip-title">مجاني</div>
                     <i class="fa-solid fa-user-shield vip-crown"></i>
-                    <div class="vip-qs">5 أسئلة يومياً</div>
-                    <div class="vip-reward">0,10 USDT</div>
+                    <div class="vip-qs">1 أسئلة يومياً</div>
+                    <div class="vip-reward">0.02 USDT</div>
                     <div class="vip-subtext">لكل سؤال</div>
                     <div class="vip-price">مجاناً</div>
-                    <button class="vip-btn" onclick="changePlan('مجاني', 5, 0.10, 0)">التفعيل الآن</button>
+                    <button class="vip-btn" id="btn-free" onclick="changePlan('free', 'مجاني', 1, 0.02, 0)">التفعيل الآن</button>
                 </div>
 
-                <!-- 2. باقة VIP 1 -->
                 <div class="vip-card card-vip1">
                     <div class="vip-title">VIP 1</div>
                     <i class="fa-solid fa-crown vip-crown"></i>
-                    <div class="vip-qs">6 أسئلة يومياً</div>
-                    <div class="vip-reward">0,60 USDT</div>
+                    <div class="vip-qs">3 أسئلة يومياً</div>
+                    <div class="vip-reward">0.25 USDT</div>
                     <div class="vip-subtext">لكل سؤال</div>
-                    <div class="vip-price">$10</div>
-                    <button class="vip-btn" onclick="changePlan('VIP 1', 6, 0.60, 10)">اشترك الآن</button>
+                    <div class="vip-price">$25</div>
+                    <button class="vip-btn" id="btn-vip1" onclick="changePlan('vip1', 'VIP 1', 3, 0.25, 25)">اشترك الآن</button>
                 </div>
 
-                <!-- 3. باقة VIP 2 -->
                 <div class="vip-card card-vip2">
                     <div class="vip-title">VIP 2</div>
                     <i class="fa-solid fa-crown vip-crown"></i>
-                    <div class="vip-qs">15 أسئلة يومياً</div>
-                    <div class="vip-reward">0,10 USDT</div>
+                    <div class="vip-qs">4 أسئلة يومياً</div>
+                    <div class="vip-reward">0.30 USDT</div>
                     <div class="vip-subtext">لكل سؤال</div>
-                    <div class="vip-price">$25</div>
-                    <button class="vip-btn" onclick="changePlan('VIP 2', 15, 0.10, 25)">اشترك الآن</button>
+                    <div class="vip-price">$40</div>
+                    <button class="vip-btn" id="btn-vip2" onclick="changePlan('vip2', 'VIP 2', 4, 0.30, 40)">اشترك الآن</button>
                 </div>
 
-                <!-- 4. باقة VIP 3 -->
                 <div class="vip-card card-vip3">
                     <div class="vip-title">VIP 3</div>
                     <i class="fa-solid fa-crown vip-crown"></i>
-                    <div class="vip-qs">10 أسئلة يومياً</div>
-                    <div class="vip-reward">0,06 USDT</div>
+                    <div class="vip-qs">5 أسئلة يومياً</div>
+                    <div class="vip-reward">0.36 USDT</div>
                     <div class="vip-subtext">لكل سؤال</div>
-                    <div class="vip-price">$50</div>
-                    <button class="vip-btn" onclick="changePlan('VIP 3', 10, 0.06, 50)">اشترك الآن</button>
+                    <div class="vip-price">$60</div>
+                    <button class="vip-btn" id="btn-vip3" onclick="changePlan('vip3', 'VIP 3', 5, 0.36, 60)">اشترك الآن</button>
                 </div>
 
-                <!-- 5. باقة VIP 4 -->
                 <div class="vip-card card-vip4">
                     <div class="vip-title">VIP 4</div>
                     <i class="fa-solid fa-crown vip-crown"></i>
-                    <div class="vip-qs">20 أسئلة يومياً</div>
-                    <div class="vip-reward">0,10 USDT</div>
+                    <div class="vip-qs">6 أسئلة يومياً</div>
+                    <div class="vip-reward">0.378 USDT</div>
                     <div class="vip-subtext">لكل سؤال</div>
-                    <div class="vip-price">$100</div>
-                    <button class="vip-btn" onclick="changePlan('VIP 4', 20, 0.10, 100)">اشترك الآن</button>
+                    <div class="vip-price">$75</div>
+                    <button class="vip-btn" id="btn-vip4" onclick="changePlan('vip4', 'VIP 4', 6, 0.378, 75)">اشترك الآن</button>
                 </div>
 
-                <!-- 6. باقة VIP 5 -->
                 <div class="vip-card card-vip5">
                     <div class="vip-title">VIP 5</div>
                     <i class="fa-solid fa-gem vip-crown"></i>
-                    <div class="vip-qs">25 أسئلة يومياً</div>
-                    <div class="vip-reward">0,20 USDT</div>
+                    <div class="vip-qs">7 أسئلة يومياً</div>
+                    <div class="vip-reward">0.432 USDT</div>
                     <div class="vip-subtext">لكل سؤال</div>
-                    <div class="vip-price">$200</div>
-                    <button class="vip-btn" onclick="changePlan('VIP 5', 25, 0.20, 200)">اشترك الآن</button>
+                    <div class="vip-price">$100</div>
+                    <button class="vip-btn" id="btn-vip5" onclick="changePlan('vip5', 'VIP 5', 7, 0.432, 100)">اشترك الآن</button>
                 </div>
             </div>
 
-            <!-- صندوق المميزات الإضافي -->
             <div class="benefits-card">
                 <div class="benefits-header">بعد الاشتراك يتم تحديث:</div>
                 <div class="benefits-grid">
@@ -989,17 +984,25 @@
                     </div>
                     <div class="benefit-item">
                         <i class="fa-solid fa-check-double benefit-icon"></i> 
+                        <span>اجمالي فريق الارباح</span>
+                    </div>
+                    <div class="benefit-item">
+                        <i class="fa-solid fa-check-double benefit-icon"></i> 
                         <span>مقدار الربح</span>
                     </div>
                     <div class="benefit-item">
                         <i class="fa-solid fa-check-double benefit-icon"></i> 
                         <span>المزايا الإضافية</span>
                     </div>
+                    <div class="benefit-item">
+                        <i class="fa-solid fa-check-double benefit-icon"></i> 
+                        <span>ارباح الاشتراكات</span>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- 5. البانر التفاعلي ثلاثي الأبعاد -->
+        <!-- 5. البانر -->
         <div class="hero-banner" id="bannerCard">
             <div class="banner-content">
                 <div class="banner-logo">
@@ -1117,377 +1120,575 @@
         </a> 
     </div>
 
-    <!-- Script -->
-    <script>
-        // 1. إعدادات التطبيق الافتراضية والاعتماد على اللغة من الملف الخارجي
-        let appData = {
-            balance: 0.00,       
-            level: null,         
-            reward: 0,
-            dailyLimit: 0,
-            solved: 0,
-            qIndex: 0,
-            selectedOpt: null, 
-            timerVal: 12,
-            timerInterval: null,
-            resetTimerInterval: null,
-            // يتم أخذ اللغة تلقائياً من الصفحة (والتي سيتم تعديلها عبر language.js)
-            language: document.documentElement.lang || window.localStorage.getItem('lang') || 'ar'
-        };
+   <!-- JavaScript البرمجي الآمن والمعالج بالكامل -->
+<script>
+    // 1. إعدادات Firebase
+    const firebaseConfig = {
+        databaseURL: "https://trading-app-task-default-rtdb.firebaseio.com/"
+    };
 
-        const questionsList = [
-            { q: "12 × 4", opts: ["32", "48", "36", "52"], ans: 1 },
-            { q: "7 + 8", opts: ["12", "14", "15", "16"], ans: 2 },
-            { q: "18 - 7", opts: ["9", "10", "11", "12"], ans: 2 },
-            { q: "9 × 5", opts: ["35", "40", "45", "50"], ans: 2 },
-            { q: "(12 + 8) × 2", opts: ["30", "32", "36", "40"], ans: 3 }
-        ];
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+    }
+    const db = firebase.database();
+    const auth = firebase.auth();
 
-        // نصوص الترجمة الأساسية
-        const translations = {
-            ar: {
-                locked: "المهام مقفلة!",
-                lockedDesc: "يرجى تفعيل الباقة المجانية أو الاشتراك في باقة VIP للبدء.",
-                done: "تم إكمال المهام!",
-                doneDesc: "عد غداً لتجديد المهام. يبدأ المؤقت الآن.",
-                noNet: "لا يوجد اتصال بالإنترنت! يرجى التحقق من الشبكة.",
-                noBalance: "رصيدك غير كافٍ للاشتراك في هذه الباقة!",
-                activated: "تم تفعيل الباقة بنجاح!",
-                wrongAns: "إجابة خاطئة!",
-                correctAns: "إجابة صحيحة!",
-                timeout: "انتهى الوقت! انتقلت للسؤال التالي.",
-                notActive: "غير مفعل",
-                selectAns: "يرجى تحديد إجابة أولاً!",
-                correctIs: "الإجابة الصحيحة هي:",
-                alreadySub: "أنت مشترك في هذه الباقة بالفعل!"
-            },
-            en: {
-                locked: "Tasks Locked!",
-                lockedDesc: "Please activate Free plan or VIP subscription to start.",
-                done: "Tasks Completed!",
-                doneDesc: "Come back tomorrow. Timer starts now.",
-                noNet: "No Internet Connection! Please check your network.",
-                noBalance: "Insufficient balance for this subscription!",
-                activated: "Plan activated successfully!",
-                wrongAns: "Wrong Answer!",
-                correctAns: "Correct Answer!",
-                timeout: "Time out! Moved to next question.",
-                notActive: "Not Active",
-                selectAns: "Select an answer first!",
-                correctIs: "Correct answer is:",
-                alreadySub: "Already subscribed to this plan!"
-            }
-        };
+    let userId = null;
+    let serverOffset = 0; // فارق التوقيت لمنع تلاعب الجهاز
 
-        function getText(key) {
-            // تحديث اللغة الحالية قبل استدعاء النص في حال تم تغييرها من الملف الخارجي
-            appData.language = document.documentElement.lang || window.localStorage.getItem('lang') || 'ar';
-            return translations[appData.language][key];
+    // مزامنة توقيت السيرفر لمنع تلاعب المستخدم بساعة الهاتف
+    db.ref('.info/serverTimeOffset').on('value', (snap) => {
+        serverOffset = snap.val() || 0;
+    });
+
+    function getServerTime() {
+        return Date.now() + serverOffset;
+    }
+
+    function getTodayDateString() {
+        return new Date(getServerTime()).toISOString().split('T')[0];
+    }
+
+    function getNextUTCMidnightTimestamp() {
+        const now = new Date(getServerTime());
+        return Date.UTC(
+            now.getUTCFullYear(),
+            now.getUTCMonth(),
+            now.getUTCDate() + 1,
+            0, 0, 0, 0
+        );
+    }
+
+    // 2. دالة تشفير الإجابات لمنع كشفها في الكود المصدري
+    const HASH_SALT = "TaskApp_Secure_2026_xKey";
+
+    function generateHash(text) {
+        let hash = 5381;
+        for (let i = 0; i < text.length; i++) {
+            hash = ((hash << 5) + hash) + text.charCodeAt(i);
         }
+        return (hash >>> 0).toString(16);
+    }
 
-        // 2. تحديث لوحة الإحصائيات
-        function renderDashboard() {
-            document.getElementById('val-level').innerText = appData.level || getText('notActive');
-            document.getElementById('val-balance').innerText = appData.balance.toFixed(2);
-            document.getElementById('val-reward').innerText = appData.reward.toFixed(2);
-            document.getElementById('val-qs').innerText = `${appData.solved} / ${appData.dailyLimit}`;
-            document.getElementById('q-total').innerText = appData.dailyLimit || "-";
-            document.getElementById('q-curr').innerText = appData.dailyLimit > 0 ? Math.min(appData.solved + 1, appData.dailyLimit) : "-";
+    function getAnsHash(qText, optText) {
+        return generateHash(qText + "::" + optText + "::" + HASH_SALT);
+    }
 
-            const headerBadge = document.getElementById('header-vip-badge');
-            if (!appData.level || appData.level === 'مجاني' || appData.level === 'Free') {
-                headerBadge.className = 'header-vip-badge free-level';
-                headerBadge.innerHTML = `<i class="fa-solid fa-user-shield"></i> <span id="header-vip-text">${appData.level || '-'}</span>`;
+    // 3. هيكل البيانات الأساسي (مع تشفير الإجابات)
+    let appData = {
+        balance: 0.00,
+        activePlans: {},
+        solvedToday: 0,
+        qIndex: 0,
+        selectedOpt: null,
+        timerVal: 60,
+        timerInterval: null,
+        resetTimerInterval: null,
+        lastDate: getTodayDateString(),
+        language: document.documentElement.lang || window.localStorage.getItem('lang') || 'ar'
+    };
+
+    const questionsList = [
+        { q: "12 × 4", opts: ["32", "48", "36", "52"], ansHash: "aeae24ca" },
+        { q: "7 + 8", opts: ["12", "14", "15", "16"], ansHash: "aa5c9950" },
+        { q: "10 - 7", opts: ["9", "3", "11", "12"], ansHash: "91c12328" },
+        { q: "9 × 5", opts: ["35", "40", "45", "50"], ansHash: "d9cb695e" },
+        { q: "5 × 2", opts: ["30", "32", "36", "10"], ansHash: "916866af" }
+    ];
+
+    const translations = {
+        ar: {
+            locked: "المهام مقفلة!",
+            lockedDesc: "يرجى تفعيل الباقة المجانية أو الاشتراك في باقة VIP للبدء.",
+            done: "تم إكمال المهام!",
+            doneDesc: "عد غداً لتجديد المهام. يبدأ المؤقت الآن.",
+            noNet: "لا يوجد اتصال بالإنترنت! يرجى التحقق من الشبكة.",
+            noBalance: "رصيدك غير كافٍ للاشتراك في هذه الباقة!",
+            activated: "تم تفعيل الباقة بنجاح!",
+            wrongAns: "إجابة خاطئة!",
+            correctAns: "إجابة صحيحة!",
+            timeout: "انتهى الوقت! انتقلت للسؤال التالي.",
+            notActive: "غير مفعل",
+            selectAns: "يرجى تحديد إجابة أولاً!",
+            correctIs: "الإجابة الصحيحة هي:",
+            alreadySub: "أنت مشترك في هذه الباقة بالفعل!",
+            authError: "حدث خطأ في الاتصال بالسيرفر. جاري إعادة المحاولة..."
+        },
+        en: {
+            locked: "Tasks Locked!",
+            lockedDesc: "Please activate Free plan or VIP subscription to start.",
+            done: "Tasks Completed!",
+            doneDesc: "Come back tomorrow. Timer starts now.",
+            noNet: "No Internet Connection! Please check your network.",
+            noBalance: "Insufficient balance for this subscription!",
+            activated: "Plan activated successfully!",
+            wrongAns: "Wrong Answer!",
+            correctAns: "Correct Answer!",
+            timeout: "Time out! Moved to next question.",
+            notActive: "Not Active",
+            selectAns: "Select an answer first!",
+            correctIs: "Correct answer is:",
+            alreadySub: "Already subscribed to this plan!",
+            authError: "Server connection error. Retrying..."
+        }
+    };
+
+    function getText(key) {
+        appData.language = document.documentElement.lang || window.localStorage.getItem('lang') || 'ar';
+        return translations[appData.language] ? translations[appData.language][key] : translations['ar'][key];
+    }
+
+    // 4. إدارة المصادقة والمزامنة السحابية
+    function initAuthAndLoadData(onSuccess) {
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                userId = user.uid;
+                loadUserData(onSuccess);
             } else {
-                headerBadge.className = 'header-vip-badge vip-level';
-                headerBadge.innerHTML = `<i class="fa-solid fa-crown"></i> <span id="header-vip-text">${appData.level}</span>`;
+                auth.signInAnonymously().catch((error) => {
+                    console.error("Firebase Auth Error:", error);
+                    showToast(getText('authError'), true);
+                });
             }
+        });
+    }
+
+    function syncDataToCloud() {
+        if (!userId) return;
+
+        const dataToSave = {
+            balance: appData.balance,
+            activePlans: appData.activePlans,
+            solvedToday: appData.solvedToday,
+            lastDate: appData.lastDate,
+            qIndex: appData.qIndex
+        };
+
+        localStorage.setItem('user_app_data_' + userId, JSON.stringify(dataToSave));
+
+        if (navigator.onLine) {
+            db.ref('users/' + userId).set({
+                ...dataToSave,
+                lastUpdated: firebase.database.ServerValue.TIMESTAMP
+            });
+        }
+    }
+
+    function loadUserData(callback) {
+        if (!userId) return;
+
+        if (navigator.onLine) {
+            db.ref('users/' + userId).once('value').then((snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    appData.balance = data.balance || 0.00;
+                    appData.activePlans = data.activePlans || {};
+                    appData.solvedToday = data.solvedToday || 0;
+                    appData.lastDate = data.lastDate || getTodayDateString();
+                    appData.qIndex = data.qIndex || 0;
+                } else {
+                    loadFromLocalStorage();
+                }
+                checkDailyReset();
+                if (callback) callback();
+            }).catch(() => {
+                loadFromLocalStorage();
+                checkDailyReset();
+                if (callback) callback();
+            });
+        } else {
+            loadFromLocalStorage();
+            checkDailyReset();
+            if (callback) callback();
+        }
+    }
+
+    function loadFromLocalStorage() {
+        if (!userId) return;
+        const local = localStorage.getItem('user_app_data_' + userId);
+        if (local) {
+            const data = JSON.parse(local);
+            appData.balance = data.balance || 0.00;
+            appData.activePlans = data.activePlans || {};
+            appData.solvedToday = data.solvedToday || 0;
+            appData.lastDate = data.lastDate || getTodayDateString();
+            appData.qIndex = data.qIndex || 0;
+        }
+    }
+
+    // دالة موحدة ومؤمنة للتحقق من إعادة التصفير اليومي
+    function checkDailyReset() {
+        const today = getTodayDateString();
+        if (appData.lastDate !== today) {
+            appData.solvedToday = 0;
+            appData.lastDate = today;
+            appData.qIndex = 0;
+            syncDataToCloud();
+            return true;
+        }
+        return false;
+    }
+
+    function handleBack() {
+        if (document.referrer) {
+            history.back();
+        } else {
+            window.location.href = 'home.html';
+        }
+    }
+
+    // 5. إحصائيات الباقات
+    function getAggregatedStats() {
+        const keys = Object.keys(appData.activePlans);
+        if (keys.length === 0) {
+            return { totalLimit: 0, avgReward: 0, totalPotentialProfit: 0, levelText: getText('notActive') };
         }
 
-        // 3. عرض السؤال أو رسائل القفل/الانتهاء
-        function renderQuestion() {
-            const qView = document.getElementById('question-view');
-            
-            if (!navigator.onLine) {
-                qView.innerHTML = `
-                    <div style="color: var(--neon-red); font-weight:900; font-size:20px; margin-top:20px;">
-                        <i class="fa-solid fa-wifi"></i> ${getText('noNet')}
-                    </div>`;
-                return;
-            }
+        let totalLimit = 0;
+        let totalProfit = 0;
+        let planNames = [];
 
-            if (!appData.level) {
-                qView.innerHTML = `
-                    <div style="color: var(--gold); font-weight:900; font-size:22px; margin-top:20px;">
-                        <i class="fa-solid fa-lock"></i> ${getText('locked')}
-                    </div>
-                    <div style="color: #fff; font-weight:700; margin-top:10px;">
-                        ${getText('lockedDesc')}
-                    </div>`;
-                clearInterval(appData.timerInterval);
-                document.getElementById('q-timer').innerText = "00:00";
-                return;
-            }
+        keys.forEach(k => {
+            const p = appData.activePlans[k];
+            totalLimit += p.limit;
+            totalProfit += (p.limit * p.reward);
+            planNames.push(p.name);
+        });
 
-            if (appData.solved >= appData.dailyLimit) {
-                qView.innerHTML = `
-                    <div style="color: var(--neon-cyan); font-weight:900; font-size:22px; margin-top:20px;">
-                        <i class="fa-solid fa-circle-check"></i> ${getText('done')}
-                    </div>
-                    <div style="color: #fff; font-weight:700; margin-top:10px;">
-                        ${getText('doneDesc')}
-                    </div>`;
-                clearInterval(appData.timerInterval);
-                document.getElementById('q-timer').innerText = "00:00";
-                
-                if (!appData.resetTimerInterval) startResetTimer(); 
-                return;
-            }
+        const avgReward = totalLimit > 0 ? (totalProfit / totalLimit) : 0;
+        const levelText = planNames.join(' + ');
 
-            const curr = questionsList[appData.qIndex % questionsList.length];
+        return { totalLimit, avgReward, totalPotentialProfit: totalProfit, levelText };
+    }
+
+    // 6. عرض البيانات
+    function renderDashboard() {
+        checkDailyReset();
+        const stats = getAggregatedStats();
+        
+        document.getElementById('val-level').innerText = stats.levelText;
+        document.getElementById('val-balance').innerText = appData.balance.toFixed(2);
+        document.getElementById('val-reward').innerText = stats.avgReward.toFixed(2);
+        document.getElementById('val-qs').innerText = `${appData.solvedToday} / ${stats.totalLimit}`;
+        document.getElementById('q-total').innerText = stats.totalLimit || "0";
+        document.getElementById('q-curr').innerText = stats.totalLimit > 0 ? Math.min(appData.solvedToday + 1, stats.totalLimit) : "0";
+
+        const headerBadge = document.getElementById('header-vip-badge');
+        if (Object.keys(appData.activePlans).length === 0) {
+            headerBadge.className = 'header-vip-badge free-level';
+            headerBadge.innerHTML = `<i class="fa-solid fa-user-shield"></i> <span>${getText('notActive')}</span>`;
+        } else {
+            headerBadge.className = 'header-vip-badge vip-level';
+            headerBadge.innerHTML = `<i class="fa-solid fa-crown"></i> <span>${stats.levelText}</span>`;
+        }
+
+        Object.keys(appData.activePlans).forEach(planKey => {
+            const btn = document.getElementById('btn-' + planKey);
+            if (btn) {
+                btn.innerText = "مفعل حالياً";
+                btn.style.background = "rgba(0,243,166,0.3)";
+                btn.style.color = "#fff";
+            }
+        });
+    }
+
+    // 7. عرض الأسئلة
+    function renderQuestion() {
+        checkDailyReset();
+        const qView = document.getElementById('question-view');
+        const stats = getAggregatedStats();
+        
+        if (!navigator.onLine) {
             qView.innerHTML = `
-                <div class="q-title">
-                    <i class="fa-solid fa-shapes" style="color: var(--neon-cyan); font-size: 16px;"></i>
-                    ما ناتج العملية التالية ؟
+                <div style="color: var(--neon-red); font-weight:900; font-size:20px; margin-top:20px;">
+                    <i class="fa-solid fa-wifi"></i> ${getText('noNet')}
+                </div>`;
+            return;
+        }
+
+        if (Object.keys(appData.activePlans).length === 0) {
+            qView.innerHTML = `
+                <div style="color: var(--gold); font-weight:900; font-size:22px; margin-top:20px;">
+                    <i class="fa-solid fa-lock"></i> ${getText('locked')}
                 </div>
-                <div class="q-math" id="q-expression">${curr.q}</div>
-                <div class="options-grid" id="options-box"></div>
-                <button class="confirm-btn" onclick="submitAnswer()">
-                    <i class="fa-solid fa-circle-check"></i> تأكيد الإجابة
-                </button>
-            `;
-
-            const html = curr.opts.map((opt, i) => `
-                <button class="option-btn ${appData.selectedOpt === i ? 'active' : ''}" onclick="selectOption(${i})">
-                    <span class="opt-badge">${String.fromCharCode(65 + i)}</span>
-                    <span>${opt}</span>
-                </button>
-            `).join('');
-
-            document.getElementById('options-box').innerHTML = html;
-            startTimer();
-        }
-
-        function selectOption(index) {
-            if (!navigator.onLine) { showToast(getText('noNet'), true); return; }
-            appData.selectedOpt = index;
-            
-            const curr = questionsList[appData.qIndex % questionsList.length];
-            const html = curr.opts.map((opt, i) => `
-                <button class="option-btn ${appData.selectedOpt === i ? 'active' : ''}" onclick="selectOption(${i})">
-                    <span class="opt-badge">${String.fromCharCode(65 + i)}</span>
-                    <span>${opt}</span>
-                </button>
-            `).join('');
-            document.getElementById('options-box').innerHTML = html;
-        }
-
-        // 4. تأكيد الإجابة
-        function submitAnswer() {
-            if (!navigator.onLine) { showToast(getText('noNet'), true); return; }
-            if (appData.solved >= appData.dailyLimit || !appData.level) return;
-            
-            if (appData.selectedOpt === null) {
-                showToast(getText('selectAns'), false);
-                return;
-            }
-
-            const curr = questionsList[appData.qIndex % questionsList.length];
-            if (appData.selectedOpt === curr.ans) {
-                clearInterval(appData.timerInterval);
-                appData.balance += appData.reward;
-                appData.solved++;
-                
-                let todayProfit = appData.solved * appData.reward;
-                document.getElementById('result-earned').innerText = `+ ${appData.reward.toFixed(2)} USDT`;
-                document.getElementById('streak-val').innerText = `+ ${todayProfit.toFixed(2)} USDT`;
-                
-                showToast(`${getText('correctAns')} +${appData.reward.toFixed(2)} USDT`, false);
-
-                document.getElementById('question-view').style.display = 'none';
-                document.getElementById('wrong-view').style.display = 'none';
-                document.getElementById('result-view').style.display = 'flex';
-                
-                renderDashboard();
-            } else {
-                clearInterval(appData.timerInterval);
-                document.getElementById('question-view').style.display = 'none';
-                document.getElementById('result-view').style.display = 'none';
-                document.getElementById('wrong-view').style.display = 'flex';
-                document.getElementById('hint-box').style.display = 'none';
-            }
-        }
-
-        function showHint() {
-            const curr = questionsList[appData.qIndex % questionsList.length];
-            const correctValue = curr.opts[curr.ans];
-            const hintBox = document.getElementById('hint-box');
-            hintBox.innerHTML = `${getText('correctIs')} <span style="color:var(--gold); font-size:18px;">${correctValue}</span>`;
-            hintBox.style.display = 'block';
-        }
-
-        function retryQuestion() {
-            document.getElementById('wrong-view').style.display = 'none';
-            document.getElementById('question-view').style.display = 'flex';
-            appData.selectedOpt = null;
-            renderQuestion();
-        }
-
-        function nextQuestion() {
-            document.getElementById('result-view').style.display = 'none';
-            document.getElementById('wrong-view').style.display = 'none';
-            document.getElementById('question-view').style.display = 'flex';
-            
-            appData.selectedOpt = null;
-            appData.qIndex++;
-            renderDashboard();
-            renderQuestion();
-        }
-
-        // 5. إدارة المؤقتات
-        function startTimer() {
+                <div style="color: #fff; font-weight:700; margin-top:10px;">
+                    ${getText('lockedDesc')}
+                </div>`;
             clearInterval(appData.timerInterval);
-            appData.timerVal = 12;
-            const timerEl = document.getElementById('q-timer');
+            document.getElementById('q-timer').innerText = "00:00";
+            return;
+        }
+
+        if (appData.solvedToday >= stats.totalLimit) {
+            qView.innerHTML = `
+                <div style="color: var(--neon-cyan); font-weight:900; font-size:22px; margin-top:20px;">
+                    <i class="fa-solid fa-circle-check"></i> ${getText('done')}
+                </div>
+                <div style="color: #fff; font-weight:700; margin-top:10px;">
+                    ${getText('doneDesc')}
+                </div>`;
+            clearInterval(appData.timerInterval);
+            document.getElementById('q-timer').innerText = "00:00";
+            return;
+        }
+
+        const curr = questionsList[appData.qIndex % questionsList.length];
+        qView.innerHTML = `
+            <div class="q-title">
+                <i class="fa-solid fa-shapes" style="color: var(--neon-cyan); font-size: 16px;"></i>
+                ما ناتج العملية التالية ؟
+            </div>
+            <div class="q-math" id="q-expression">${curr.q}</div>
+            <div class="options-grid" id="options-box"></div>
+            <button class="confirm-btn" onclick="submitAnswer()">
+                <i class="fa-solid fa-circle-check"></i> تأكيد الإجابة
+            </button>
+        `;
+
+        const html = curr.opts.map((opt, i) => `
+            <button class="option-btn ${appData.selectedOpt === i ? 'active' : ''}" onclick="selectOption(${i})">
+                <span class="opt-badge">${String.fromCharCode(65 + i)}</span>
+                <span>${opt}</span>
+            </button>
+        `).join('');
+
+        document.getElementById('options-box').innerHTML = html;
+        startTimer();
+    }
+
+    function selectOption(index) {
+        if (!navigator.onLine) { showToast(getText('noNet'), true); return; }
+        appData.selectedOpt = index;
+        
+        const curr = questionsList[appData.qIndex % questionsList.length];
+        const html = curr.opts.map((opt, i) => `
+            <button class="option-btn ${appData.selectedOpt === i ? 'active' : ''}" onclick="selectOption(${i})">
+                <span class="opt-badge">${String.fromCharCode(65 + i)}</span>
+                <span>${opt}</span>
+            </button>
+        `).join('');
+        document.getElementById('options-box').innerHTML = html;
+    }
+
+    // 8. التأكيد والتحقق الآمن
+    function submitAnswer() {
+        if (!navigator.onLine) { showToast(getText('noNet'), true); return; }
+        checkDailyReset();
+        const stats = getAggregatedStats();
+        if (appData.solvedToday >= stats.totalLimit || stats.totalLimit === 0) return;
+        
+        if (appData.selectedOpt === null) {
+            showToast(getText('selectAns'), false);
+            return;
+        }
+
+        const curr = questionsList[appData.qIndex % questionsList.length];
+        const selectedValue = curr.opts[appData.selectedOpt];
+        const computedHash = getAnsHash(curr.q, selectedValue);
+
+        if (computedHash === curr.ansHash) {
+            clearInterval(appData.timerInterval);
+            
+            const earnedReward = stats.avgReward;
+            appData.balance += earnedReward;
+            appData.solvedToday++;
+            
+            let todayProfit = appData.solvedToday * stats.avgReward;
+            document.getElementById('result-earned').innerText = `+ ${earnedReward.toFixed(2)} USDT`;
+            document.getElementById('streak-val').innerText = `+ ${todayProfit.toFixed(2)} USDT`;
+            
+            showToast(`${getText('correctAns')} +${earnedReward.toFixed(2)} USDT`, false);
+
+            document.getElementById('question-view').style.display = 'none';
+            document.getElementById('wrong-view').style.display = 'none';
+            document.getElementById('result-view').style.display = 'flex';
+            
+            syncDataToCloud();
+            renderDashboard();
+        } else {
+            clearInterval(appData.timerInterval);
+            document.getElementById('question-view').style.display = 'none';
+            document.getElementById('result-view').style.display = 'none';
+            document.getElementById('wrong-view').style.display = 'flex';
+            document.getElementById('hint-box').style.display = 'none';
+        }
+    }
+
+    function showHint() {
+        const curr = questionsList[appData.qIndex % questionsList.length];
+        // استخراج الخيار الصحيح بدون كشفه مسبقاً في الذاكرة
+        const correctValue = curr.opts.find(opt => getAnsHash(curr.q, opt) === curr.ansHash);
+        const hintBox = document.getElementById('hint-box');
+        hintBox.innerHTML = `${getText('correctIs')} <span style="color:var(--gold); font-size:18px;">${correctValue}</span>`;
+        hintBox.style.display = 'block';
+    }
+
+    function retryQuestion() {
+        document.getElementById('wrong-view').style.display = 'none';
+        document.getElementById('question-view').style.display = 'flex';
+        appData.selectedOpt = null;
+        renderQuestion();
+    }
+
+    function nextQuestion() {
+        document.getElementById('result-view').style.display = 'none';
+        document.getElementById('wrong-view').style.display = 'none';
+        document.getElementById('question-view').style.display = 'flex';
+        
+        appData.selectedOpt = null;
+        appData.qIndex++;
+        syncDataToCloud();
+        renderDashboard();
+        renderQuestion();
+    }
+
+    // 9. المؤقتات الزمانية والمؤقت اليومي المستمر
+    function startTimer() {
+        clearInterval(appData.timerInterval);
+        appData.timerVal = 60;
+        const timerEl = document.getElementById('q-timer');
+        timerEl.innerText = `00:${appData.timerVal < 10 ? '0' : ''}${appData.timerVal}`;
+
+        appData.timerInterval = setInterval(() => {
+            appData.timerVal--;
             timerEl.innerText = `00:${appData.timerVal < 10 ? '0' : ''}${appData.timerVal}`;
 
-            appData.timerInterval = setInterval(() => {
-                appData.timerVal--;
-                timerEl.innerText = `00:${appData.timerVal < 10 ? '0' : ''}${appData.timerVal}`;
+            if (appData.timerVal <= 0) {
+                clearInterval(appData.timerInterval);
+                showToast(getText('timeout'), true);
+                appData.selectedOpt = null;
+                appData.qIndex++;
+                syncDataToCloud();
+                renderQuestion();
+            }
+        }, 1000);
+    }
 
-                if (appData.timerVal <= 0) {
-                    clearInterval(appData.timerInterval);
-                    showToast(getText('timeout'), true);
-                    appData.selectedOpt = null;
-                    appData.qIndex++;
-                    renderQuestion();
+    // مؤقت تنازلي موحد يعرض دقيقة بدقيقة الوقت المتبقي لليوم الجديد
+    function startResetTimer() {
+        clearInterval(appData.resetTimerInterval);
+        const el = document.getElementById('val-reset-timer');
+
+        appData.resetTimerInterval = setInterval(() => {
+            const now = getServerTime();
+            const targetMidnight = getNextUTCMidnightTimestamp();
+            let diffSec = Math.floor((targetMidnight - now) / 1000);
+
+            if (diffSec <= 0 || checkDailyReset()) {
+                renderDashboard();
+                renderQuestion();
+            } else {
+                let h = Math.floor(diffSec / 3600);
+                let m = Math.floor((diffSec % 3600) / 60);
+                let s = diffSec % 60;
+                if (el) {
+                    el.innerText = `${h < 10 ? '0' : ''}${h}:${m < 10 ? '0' : ''}${m}:${s < 10 ? '0' : ''}${s}`;
                 }
-            }, 1000);
-        }
-
-        function startResetTimer() {
-            clearInterval(appData.resetTimerInterval);
-            let sec = 86399; 
-            const el = document.getElementById('val-reset-timer');
-            
-            appData.resetTimerInterval = setInterval(() => {
-                let h = Math.floor(sec / 3600);
-                let m = Math.floor((sec % 3600) / 60);
-                let s = sec % 60;
-                el.innerText = `${h<10?'0':''}${h}:${m<10?'0':''}${m}:${s<10?'0':''}${s}`;
-                
-                if (sec > 0) sec--;
-                else {
-                    clearInterval(appData.resetTimerInterval);
-                    appData.resetTimerInterval = null;
-                    appData.solved = 0;
-                    renderDashboard();
-                    renderQuestion();
-                }
-            }, 1000);
-        }
-
-        // 6. نظام الاشتراكات
-        function changePlan(levelName, limit, rewardVal, price) {
-            if (!navigator.onLine) { showToast(getText('noNet'), true); return; }
-            
-            if (appData.level === levelName) {
-                showToast(getText('alreadySub'), true);
-                return;
             }
+        }, 1000);
+    }
 
-            if (price > 0 && appData.balance < price) {
-                showToast(getText('noBalance'), true);
-                return;
-            }
-
-            if (price > 0) {
-                appData.balance -= price;
-            }
-            
-            appData.level = levelName;
-            appData.dailyLimit = limit;
-            appData.reward = rewardVal;
-            appData.solved = 0;
-            appData.qIndex = 0;
-            appData.selectedOpt = null;
-            
-            clearInterval(appData.resetTimerInterval);
-            appData.resetTimerInterval = null;
-            document.getElementById('val-reset-timer').innerText = "00:00:00";
-            
-            document.getElementById('result-view').style.display = 'none';
-            document.getElementById('wrong-view').style.display = 'none';
-            document.getElementById('question-view').style.display = 'flex';
-
-            renderDashboard();
-            renderQuestion();
-            showToast(`${getText('activated')} (${levelName})`, false);
+    // 10. الاشتراك وتفعيل الباقات
+    function changePlan(planKey, levelName, limit, rewardVal, price) {
+        if (!navigator.onLine) { showToast(getText('noNet'), true); return; }
+        
+        if (appData.activePlans[planKey]) {
+            showToast(getText('alreadySub'), true);
+            return;
         }
 
-        // 7. أدوات مساعدة
-        function showToast(msg, isError = false) {
-            const toast = document.getElementById('toast');
-            toast.innerText = msg;
-            if(isError) toast.classList.add('error');
-            else toast.classList.remove('error');
-
-            toast.classList.add('show');
-            setTimeout(() => toast.classList.remove('show'), 3000);
+        if (price > 0 && appData.balance < price) {
+            showToast(getText('noBalance'), true);
+            return;
         }
 
-        // 8. مراقبة حالة الإنترنت مباشرة
-        window.addEventListener('online', () => {
-            showToast(appData.language === 'ar' ? 'عاد الاتصال بالإنترنت' : 'Back Online', false);
-            renderQuestion();
-        });
-        window.addEventListener('offline', () => {
-            showToast(getText('noNet'), true);
-            renderQuestion();
-        });
-
-        // تهيئة التأثيرات ثلاثية الأبعاد
-        function init3DBanner() {
-            const card = document.getElementById('bannerCard');
-            if (!card) return;
-
-            const handleMove = (x, y, rect) => {
-                const rotateX = (-y / rect.height) * 20; 
-                const rotateY = (x / rect.width) * 20;
-                card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
-            };
-
-            card.addEventListener('mousemove', (e) => {
-                const rect = card.getBoundingClientRect();
-                const x = e.clientX - rect.left - rect.width / 2;
-                const y = e.clientY - rect.top - rect.height / 2;
-                handleMove(x, y, rect);
-            });
-
-            card.addEventListener('mouseleave', () => card.style.transform = 'rotateX(0deg) rotateY(0deg)');
+        if (price > 0) {
+            appData.balance -= price;
         }
-
-        // بدء التشغيل
-        window.onload = () => {
-            appData.level = null; 
-            renderDashboard();
-            renderQuestion(); 
-            init3DBanner();
+        
+        appData.activePlans[planKey] = {
+            id: planKey,
+            name: levelName,
+            limit: limit,
+            reward: rewardVal,
+            price: price
         };
 
-        // تفاعل شريط التنقل السفلي
-        const navItems = document.querySelectorAll('.nav-item');
-        navItems.forEach(item => {
-            item.addEventListener('click', function(e) {
-                navItems.forEach(nav => nav.classList.remove('active'));
-                this.classList.add('active');
-            });
+        appData.qIndex = 0;
+        appData.selectedOpt = null;
+        
+        document.getElementById('result-view').style.display = 'none';
+        document.getElementById('wrong-view').style.display = 'none';
+        document.getElementById('question-view').style.display = 'flex';
+
+        syncDataToCloud();
+        renderDashboard();
+        renderQuestion();
+        showToast(`${getText('activated')} (${levelName})`, false);
+    }
+
+    // 11. التنبيهات والبنر
+    function showToast(msg, isError = false) {
+        const toast = document.getElementById('toast');
+        toast.innerText = msg;
+        if(isError) toast.classList.add('error');
+        else toast.classList.remove('error');
+
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+
+    window.addEventListener('online', () => {
+        showToast(appData.language === 'ar' ? 'عاد الاتصال بالإنترنت' : 'Back Online', false);
+        loadUserData(() => {
+            renderDashboard();
+            renderQuestion();
+        });
+    });
+
+    window.addEventListener('offline', () => {
+        showToast(getText('noNet'), true);
+        renderQuestion();
+    });
+
+    function init3DBanner() {
+        const card = document.getElementById('bannerCard');
+        if (!card) return;
+
+        const handleMove = (x, y, rect) => {
+            const rotateX = (-y / rect.height) * 20; 
+            const rotateY = (x / rect.width) * 20;
+            card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+        };
+
+        card.addEventListener('mousemove', (e) => {
+            const rect = card.getBoundingClientRect();
+            const x = e.clientX - rect.left - rect.width / 2;
+            const y = e.clientY - rect.top - rect.height / 2;
+            handleMove(x, y, rect);
         });
 
-    </script>
-    
-    <!-- الاعتماد على ملف اللغة الخارجي لتغيير النصوص -->
-    <script src="language.js"></script>
+        card.addEventListener('mouseleave', () => card.style.transform = 'rotateX(0deg) rotateY(0deg)');
+    }
+
+    // 12. بدء التشغيل الآمن
+    window.onload = () => {
+        initAuthAndLoadData(() => {
+            renderDashboard();
+            renderQuestion(); 
+            startResetTimer(); // تشغيل مؤقت التجديد اليومي المستمر
+            init3DBanner();
+        });
+    };
+
+    const navItems = document.querySelectorAll('.nav-item');
+    navItems.forEach(item => {
+        item.addEventListener('click', function() {
+            navItems.forEach(nav => nav.classList.remove('active'));
+            this.classList.add('active');
+        });
+    });
+</script>
 
 </body>
 </html>
