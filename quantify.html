@@ -1680,15 +1680,21 @@
         card.addEventListener('mouseleave', () => card.style.transform = 'rotateX(0deg) rotateY(0deg)');
     }
 
-    // 12. بدء التشغيل الآمن
+       // 12. بدء التشغيل الآمن
     window.onload = () => {
+        // إضافة هذا الجزء لعرض الحالة الافتراضية فوراً (مستوى غير مفعل والمهام مقفلة)
+        renderDashboard();
+        renderQuestion();
+        
         initAuthAndLoadData(() => {
+            // إعادة التحديث بالبيانات الفعلية بعد نجاح جلبها من السيرفر
             renderDashboard();
             renderQuestion(); 
             startResetTimer(); // تشغيل مؤقت التجديد اليومي المستمر
             init3DBanner();
         });
     };
+
 
     const navItems = document.querySelectorAll('.nav-item');
     navItems.forEach(item => {
