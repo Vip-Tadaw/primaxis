@@ -1123,7 +1123,7 @@
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
     import { getAuth, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
-    import { getFirestore, doc, onSnapshot, updateDoc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+    import { getFirestore, doc, onSnapshot, updateDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
     // 1. إعدادات Firebase
     const firebaseConfig = {
@@ -1140,6 +1140,15 @@
     const db = getFirestore(app);
 
     let userId = null;
+
+    // دوال الأمان الحسابي لمنع مشاكل الفواصل العشرية
+    function safeAdd(a, b) {
+        return Math.round((Number(a) + Number(b)) * 10000) / 10000;
+    }
+
+    function safeSub(a, b) {
+        return Math.round((Number(a) - Number(b)) * 10000) / 10000;
+    }
 
     function getTodayDateString() {
         return new Date().toISOString().split('T')[0];
@@ -1170,6 +1179,7 @@
         balance: 0.00,
         activePlans: {},
         solvedToday: 0,
+        todayEarned: 0.00,
         qIndex: 0,
         selectedOpt: null,
         timerVal: 60,
@@ -1219,6 +1229,7 @@
             balance: appData.balance,
             activePlans: appData.activePlans || {},
             solvedToday: appData.solvedToday,
+            todayEarned: appData.todayEarned || 0,
             lastDate: appData.lastDate,
             qIndex: appData.qIndex
         };
@@ -1228,7 +1239,6 @@
             try {
                 await updateDoc(userRef, dataToSave);
             } catch (e) {
-                // إذا لم يكن المستند موجوداً، قم بإنشائه
                 await setDoc(userRef, dataToSave, { merge: true });
             }
         }
@@ -1238,6 +1248,7 @@
         const today = getTodayDateString();
         if (appData.lastDate !== today) {
             appData.solvedToday = 0;
+            appData.todayEarned = 0.00;
             appData.lastDate = today;
             appData.qIndex = 0;
             syncDataToCloud();
@@ -1246,30 +1257,58 @@
         return false;
     }
 
-    // 5. إحصائيات الباقات
+    // 5. إحصائيات الباقات الحسابية الدقيقة
     function getAggregatedStats() {
         const keys = Object.keys(appData.activePlans || {});
         if (keys.length === 0) {
-            return { totalLimit: 0, avgReward: 0, totalPotentialProfit: 0, levelText: getText('notActive') };
+            return { 
+                totalLimit: 0, 
+                taskRewards: [], 
+                currentReward: 0, 
+                totalPotentialProfit: 0, 
+                levelText: getText('notActive') 
+            };
         }
 
+        const planOrder = ['free', 'vip1', 'vip2', 'vip3', 'vip4', 'vip5'];
         let totalLimit = 0;
-        let totalProfit = 0;
+        let totalPotentialProfit = 0;
         let planNames = [];
+        let taskRewards = [];
 
-        keys.forEach(k => {
+        planOrder.forEach(k => {
             const p = appData.activePlans[k];
             if (p) {
                 totalLimit += p.limit;
-                totalProfit += (p.limit * p.reward);
+                totalPotentialProfit = safeAdd(totalPotentialProfit, p.limit * p.reward);
                 planNames.push(p.name);
+                for (let i = 0; i < p.limit; i++) {
+                    taskRewards.push(p.reward);
+                }
             }
         });
 
-        const avgReward = totalLimit > 0 ? (totalProfit / totalLimit) : 0;
+        keys.forEach(k => {
+            if (!planOrder.includes(k)) {
+                const p = appData.activePlans[k];
+                if (p) {
+                    totalLimit += p.limit;
+                    totalPotentialProfit = safeAdd(totalPotentialProfit, p.limit * p.reward);
+                    planNames.push(p.name);
+                    for (let i = 0; i < p.limit; i++) {
+                        taskRewards.push(p.reward);
+                    }
+                }
+            }
+        });
+
+        const currentReward = appData.solvedToday < taskRewards.length 
+            ? taskRewards[appData.solvedToday] 
+            : (taskRewards.length > 0 ? taskRewards[taskRewards.length - 1] : 0);
+
         const levelText = planNames.join(' + ');
 
-        return { totalLimit, avgReward, totalPotentialProfit: totalProfit, levelText };
+        return { totalLimit, taskRewards, currentReward, totalPotentialProfit, levelText };
     }
 
     // 6. عرض البيانات
@@ -1278,8 +1317,8 @@
         const stats = getAggregatedStats();
         
         document.getElementById('val-level').innerText = stats.levelText;
-        document.getElementById('val-balance').innerText = parseFloat(appData.balance).toFixed(2);
-        document.getElementById('val-reward').innerText = stats.avgReward.toFixed(2);
+        document.getElementById('val-balance').innerText = parseFloat(appData.balance.toFixed(4));
+        document.getElementById('val-reward').innerText = parseFloat(stats.currentReward.toFixed(3));
         document.getElementById('val-qs').innerText = `${appData.solvedToday} / ${stats.totalLimit}`;
         document.getElementById('q-total').innerText = stats.totalLimit || "0";
         document.getElementById('q-curr').innerText = stats.totalLimit > 0 ? Math.min(appData.solvedToday + 1, stats.totalLimit) : "0";
@@ -1376,7 +1415,7 @@
         document.getElementById('options-box').innerHTML = html;
     };
 
-    // 8. التأكيد والتحقق
+    // 8. التأكيد والتحقق الحسابي الدقيق
     window.submitAnswer = function() {
         checkDailyReset();
         const stats = getAggregatedStats();
@@ -1394,15 +1433,17 @@
         if (computedHash === curr.ansHash) {
             clearInterval(appData.timerInterval);
             
-            const earnedReward = stats.avgReward;
-            appData.balance += earnedReward;
+            // تحديد الربح المستحق لهذه المهمة بالذات
+            const earnedReward = stats.taskRewards[appData.solvedToday] || stats.currentReward;
+            
+            appData.balance = safeAdd(appData.balance, earnedReward);
+            appData.todayEarned = safeAdd(appData.todayEarned || 0, earnedReward);
             appData.solvedToday++;
             
-            let todayProfit = appData.solvedToday * stats.avgReward;
-            document.getElementById('result-earned').innerText = `+ ${earnedReward.toFixed(2)} USDT`;
-            document.getElementById('streak-val').innerText = `+ ${todayProfit.toFixed(2)} USDT`;
+            document.getElementById('result-earned').innerText = `+ ${earnedReward} USDT`;
+            document.getElementById('streak-val').innerText = `+ ${appData.todayEarned} USDT`;
             
-            showToast(`${getText('correctAns')} +${earnedReward.toFixed(2)} USDT`, false);
+            showToast(`${getText('correctAns')} +${earnedReward} USDT`, false);
 
             document.getElementById('question-view').style.display = 'none';
             document.getElementById('wrong-view').style.display = 'none';
@@ -1492,7 +1533,7 @@
         }, 1000);
     }
 
-    // 10. تفعيل الباقات
+    // 10. تفعيل الباقات بخصم دقيق وموثوق
     window.changePlan = async function(planKey, levelName, limit, rewardVal, price) {
         if (appData.activePlans && appData.activePlans[planKey]) {
             showToast(getText('alreadySub'), true);
@@ -1505,7 +1546,7 @@
         }
 
         if (price > 0) {
-            appData.balance -= price;
+            appData.balance = safeSub(appData.balance, price);
         }
         
         if (!appData.activePlans) appData.activePlans = {};
@@ -1518,9 +1559,6 @@
             price: price
         };
 
-        appData.qIndex = 0;
-        appData.selectedOpt = null;
-        
         document.getElementById('result-view').style.display = 'none';
         document.getElementById('wrong-view').style.display = 'none';
         document.getElementById('question-view').style.display = 'flex';
@@ -1551,13 +1589,12 @@
         }
     };
 
-    // 12. الاتصال اللحظي بـ Firestore عند تحميل الصفحة
+    // 12. الاتصال اللحظي بـ Firestore مع معالجة المؤقت الخفي
     onAuthStateChanged(auth, (user) => {
         if (user) {
             userId = user.uid;
             const userDocRef = doc(db, "users", userId);
             
-            // الاستماع اللحظي لتحديثات الرصيد والباقات
             onSnapshot(userDocRef, (docSnap) => {
                 if (docSnap.exists()) {
                     const data = docSnap.data();
@@ -1565,21 +1602,27 @@
                     appData.balance = data.balance !== undefined ? parseFloat(data.balance) : appData.balance;
                     appData.activePlans = data.activePlans || appData.activePlans;
                     appData.solvedToday = data.solvedToday !== undefined ? data.solvedToday : appData.solvedToday;
+                    appData.todayEarned = data.todayEarned !== undefined ? data.todayEarned : appData.todayEarned;
                     appData.lastDate = data.lastDate || appData.lastDate;
                     appData.qIndex = data.qIndex !== undefined ? data.qIndex : appData.qIndex;
                 }
                 checkDailyReset();
                 renderDashboard();
-                renderQuestion();
+
+                // تجديد واجهة السؤال فقط إذا كان المستخدم واقفاً في شاشة السؤال منعاً لإعادة تشغيل المؤقت أثناء عرض شاشة النتيجة
+                const qView = document.getElementById('question-view');
+                if (qView && window.getComputedStyle(qView).display !== 'none') {
+                    renderQuestion();
+                }
                 startResetTimer();
             });
         } else {
-            // إذا لم يكن هناك مستخدم مسجل، قم بتسجيله مجهولاً أو تحويله لصفحة الدخول
             signInAnonymously(auth).catch((error) => console.error(error));
         }
     });
 
 </script>
+
 
 
 </body>
