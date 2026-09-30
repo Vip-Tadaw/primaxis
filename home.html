@@ -161,11 +161,49 @@
         .bb-sub { font-size: 10px; color: #b0c4de; }
         .bb-icon { font-size: 30px; color: var(--neon-purple); opacity: 0.8; }
 
-        /* ---------------- القائمة السفلية ---------------- */
-        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background-color: rgba(5, 5, 15, 0.95); backdrop-filter: blur(10px); display: flex; justify-content: space-around; padding: 12px 0 15px; border-top: 1px solid rgba(138,43,226,0.3); z-index: 100; direction: ltr; box-shadow: 0 -5px 20px rgba(0,0,0,0.8); }
-        .nav-item { display: flex; flex-direction: column; align-items: center; color: #6b7280; font-size: 11px; gap: 6px; font-weight: bold; text-decoration: none; transition: 0.3s; flex: 1; }
-        .nav-item.active { color: #a855f7; text-shadow: 0 0 10px rgba(168, 85, 247, 0.5); }
-        .nav-item i { font-size: 20px; }
+      /* ---------------- القائمة السفلية الموحدة ---------------- */
+.bottom-nav { 
+    position: fixed; 
+    bottom: 0; 
+    left: 0; 
+    right: 0;
+    margin: 0 auto;
+    width: 100%; 
+    max-width: 500px; /* لضمان عدم تمدد الشريط على شاشات الكمبيوتر الكبيرة */
+    background-color: rgba(5, 5, 15, 0.95); 
+    backdrop-filter: blur(10px); 
+    display: flex; 
+    justify-content: space-around; 
+    padding: 12px 0 15px; 
+    border-top: 1px solid rgba(138,43,226,0.3); 
+    z-index: 1000; 
+    direction: ltr; 
+    box-shadow: 0 -5px 20px rgba(0,0,0,0.8); 
+    box-sizing: border-box;
+}
+
+.nav-item { 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    color: #6b7280; 
+    font-size: 11px; 
+    gap: 6px; 
+    font-weight: bold; 
+    text-decoration: none; 
+    transition: all 0.3s ease; 
+    flex: 1; 
+}
+
+.nav-item.active { 
+    color: #a855f7; 
+    text-shadow: 0 0 10px rgba(168, 85, 247, 0.5); 
+}
+
+.nav-item i { 
+    font-size: 20px; 
+}
+
 
         /* تحسينات إضافية للهواتف ذات الشاشات الصغيرة جداً */
         @media (max-width: 380px) {
@@ -184,6 +222,7 @@
             .user-info-wrap { gap: 10px; }
             .avatar-box img { width: 50px; height: 50px; }
         }
+        
     </style>
 </head>
 <body>
