@@ -239,7 +239,7 @@
                 </div>
             </div>
             <div class="form-hint">
-                <i class="fa-solid fa-circle-info"></i> الحد الأدنى للسحب 3.00 USDT | الحد الأقصى 9999999.00 USDT
+                <i class="fa-solid fa-circle-info"></i> الحد الأدنى للسحب 1.00 USDT | الحد الأقصى 9999999.00 USDT
             </div>
         </div>
 
@@ -263,7 +263,7 @@
                     <i class="fa-solid fa-file-invoice-dollar"></i> إجمالي المبلغ المستلم
                 </div>
                 <div class="fee-badge">
-                    <span>5%</span> الرسوم الإدارية تُخصم تلقائياً
+                    <span>6%</span> الرسوم الإدارية تُخصم تلقائياً
                 </div>
             </div>
             <div class="receipt-values">
@@ -284,10 +284,10 @@
             <i class="fa-brands fa-usps notes-bg-icon"></i>
             <div class="notes-title"><i class="fa-solid fa-shield-halved"></i> ملاحظات هامة</div>
             <ul class="notes-list">
-                <li>أوقات المعالجة: السحب متاح على مدار 24 ساعة. وقت الوصول المتوقع من (1 إلى 10 دقائق).</li>
+                <li>أوقات المعالجة: السحب متاح على مدار 24 ساعة. وقت الوصول المتوقع من (12 إلى 24 ساعه).</li>
                 <li>تأكد من مطابقة الشبكة: سيتم السحب تلقائياً للمحفظة الأمنية التي قمت بربطها مسبقاً.</li>
                 <li>الحد الأدنى الفعلي: أقل كمية يسمح بسحبها هي 3 USDT.</li>
-                <li>الرسوم التلقائية: تخضع عمليات السحب لخصم رسوم شبكة ثابتة بنسبة 5% تغطي تكلفة غاز البلوكتشين.</li>
+                <li>الرسوم التلقائية: تخضع عمليات السحب لخصم رسوم شبكة ثابتة بنسبة 6% تغطي تكلفة غاز البلوكتشين.</li>
             </ul>
             <div class="disclaimer">
                 <i class="fa-solid fa-circle-exclamation"></i>
@@ -343,10 +343,10 @@
         const auth = getAuth(app);
 
         let userBalance = 0;
-        let currentMinAmount = 3.00;
+        let currentMinAmount = 1.00;
         let currentUserData = null;
         let userId = null;
-        const FEE_PERCENTAGE = 5;
+        const FEE_PERCENTAGE = 6;
 
         window.showPlatformToast = function(message, type = "error") {
             const toast = document.getElementById("custom-toast");
