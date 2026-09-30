@@ -1120,7 +1120,11 @@
         </a> 
     </div>
 
-<script>
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+    import { getFirestore, doc, onSnapshot, updateDoc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
     // 1. إعدادات Firebase
     const firebaseConfig = {
         apiKey: "AIzaSyCa3nVSth5Jhhuhvblw23w0uxzR1VJHLOo",
@@ -1131,46 +1135,19 @@
         appId: "1:21558070357:web:6237dcf59b162b5dae18dc"
     };
 
-    if (!firebase.apps.length) {
-        firebase.initializeApp(firebaseConfig);
-    }
-    const db = firebase.database();
-    const auth = firebase.auth();
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
 
     let userId = null;
-    let serverOffset = 0;
-
-    // الحصول على معرف ثابت محلياً فوراً لحماية حفظ البيانات
-    function getUserId() {
-        if (userId) return userId;
-        let localUid = localStorage.getItem('app_device_user_id');
-        if (!localUid) {
-            localUid = 'user_' + Date.now() + '_' + Math.floor(Math.random() * 1000000);
-            localStorage.setItem('app_device_user_id', localUid);
-        }
-        return localUid;
-    }
-
-    db.ref('.info/serverTimeOffset').on('value', (snap) => {
-        serverOffset = snap.val() || 0;
-    });
-
-    function getServerTime() {
-        return Date.now() + serverOffset;
-    }
 
     function getTodayDateString() {
-        return new Date(getServerTime()).toISOString().split('T')[0];
+        return new Date().toISOString().split('T')[0];
     }
 
     function getNextUTCMidnightTimestamp() {
-        const now = new Date(getServerTime());
-        return Date.UTC(
-            now.getUTCFullYear(),
-            now.getUTCMonth(),
-            now.getUTCDate() + 1,
-            0, 0, 0, 0
-        );
+        const now = new Date();
+        return Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1, 0, 0, 0, 0);
     }
 
     // 2. تشفير الإجابات
@@ -1227,52 +1204,17 @@
             correctIs: "الإجابة الصحيحة هي:",
             alreadySub: "أنت مشترك في هذه الباقة بالفعل!",
             authError: "حدث خطأ في الاتصال بالسيرفر."
-        },
-        en: {
-            locked: "Tasks Locked!",
-            lockedDesc: "Please activate Free plan or VIP subscription to start.",
-            done: "Tasks Completed!",
-            doneDesc: "Come back tomorrow. Timer starts now.",
-            noNet: "No Internet Connection! Please check your network.",
-            noBalance: "Insufficient balance for this subscription!",
-            activated: "Plan activated successfully!",
-            wrongAns: "Wrong Answer!",
-            correctAns: "Correct Answer!",
-            timeout: "Time out! Moved to next question.",
-            notActive: "Not Active",
-            selectAns: "Select an answer first!",
-            correctIs: "Correct answer is:",
-            alreadySub: "Already subscribed to this plan!",
-            authError: "Server connection error."
         }
     };
 
     function getText(key) {
-        appData.language = document.documentElement.lang || window.localStorage.getItem('lang') || 'ar';
-        return translations[appData.language] ? translations[appData.language][key] : translations['ar'][key];
+        return translations['ar'][key];
     }
 
-    // 4. إدارة التخزين المحلي والسحابي الآمن الفوري
-    function loadFromLocalStorage() {
-        const currentId = getUserId();
-        const local = localStorage.getItem('user_app_data_' + currentId) || localStorage.getItem('user_app_data_global');
-        if (local) {
-            try {
-                const data = JSON.parse(local);
-                appData.balance = typeof data.balance === 'number' ? data.balance : 0.00;
-                appData.activePlans = data.activePlans || {};
-                appData.solvedToday = data.solvedToday || 0;
-                appData.lastDate = data.lastDate || getTodayDateString();
-                appData.qIndex = data.qIndex || 0;
-            } catch(e) {
-                console.error("خطأ قراءة التخزين المحلي", e);
-            }
-        }
-    }
-
-    function syncDataToCloud() {
-        const currentId = getUserId();
-
+    // 4. المزامنة السحابية مع Firestore
+    async function syncDataToCloud() {
+        if (!userId) return;
+        
         const dataToSave = {
             balance: appData.balance,
             activePlans: appData.activePlans || {},
@@ -1281,61 +1223,14 @@
             qIndex: appData.qIndex
         };
 
-        // 1. التخزين المحلي الفوري
-        localStorage.setItem('user_app_data_' + currentId, JSON.stringify(dataToSave));
-        localStorage.setItem('user_app_data_global', JSON.stringify(dataToSave));
-
-        // 2. المزامنة السحابية
-        if (navigator.onLine && firebase.apps.length) {
-            db.ref('users/' + currentId).update({
-                ...dataToSave,
-                lastUpdated: firebase.database.ServerValue.TIMESTAMP
-            }).catch(e => console.log("تنبيه مزامنة للسحابة:", e));
-        }
-    }
-
-    function initAuthAndLoadData(onSuccess) {
-        auth.onAuthStateChanged((user) => {
-            if (user) {
-                userId = user.uid;
-                loadUserData(onSuccess);
-            } else {
-                auth.signInAnonymously().then(res => {
-                    if(res && res.user) userId = res.user.uid;
-                    loadUserData(onSuccess);
-                }).catch((error) => {
-                    console.error("Firebase Auth Error:", error);
-                    if (onSuccess) onSuccess(); 
-                });
-            }
-        });
-    }
-
-    function loadUserData(callback) {
-        const currentId = getUserId();
-        
         if (navigator.onLine) {
-            db.ref('users/' + currentId).once('value').then((snapshot) => {
-                const data = snapshot.val();
-                if (data && data.activePlans) {
-                    appData.balance = data.balance !== undefined ? data.balance : appData.balance;
-                    appData.activePlans = data.activePlans || appData.activePlans;
-                    appData.solvedToday = data.solvedToday !== undefined ? data.solvedToday : appData.solvedToday;
-                    appData.lastDate = data.lastDate || appData.lastDate;
-                    appData.qIndex = data.qIndex !== undefined ? data.qIndex : appData.qIndex;
-                } else {
-                    // إذا لم تكن هناك اشتراكات في السحابة، رفع ما تم تفعيله محلياً
-                    syncDataToCloud();
-                }
-                checkDailyReset();
-                if (callback) callback();
-            }).catch(() => {
-                checkDailyReset();
-                if (callback) callback();
-            });
-        } else {
-            checkDailyReset();
-            if (callback) callback();
+            const userRef = doc(db, "users", userId);
+            try {
+                await updateDoc(userRef, dataToSave);
+            } catch (e) {
+                // إذا لم يكن المستند موجوداً، قم بإنشائه
+                await setDoc(userRef, dataToSave, { merge: true });
+            }
         }
     }
 
@@ -1349,14 +1244,6 @@
             return true;
         }
         return false;
-    }
-
-    function handleBack() {
-        if (document.referrer) {
-            history.back();
-        } else {
-            window.location.href = 'home.html';
-        }
     }
 
     // 5. إحصائيات الباقات
@@ -1391,22 +1278,23 @@
         const stats = getAggregatedStats();
         
         document.getElementById('val-level').innerText = stats.levelText;
-        document.getElementById('val-balance').innerText = appData.balance.toFixed(2);
+        document.getElementById('val-balance').innerText = parseFloat(appData.balance).toFixed(2);
         document.getElementById('val-reward').innerText = stats.avgReward.toFixed(2);
         document.getElementById('val-qs').innerText = `${appData.solvedToday} / ${stats.totalLimit}`;
         document.getElementById('q-total').innerText = stats.totalLimit || "0";
         document.getElementById('q-curr').innerText = stats.totalLimit > 0 ? Math.min(appData.solvedToday + 1, stats.totalLimit) : "0";
 
         const headerBadge = document.getElementById('header-vip-badge');
-        if (Object.keys(appData.activePlans || {}).length === 0) {
-            headerBadge.className = 'header-vip-badge free-level';
-            headerBadge.innerHTML = `<i class="fa-solid fa-user-shield"></i> <span>${getText('notActive')}</span>`;
-        } else {
-            headerBadge.className = 'header-vip-badge vip-level';
-            headerBadge.innerHTML = `<i class="fa-solid fa-crown"></i> <span>${stats.levelText}</span>`;
+        if (headerBadge) {
+            if (Object.keys(appData.activePlans || {}).length === 0) {
+                headerBadge.className = 'header-vip-badge free-level';
+                headerBadge.innerHTML = `<i class="fa-solid fa-user-shield"></i> <span>${getText('notActive')}</span>`;
+            } else {
+                headerBadge.className = 'header-vip-badge vip-level';
+                headerBadge.innerHTML = `<i class="fa-solid fa-crown"></i> <span>${stats.levelText}</span>`;
+            }
         }
 
-        // تحديث أزرار الباقات
         ['free', 'vip1', 'vip2', 'vip3', 'vip4', 'vip5'].forEach(planKey => {
             const btn = document.getElementById('btn-' + planKey);
             if (btn) {
@@ -1423,6 +1311,7 @@
     function renderQuestion() {
         checkDailyReset();
         const qView = document.getElementById('question-view');
+        if (!qView) return;
         const stats = getAggregatedStats();
 
         if (Object.keys(appData.activePlans || {}).length === 0) {
@@ -1475,9 +1364,8 @@
         startTimer();
     }
 
-    function selectOption(index) {
+    window.selectOption = function(index) {
         appData.selectedOpt = index;
-        
         const curr = questionsList[appData.qIndex % questionsList.length];
         const html = curr.opts.map((opt, i) => `
             <button class="option-btn ${appData.selectedOpt === i ? 'active' : ''}" onclick="selectOption(${i})">
@@ -1486,16 +1374,16 @@
             </button>
         `).join('');
         document.getElementById('options-box').innerHTML = html;
-    }
+    };
 
     // 8. التأكيد والتحقق
-    function submitAnswer() {
+    window.submitAnswer = function() {
         checkDailyReset();
         const stats = getAggregatedStats();
         if (appData.solvedToday >= stats.totalLimit || stats.totalLimit === 0) return;
         
         if (appData.selectedOpt === null) {
-            showToast(getText('selectAns'), false);
+            showToast(getText('selectAns'), true);
             return;
         }
 
@@ -1529,24 +1417,24 @@
             document.getElementById('wrong-view').style.display = 'flex';
             document.getElementById('hint-box').style.display = 'none';
         }
-    }
+    };
 
-    function showHint() {
+    window.showHint = function() {
         const curr = questionsList[appData.qIndex % questionsList.length];
         const correctValue = curr.opts.find(opt => getAnsHash(curr.q, opt) === curr.ansHash);
         const hintBox = document.getElementById('hint-box');
         hintBox.innerHTML = `${getText('correctIs')} <span style="color:var(--gold); font-size:18px;">${correctValue}</span>`;
         hintBox.style.display = 'block';
-    }
+    };
 
-    function retryQuestion() {
+    window.retryQuestion = function() {
         document.getElementById('wrong-view').style.display = 'none';
         document.getElementById('question-view').style.display = 'flex';
         appData.selectedOpt = null;
         renderQuestion();
-    }
+    };
 
-    function nextQuestion() {
+    window.nextQuestion = function() {
         document.getElementById('result-view').style.display = 'none';
         document.getElementById('wrong-view').style.display = 'none';
         document.getElementById('question-view').style.display = 'flex';
@@ -1556,13 +1444,14 @@
         syncDataToCloud();
         renderDashboard();
         renderQuestion();
-    }
+    };
 
     // 9. المؤقتات
     function startTimer() {
         clearInterval(appData.timerInterval);
         appData.timerVal = 60;
         const timerEl = document.getElementById('q-timer');
+        if(!timerEl) return;
         timerEl.innerText = `00:${appData.timerVal < 10 ? '0' : ''}${appData.timerVal}`;
 
         appData.timerInterval = setInterval(() => {
@@ -1585,7 +1474,7 @@
         const el = document.getElementById('val-reset-timer');
 
         appData.resetTimerInterval = setInterval(() => {
-            const now = getServerTime();
+            const now = new Date().getTime();
             const targetMidnight = getNextUTCMidnightTimestamp();
             let diffSec = Math.floor((targetMidnight - now) / 1000);
 
@@ -1603,8 +1492,8 @@
         }, 1000);
     }
 
-    // 10. تفعيل الباقات (مع الحفظ الآمن)
-    function changePlan(planKey, levelName, limit, rewardVal, price) {
+    // 10. تفعيل الباقات
+    window.changePlan = async function(planKey, levelName, limit, rewardVal, price) {
         if (appData.activePlans && appData.activePlans[planKey]) {
             showToast(getText('alreadySub'), true);
             return;
@@ -1636,16 +1525,16 @@
         document.getElementById('wrong-view').style.display = 'none';
         document.getElementById('question-view').style.display = 'flex';
 
-        // حفظ مباشر فوري في المتصفح والسحابة
-        syncDataToCloud();
+        await syncDataToCloud();
         renderDashboard();
         renderQuestion();
         showToast(`${getText('activated')} (${levelName})`, false);
-    }
+    };
 
-    // 11. التنبيهات والبنر
+    // 11. التنبيهات
     function showToast(msg, isError = false) {
-        const toast = document.getElementById('toast');
+        const toast = document.getElementById('toast') || document.getElementById('custom-toast');
+        if(!toast) return;
         toast.innerText = msg;
         if(isError) toast.classList.add('error');
         else toast.classList.remove('error');
@@ -1654,51 +1543,44 @@
         setTimeout(() => toast.classList.remove('show'), 3000);
     }
 
-    function init3DBanner() {
-        const card = document.getElementById('bannerCard');
-        if (!card) return;
-
-        const handleMove = (x, y, rect) => {
-            const rotateX = (-y / rect.height) * 20; 
-            const rotateY = (x / rect.width) * 20;
-            card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
-        };
-
-        card.addEventListener('mousemove', (e) => {
-            const rect = card.getBoundingClientRect();
-            const x = e.clientX - rect.left - rect.width / 2;
-            const y = e.clientY - rect.top - rect.height / 2;
-            handleMove(x, y, rect);
-        });
-
-        card.addEventListener('mouseleave', () => card.style.transform = 'rotateX(0deg) rotateY(0deg)');
-    }
-
-    // 12. التشغيل الفوري
-    window.onload = () => {
-        // 1. قراءة التخزين المحلي فوراً عند فتح الصفحة
-        loadFromLocalStorage();
-        checkDailyReset();
-        renderDashboard();
-        renderQuestion();
-        startResetTimer();
-        init3DBanner();
-
-        // 2. الاتصال بـ Firebase ومزامنة أحدث البيانات
-        initAuthAndLoadData(() => {
-            renderDashboard();
-            renderQuestion(); 
-        });
+    window.handleBack = function() {
+        if (document.referrer) {
+            history.back();
+        } else {
+            window.location.href = 'home.html';
+        }
     };
 
-    const navItems = document.querySelectorAll('.nav-item');
-    navItems.forEach(item => {
-        item.addEventListener('click', function() {
-            navItems.forEach(nav => nav.classList.remove('active'));
-            this.classList.add('active');
-        });
+    // 12. الاتصال اللحظي بـ Firestore عند تحميل الصفحة
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            userId = user.uid;
+            const userDocRef = doc(db, "users", userId);
+            
+            // الاستماع اللحظي لتحديثات الرصيد والباقات
+            onSnapshot(userDocRef, (docSnap) => {
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    
+                    appData.balance = data.balance !== undefined ? parseFloat(data.balance) : appData.balance;
+                    appData.activePlans = data.activePlans || appData.activePlans;
+                    appData.solvedToday = data.solvedToday !== undefined ? data.solvedToday : appData.solvedToday;
+                    appData.lastDate = data.lastDate || appData.lastDate;
+                    appData.qIndex = data.qIndex !== undefined ? data.qIndex : appData.qIndex;
+                }
+                checkDailyReset();
+                renderDashboard();
+                renderQuestion();
+                startResetTimer();
+            });
+        } else {
+            // إذا لم يكن هناك مستخدم مسجل، قم بتسجيله مجهولاً أو تحويله لصفحة الدخول
+            signInAnonymously(auth).catch((error) => console.error(error));
+        }
     });
+
 </script>
+
 
 </body>
 </html>
