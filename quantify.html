@@ -7,7 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Firebase SDK (تمت إضافة مكتبة Auth) -->
+    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
@@ -1120,18 +1120,16 @@
         </a> 
     </div>
 
-   <!-- JavaScript البرمجي الآمن والمعالج بالكامل -->
 <script>
     // 1. إعدادات Firebase
- const firebaseConfig = {
-          apiKey: "AIzaSyCa3nVSth5Jhhuhvblw23w0uxzR1VJHLOo",
-          authDomain: "yaqoout-b4c83.firebaseapp.com",
-          projectId: "yaqoout-b4c83",
-          storageBucket: "yaqoout-b4c83.firebasestorage.app",
-          messagingSenderId: "21558070357",
-          appId: "1:21558070357:web:6237dcf59b162b5dae18dc"
-      };
-
+    const firebaseConfig = {
+        apiKey: "AIzaSyCa3nVSth5Jhhuhvblw23w0uxzR1VJHLOo",
+        authDomain: "yaqoout-b4c83.firebaseapp.com",
+        projectId: "yaqoout-b4c83",
+        storageBucket: "yaqoout-b4c83.firebasestorage.app",
+        messagingSenderId: "21558070357",
+        appId: "1:21558070357:web:6237dcf59b162b5dae18dc"
+    };
 
     if (!firebase.apps.length) {
         firebase.initializeApp(firebaseConfig);
@@ -1140,9 +1138,19 @@
     const auth = firebase.auth();
 
     let userId = null;
-    let serverOffset = 0; // فارق التوقيت لمنع تلاعب الجهاز
+    let serverOffset = 0;
 
-    // مزامنة توقيت السيرفر لمنع تلاعب المستخدم بساعة الهاتف
+    // الحصول على معرف ثابت محلياً فوراً لحماية حفظ البيانات
+    function getUserId() {
+        if (userId) return userId;
+        let localUid = localStorage.getItem('app_device_user_id');
+        if (!localUid) {
+            localUid = 'user_' + Date.now() + '_' + Math.floor(Math.random() * 1000000);
+            localStorage.setItem('app_device_user_id', localUid);
+        }
+        return localUid;
+    }
+
     db.ref('.info/serverTimeOffset').on('value', (snap) => {
         serverOffset = snap.val() || 0;
     });
@@ -1165,7 +1173,7 @@
         );
     }
 
-    // 2. دالة تشفير الإجابات لمنع كشفها في الكود المصدري
+    // 2. تشفير الإجابات
     const HASH_SALT = "TaskApp_Secure_2026_xKey";
 
     function generateHash(text) {
@@ -1180,7 +1188,7 @@
         return generateHash(qText + "::" + optText + "::" + HASH_SALT);
     }
 
-    // 3. هيكل البيانات الأساسي (مع تشفير الإجابات)
+    // 3. هيكل البيانات الأساسي
     let appData = {
         balance: 0.00,
         activePlans: {},
@@ -1218,7 +1226,7 @@
             selectAns: "يرجى تحديد إجابة أولاً!",
             correctIs: "الإجابة الصحيحة هي:",
             alreadySub: "أنت مشترك في هذه الباقة بالفعل!",
-            authError: "حدث خطأ في الاتصال بالسيرفر. جاري إعادة المحاولة..."
+            authError: "حدث خطأ في الاتصال بالسيرفر."
         },
         en: {
             locked: "Tasks Locked!",
@@ -1235,7 +1243,7 @@
             selectAns: "Select an answer first!",
             correctIs: "Correct answer is:",
             alreadySub: "Already subscribed to this plan!",
-            authError: "Server connection error. Retrying..."
+            authError: "Server connection error."
         }
     };
 
@@ -1244,88 +1252,93 @@
         return translations[appData.language] ? translations[appData.language][key] : translations['ar'][key];
     }
 
-    // 4. إدارة المصادقة والمزامنة السحابية
-   function initAuthAndLoadData(onSuccess) {
-    auth.onAuthStateChanged((user) => {
-        if (user) {
-            userId = user.uid;
-            loadUserData(onSuccess);
-        } else {
-            auth.signInAnonymously().catch((error) => {
-                console.error("Firebase Auth Error:", error);
-                showToast("حدث خطأ بالاتصال، تم تشغيل الوضع المحلي", true);
-                
-                // الحل هنا: إجبار التطبيق على إكمال التحميل حتى لو فشل الفايربيس
-                if (onSuccess) onSuccess(); 
-            });
+    // 4. إدارة التخزين المحلي والسحابي الآمن الفوري
+    function loadFromLocalStorage() {
+        const currentId = getUserId();
+        const local = localStorage.getItem('user_app_data_' + currentId) || localStorage.getItem('user_app_data_global');
+        if (local) {
+            try {
+                const data = JSON.parse(local);
+                appData.balance = typeof data.balance === 'number' ? data.balance : 0.00;
+                appData.activePlans = data.activePlans || {};
+                appData.solvedToday = data.solvedToday || 0;
+                appData.lastDate = data.lastDate || getTodayDateString();
+                appData.qIndex = data.qIndex || 0;
+            } catch(e) {
+                console.error("خطأ قراءة التخزين المحلي", e);
+            }
         }
-    });
-}
+    }
 
     function syncDataToCloud() {
-        if (!userId) return;
+        const currentId = getUserId();
 
         const dataToSave = {
             balance: appData.balance,
-            activePlans: appData.activePlans,
+            activePlans: appData.activePlans || {},
             solvedToday: appData.solvedToday,
             lastDate: appData.lastDate,
             qIndex: appData.qIndex
         };
 
-        localStorage.setItem('user_app_data_' + userId, JSON.stringify(dataToSave));
+        // 1. التخزين المحلي الفوري
+        localStorage.setItem('user_app_data_' + currentId, JSON.stringify(dataToSave));
+        localStorage.setItem('user_app_data_global', JSON.stringify(dataToSave));
 
-        if (navigator.onLine) {
-            db.ref('users/' + userId).set({
+        // 2. المزامنة السحابية
+        if (navigator.onLine && firebase.apps.length) {
+            db.ref('users/' + currentId).update({
                 ...dataToSave,
                 lastUpdated: firebase.database.ServerValue.TIMESTAMP
-            });
+            }).catch(e => console.log("تنبيه مزامنة للسحابة:", e));
         }
     }
 
-    function loadUserData(callback) {
-        if (!userId) return;
+    function initAuthAndLoadData(onSuccess) {
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                userId = user.uid;
+                loadUserData(onSuccess);
+            } else {
+                auth.signInAnonymously().then(res => {
+                    if(res && res.user) userId = res.user.uid;
+                    loadUserData(onSuccess);
+                }).catch((error) => {
+                    console.error("Firebase Auth Error:", error);
+                    if (onSuccess) onSuccess(); 
+                });
+            }
+        });
+    }
 
+    function loadUserData(callback) {
+        const currentId = getUserId();
+        
         if (navigator.onLine) {
-            db.ref('users/' + userId).once('value').then((snapshot) => {
+            db.ref('users/' + currentId).once('value').then((snapshot) => {
                 const data = snapshot.val();
-                if (data) {
-                    appData.balance = data.balance || 0.00;
-                    appData.activePlans = data.activePlans || {};
-                    appData.solvedToday = data.solvedToday || 0;
-                    appData.lastDate = data.lastDate || getTodayDateString();
-                    appData.qIndex = data.qIndex || 0;
+                if (data && data.activePlans) {
+                    appData.balance = data.balance !== undefined ? data.balance : appData.balance;
+                    appData.activePlans = data.activePlans || appData.activePlans;
+                    appData.solvedToday = data.solvedToday !== undefined ? data.solvedToday : appData.solvedToday;
+                    appData.lastDate = data.lastDate || appData.lastDate;
+                    appData.qIndex = data.qIndex !== undefined ? data.qIndex : appData.qIndex;
                 } else {
-                    loadFromLocalStorage();
+                    // إذا لم تكن هناك اشتراكات في السحابة، رفع ما تم تفعيله محلياً
+                    syncDataToCloud();
                 }
                 checkDailyReset();
                 if (callback) callback();
             }).catch(() => {
-                loadFromLocalStorage();
                 checkDailyReset();
                 if (callback) callback();
             });
         } else {
-            loadFromLocalStorage();
             checkDailyReset();
             if (callback) callback();
         }
     }
 
-    function loadFromLocalStorage() {
-        if (!userId) return;
-        const local = localStorage.getItem('user_app_data_' + userId);
-        if (local) {
-            const data = JSON.parse(local);
-            appData.balance = data.balance || 0.00;
-            appData.activePlans = data.activePlans || {};
-            appData.solvedToday = data.solvedToday || 0;
-            appData.lastDate = data.lastDate || getTodayDateString();
-            appData.qIndex = data.qIndex || 0;
-        }
-    }
-
-    // دالة موحدة ومؤمنة للتحقق من إعادة التصفير اليومي
     function checkDailyReset() {
         const today = getTodayDateString();
         if (appData.lastDate !== today) {
@@ -1348,7 +1361,7 @@
 
     // 5. إحصائيات الباقات
     function getAggregatedStats() {
-        const keys = Object.keys(appData.activePlans);
+        const keys = Object.keys(appData.activePlans || {});
         if (keys.length === 0) {
             return { totalLimit: 0, avgReward: 0, totalPotentialProfit: 0, levelText: getText('notActive') };
         }
@@ -1359,9 +1372,11 @@
 
         keys.forEach(k => {
             const p = appData.activePlans[k];
-            totalLimit += p.limit;
-            totalProfit += (p.limit * p.reward);
-            planNames.push(p.name);
+            if (p) {
+                totalLimit += p.limit;
+                totalProfit += (p.limit * p.reward);
+                planNames.push(p.name);
+            }
         });
 
         const avgReward = totalLimit > 0 ? (totalProfit / totalLimit) : 0;
@@ -1383,7 +1398,7 @@
         document.getElementById('q-curr').innerText = stats.totalLimit > 0 ? Math.min(appData.solvedToday + 1, stats.totalLimit) : "0";
 
         const headerBadge = document.getElementById('header-vip-badge');
-        if (Object.keys(appData.activePlans).length === 0) {
+        if (Object.keys(appData.activePlans || {}).length === 0) {
             headerBadge.className = 'header-vip-badge free-level';
             headerBadge.innerHTML = `<i class="fa-solid fa-user-shield"></i> <span>${getText('notActive')}</span>`;
         } else {
@@ -1391,12 +1406,15 @@
             headerBadge.innerHTML = `<i class="fa-solid fa-crown"></i> <span>${stats.levelText}</span>`;
         }
 
-        Object.keys(appData.activePlans).forEach(planKey => {
+        // تحديث أزرار الباقات
+        ['free', 'vip1', 'vip2', 'vip3', 'vip4', 'vip5'].forEach(planKey => {
             const btn = document.getElementById('btn-' + planKey);
             if (btn) {
-                btn.innerText = "مفعل حالياً";
-                btn.style.background = "rgba(0,243,166,0.3)";
-                btn.style.color = "#fff";
+                if (appData.activePlans && appData.activePlans[planKey]) {
+                    btn.innerText = "مفعل حالياً";
+                    btn.style.background = "rgba(0,243,166,0.3)";
+                    btn.style.color = "#fff";
+                }
             }
         });
     }
@@ -1406,16 +1424,8 @@
         checkDailyReset();
         const qView = document.getElementById('question-view');
         const stats = getAggregatedStats();
-        
-        if (!navigator.onLine) {
-            qView.innerHTML = `
-                <div style="color: var(--neon-red); font-weight:900; font-size:20px; margin-top:20px;">
-                    <i class="fa-solid fa-wifi"></i> ${getText('noNet')}
-                </div>`;
-            return;
-        }
 
-        if (Object.keys(appData.activePlans).length === 0) {
+        if (Object.keys(appData.activePlans || {}).length === 0) {
             qView.innerHTML = `
                 <div style="color: var(--gold); font-weight:900; font-size:22px; margin-top:20px;">
                     <i class="fa-solid fa-lock"></i> ${getText('locked')}
@@ -1466,7 +1476,6 @@
     }
 
     function selectOption(index) {
-        if (!navigator.onLine) { showToast(getText('noNet'), true); return; }
         appData.selectedOpt = index;
         
         const curr = questionsList[appData.qIndex % questionsList.length];
@@ -1479,9 +1488,8 @@
         document.getElementById('options-box').innerHTML = html;
     }
 
-    // 8. التأكيد والتحقق الآمن
+    // 8. التأكيد والتحقق
     function submitAnswer() {
-        if (!navigator.onLine) { showToast(getText('noNet'), true); return; }
         checkDailyReset();
         const stats = getAggregatedStats();
         if (appData.solvedToday >= stats.totalLimit || stats.totalLimit === 0) return;
@@ -1525,7 +1533,6 @@
 
     function showHint() {
         const curr = questionsList[appData.qIndex % questionsList.length];
-        // استخراج الخيار الصحيح بدون كشفه مسبقاً في الذاكرة
         const correctValue = curr.opts.find(opt => getAnsHash(curr.q, opt) === curr.ansHash);
         const hintBox = document.getElementById('hint-box');
         hintBox.innerHTML = `${getText('correctIs')} <span style="color:var(--gold); font-size:18px;">${correctValue}</span>`;
@@ -1551,7 +1558,7 @@
         renderQuestion();
     }
 
-    // 9. المؤقتات الزمانية والمؤقت اليومي المستمر
+    // 9. المؤقتات
     function startTimer() {
         clearInterval(appData.timerInterval);
         appData.timerVal = 60;
@@ -1573,7 +1580,6 @@
         }, 1000);
     }
 
-    // مؤقت تنازلي موحد يعرض دقيقة بدقيقة الوقت المتبقي لليوم الجديد
     function startResetTimer() {
         clearInterval(appData.resetTimerInterval);
         const el = document.getElementById('val-reset-timer');
@@ -1597,11 +1603,9 @@
         }, 1000);
     }
 
-    // 10. الاشتراك وتفعيل الباقات
+    // 10. تفعيل الباقات (مع الحفظ الآمن)
     function changePlan(planKey, levelName, limit, rewardVal, price) {
-        if (!navigator.onLine) { showToast(getText('noNet'), true); return; }
-        
-        if (appData.activePlans[planKey]) {
+        if (appData.activePlans && appData.activePlans[planKey]) {
             showToast(getText('alreadySub'), true);
             return;
         }
@@ -1615,6 +1619,8 @@
             appData.balance -= price;
         }
         
+        if (!appData.activePlans) appData.activePlans = {};
+
         appData.activePlans[planKey] = {
             id: planKey,
             name: levelName,
@@ -1630,6 +1636,7 @@
         document.getElementById('wrong-view').style.display = 'none';
         document.getElementById('question-view').style.display = 'flex';
 
+        // حفظ مباشر فوري في المتصفح والسحابة
         syncDataToCloud();
         renderDashboard();
         renderQuestion();
@@ -1646,19 +1653,6 @@
         toast.classList.add('show');
         setTimeout(() => toast.classList.remove('show'), 3000);
     }
-
-    window.addEventListener('online', () => {
-        showToast(appData.language === 'ar' ? 'عاد الاتصال بالإنترنت' : 'Back Online', false);
-        loadUserData(() => {
-            renderDashboard();
-            renderQuestion();
-        });
-    });
-
-    window.addEventListener('offline', () => {
-        showToast(getText('noNet'), true);
-        renderQuestion();
-    });
 
     function init3DBanner() {
         const card = document.getElementById('bannerCard');
@@ -1680,21 +1674,22 @@
         card.addEventListener('mouseleave', () => card.style.transform = 'rotateX(0deg) rotateY(0deg)');
     }
 
-       // 12. بدء التشغيل الآمن
+    // 12. التشغيل الفوري
     window.onload = () => {
-        // إضافة هذا الجزء لعرض الحالة الافتراضية فوراً (مستوى غير مفعل والمهام مقفلة)
+        // 1. قراءة التخزين المحلي فوراً عند فتح الصفحة
+        loadFromLocalStorage();
+        checkDailyReset();
         renderDashboard();
         renderQuestion();
-        
+        startResetTimer();
+        init3DBanner();
+
+        // 2. الاتصال بـ Firebase ومزامنة أحدث البيانات
         initAuthAndLoadData(() => {
-            // إعادة التحديث بالبيانات الفعلية بعد نجاح جلبها من السيرفر
             renderDashboard();
             renderQuestion(); 
-            startResetTimer(); // تشغيل مؤقت التجديد اليومي المستمر
-            init3DBanner();
         });
     };
-
 
     const navItems = document.querySelectorAll('.nav-item');
     navItems.forEach(item => {
