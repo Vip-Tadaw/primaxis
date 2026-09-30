@@ -1,0 +1,1493 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>لوحة المهام والتداول</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-dark: #020811;
+            --card-bg: rgba(4, 20, 34, 0.92);
+            --neon-cyan: #00f3a6;
+            --neon-glow: rgba(0, 243, 166, 0.5);
+            --neon-soft: rgba(0, 243, 166, 0.12);
+            --neon-red: #ff4d4d;
+            --red-glow: rgba(255, 77, 77, 0.5);
+            --gold: #ffcc00;
+            --gold-glow: rgba(255, 204, 0, 0.5);
+            --text-white: #ffffff;
+            --text-muted: #8397ab;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Cairo', sans-serif;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-white);
+            display: block; /* تغيير ليناسب شاشة الهاتف بشكل طبيعي */
+            padding-bottom: 75px; /* مساحة سفلية لشريط التنقل */
+        }
+
+        .phone-container {
+            width: 100%;
+            background: var(--bg-dark);
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            position: relative;
+            min-height: 100vh;
+        }
+
+        /* 1. الشريط العلوي */
+        .top-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 2px 4px;
+        }
+
+        /* زر الرجوع */
+        .back-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            background: rgba(0, 243, 166, 0.08);
+            border: 1.5px solid rgba(0, 243, 166, 0.3);
+            border-radius: 50%;
+            color: var(--neon-cyan);
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: rgba(0, 243, 166, 0.15);
+            box-shadow: 0 0 12px var(--neon-glow);
+        }
+
+        /* 👑 تصميم شارة الـ VIP في الأعلى 👑 */
+        .header-vip-badge {
+            padding: 5px 12px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 800;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: default;
+        }
+
+        .header-vip-badge.free-level {
+            background: rgba(0, 243, 166, 0.1);
+            border: 1.5px solid var(--neon-cyan);
+            color: #fff;
+            box-shadow: 0 0 10px var(--neon-glow);
+        }
+
+        .header-vip-badge.vip-level {
+            background: rgba(255, 204, 0, 0.15);
+            border: 1.5px solid var(--gold);
+            color: var(--gold);
+            box-shadow: 0 0 12px var(--gold-glow);
+            text-shadow: 0 0 5px var(--gold-glow);
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+
+        /* 2. شبكة الإحصائيات */
+        .stats-grid {
+            border: 2px solid var(--neon-cyan);
+            border-radius: 16px;
+            background: var(--card-bg);
+            box-shadow: 0 0 18px var(--neon-glow), inset 0 0 12px var(--neon-soft);
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            overflow: hidden;
+        }
+
+        .stat-box {
+            padding: 12px 4px;
+            text-align: center;
+            border-bottom: 1px solid rgba(0, 243, 166, 0.25);
+            border-left: 1px solid rgba(0, 243, 166, 0.25);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+
+        .stat-box:nth-child(3n) { border-left: none; }
+        .stat-box:nth-child(n+4) { border-bottom: none; }
+
+        .stat-icon {
+            font-size: 22px;
+            color: var(--neon-cyan);
+            filter: drop-shadow(0 0 6px var(--neon-cyan));
+            margin-bottom: 2px;
+        }
+
+        .stat-title {
+            font-size: 10.5px;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .stat-val {
+            font-size: 13.5px;
+            font-weight: 800;
+            color: var(--neon-cyan);
+        }
+
+        .stat-val.white { color: #ffffff; }
+        .stat-val.gold { color: var(--gold); text-shadow: 0 0 8px var(--gold-glow); }
+
+        /* 3. شاشة السؤال */
+        .question-section {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .q-header-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .q-counter {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--text-white);
+        }
+
+        .timer-badge {
+            color: var(--neon-cyan);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            border: 1.5px solid var(--neon-cyan);
+            padding: 3px 12px;
+            border-radius: 20px;
+            box-shadow: 0 0 10px var(--neon-glow);
+            background: rgba(0, 243, 166, 0.08);
+            font-weight: 800;
+        }
+
+        .q-card {
+            border: 2px solid var(--neon-cyan);
+            border-radius: 18px;
+            background: var(--card-bg);
+            box-shadow: 0 0 20px var(--neon-glow), inset 0 0 15px var(--neon-soft);
+            padding: 20px 16px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #question-view {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .q-title {
+            font-size: 13.5px;
+            color: var(--text-white);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-weight: 700;
+        }
+
+        .q-math {
+            font-size: 32px;
+            font-weight: 900;
+            color: var(--neon-cyan);
+            letter-spacing: 2px;
+            text-shadow: 0 0 14px var(--neon-glow);
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .option-btn {
+            background: rgba(3, 18, 30, 0.95);
+            border: 1.5px solid rgba(0, 243, 166, 0.35);
+            border-radius: 12px;
+            padding: 12px;
+            color: #ffffff;
+            font-size: 16px;
+            font-weight: 800;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.25s ease;
+            box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.6);
+        }
+
+        .option-btn:hover, .option-btn.active {
+            border-color: var(--neon-cyan);
+            box-shadow: 0 0 15px var(--neon-glow);
+            background: rgba(0, 243, 166, 0.18);
+        }
+
+        .opt-badge {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            border: 1.5px solid var(--text-muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: var(--text-muted);
+            font-weight: 800;
+        }
+
+        .option-btn.active .opt-badge {
+            border-color: var(--neon-cyan);
+            color: var(--neon-cyan);
+            background: rgba(0, 243, 166, 0.25);
+        }
+
+        .confirm-btn {
+            background: rgba(0, 243, 166, 0.12);
+            border: 2px solid var(--neon-cyan);
+            color: var(--neon-cyan);
+            padding: 12px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 800;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 0 15px var(--neon-glow);
+            transition: all 0.25s;
+        }
+
+        .confirm-btn:hover {
+            background: var(--neon-cyan);
+            color: #000000;
+            box-shadow: 0 0 25px var(--neon-cyan);
+        }
+
+        /* شاشة النتيجة */
+        #result-view, #wrong-view {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .success-animation-container, .failure-animation-container {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: -10px;
+        }
+
+        .confetti-svg {
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            z-index: 1;
+            animation: popConfetti 0.6s ease-out forwards;
+        }
+
+        @keyframes popConfetti {
+            0% { transform: scale(0); opacity: 1; }
+            80% { opacity: 1; }
+            100% { transform: scale(1); opacity: 0.8; }
+        }
+
+        .success-circle, .failure-circle {
+            width: 75px;
+            height: 75px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 34px;
+            z-index: 2;
+        }
+
+        .success-circle {
+            border: 3.5px solid var(--neon-cyan);
+            color: var(--neon-cyan);
+            box-shadow: 0 0 25px var(--neon-glow), inset 0 0 15px var(--neon-glow);
+            background: rgba(0, 243, 166, 0.05);
+        }
+
+        .failure-circle {
+            border: 3.5px solid var(--neon-red);
+            color: var(--neon-red);
+            box-shadow: 0 0 25px var(--red-glow), inset 0 0 15px var(--red-glow);
+            background: rgba(255, 77, 77, 0.05);
+        }
+
+        .result-text {
+            color: var(--neon-cyan);
+            font-size: 22px;
+            font-weight: 900;
+            text-shadow: 0 0 10px var(--neon-glow);
+            letter-spacing: 0.5px;
+        }
+
+        .result-reward {
+            color: var(--neon-cyan);
+            font-size: 26px;
+            font-weight: 900;
+            letter-spacing: 1.5px;
+            text-shadow: 0 0 15px var(--neon-glow);
+            margin-bottom: 5px;
+        }
+
+        .streak-box {
+            width: 100%;
+            background: rgba(255, 204, 0, 0.04);
+            border: 1.5px solid var(--gold);
+            border-radius: 12px;
+            padding: 14px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            box-shadow: 0 0 20px rgba(255, 204, 0, 0.2), inset 0 0 12px rgba(255, 204, 0, 0.1);
+        }
+
+        .streak-icon { font-size: 38px; color: var(--gold); filter: drop-shadow(0 0 8px var(--gold)); }
+        .streak-info { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; }
+        .streak-title { color: #f1f1f1; font-size: 14px; font-weight: 800; }
+        .streak-val { color: var(--gold); font-size: 20px; font-weight: 900; text-shadow: 0 0 12px var(--gold-glow); }
+
+        .next-q-btn, .retry-btn {
+            width: 100%;
+            background: transparent;
+            padding: 12px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 800;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.3s;
+            margin-top: 5px;
+        }
+
+        .next-q-btn {
+            border: 2px solid var(--neon-cyan);
+            color: var(--neon-cyan);
+            box-shadow: 0 0 15px var(--neon-glow), inset 0 0 8px var(--neon-soft);
+        }
+        .next-q-btn:hover { background: rgba(0, 243, 166, 0.15); box-shadow: 0 0 25px var(--neon-glow); }
+
+        .retry-btn {
+            border: 2px solid var(--neon-red);
+            color: var(--neon-red);
+            box-shadow: 0 0 15px var(--red-glow), inset 0 0 8px rgba(255, 77, 77, 0.15);
+        }
+        .retry-btn:hover { background: rgba(255, 77, 77, 0.15); box-shadow: 0 0 25px var(--red-glow); }
+
+        .hint-btn {
+            background: rgba(255, 204, 0, 0.1);
+            border: 1.5px solid var(--gold);
+            color: var(--gold);
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 800;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 5px;
+            transition: all 0.3s;
+            box-shadow: 0 0 10px rgba(255, 204, 0, 0.2);
+        }
+        .hint-btn:hover { background: var(--gold); color: #000; box-shadow: 0 0 20px var(--gold-glow); }
+
+        .hint-box {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1.5px dashed var(--gold);
+            border-radius: 12px;
+            padding: 12px;
+            color: #fff;
+            font-weight: 800;
+            font-size: 15px;
+            text-align: center;
+            width: 100%;
+            display: none;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        /* 4. قسم الاشتراكات */
+        .vip-section { display: flex; flex-direction: column; gap: 12px; }
+        .vip-header-title { display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 18px; font-weight: 800; color: #ffffff; text-align: center; }
+        .vip-header-title i { color: var(--gold); filter: drop-shadow(0 0 6px rgba(255, 204, 0, 0.8)); }
+        
+        .vip-cards-container { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding: 6px 0 0 0; }
+        
+        .vip-card { border-radius: 16px; background: rgba(2, 10, 20, 0.92); padding: 14px 8px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 8px; position: relative; transition: transform 0.25s, box-shadow 0.25s; }
+        .vip-card:hover { transform: translateY(-4px); }
+
+        /* ألوان الباقات */
+        .vip-card.card-free { border: 2px solid var(--neon-cyan); box-shadow: 0 0 16px rgba(0, 243, 166, 0.35), inset 0 0 10px rgba(0, 243, 166, 0.1); }
+        .vip-card.card-free .vip-title, .vip-card.card-free .vip-reward { color: var(--neon-cyan); }
+        .vip-card.card-free .vip-crown { color: var(--neon-cyan); filter: drop-shadow(0 0 6px var(--neon-cyan)); }
+        .vip-card.card-free .vip-btn { border: 1.5px solid var(--neon-cyan); color: #ffffff; background: rgba(0, 243, 166, 0.08); box-shadow: 0 0 8px rgba(0, 243, 166, 0.2); }
+        .vip-card.card-free .vip-btn:hover { background: var(--neon-cyan); color: #000; box-shadow: 0 0 15px var(--neon-cyan); }
+
+        .vip-card.card-vip1 { border: 2px solid #ffcc00; box-shadow: 0 0 16px rgba(255, 204, 0, 0.35), inset 0 0 10px rgba(255, 204, 0, 0.1); }
+        .vip-card.card-vip1 .vip-title, .vip-card.card-vip1 .vip-reward { color: #ffcc00; }
+        .vip-card.card-vip1 .vip-crown { color: #ffcc00; filter: drop-shadow(0 0 6px #ffcc00); }
+        .vip-card.card-vip1 .vip-btn { border: 1.5px solid #ffcc00; color: #ffffff; background: rgba(255, 204, 0, 0.08); box-shadow: 0 0 8px rgba(255, 204, 0, 0.2); }
+        .vip-card.card-vip1 .vip-btn:hover { background: #ffcc00; color: #000; box-shadow: 0 0 15px #ffcc00; }
+
+        .vip-card.card-vip2 { border: 2px solid #00d2ff; box-shadow: 0 0 16px rgba(0, 210, 255, 0.35), inset 0 0 10px rgba(0, 210, 255, 0.1); }
+        .vip-card.card-vip2 .vip-title, .vip-card.card-vip2 .vip-reward { color: #00d2ff; }
+        .vip-card.card-vip2 .vip-crown { color: #00d2ff; filter: drop-shadow(0 0 6px #00d2ff); }
+        .vip-card.card-vip2 .vip-btn { border: 1.5px solid #00d2ff; color: #ffffff; background: rgba(0, 210, 255, 0.08); box-shadow: 0 0 8px rgba(0, 210, 255, 0.2); }
+        .vip-card.card-vip2 .vip-btn:hover { background: #00d2ff; color: #000; box-shadow: 0 0 15px #00d2ff; }
+
+        .vip-card.card-vip3 { border: 2px solid #b23bf8; box-shadow: 0 0 16px rgba(178, 59, 248, 0.35), inset 0 0 10px rgba(178, 59, 248, 0.1); }
+        .vip-card.card-vip3 .vip-title, .vip-card.card-vip3 .vip-reward { color: #b23bf8; }
+        .vip-card.card-vip3 .vip-crown { color: #b23bf8; filter: drop-shadow(0 0 6px #b23bf8); }
+        .vip-card.card-vip3 .vip-btn { border: 1.5px solid #b23bf8; color: #ffffff; background: rgba(178, 59, 248, 0.08); box-shadow: 0 0 8px rgba(178, 59, 248, 0.2); }
+        .vip-card.card-vip3 .vip-btn:hover { background: #b23bf8; color: #ffffff; box-shadow: 0 0 15px #b23bf8; }
+
+        .vip-card.card-vip4 { border: 2px solid #ff2a8d; box-shadow: 0 0 16px rgba(255, 42, 141, 0.35), inset 0 0 10px rgba(255, 42, 141, 0.1); }
+        .vip-card.card-vip4 .vip-title, .vip-card.card-vip4 .vip-reward { color: #ff2a8d; }
+        .vip-card.card-vip4 .vip-crown { color: #ff2a8d; filter: drop-shadow(0 0 6px #ff2a8d); }
+        .vip-card.card-vip4 .vip-btn { border: 1.5px solid #ff2a8d; color: #ffffff; background: rgba(255, 42, 141, 0.08); box-shadow: 0 0 8px rgba(255, 42, 141, 0.2); }
+        .vip-card.card-vip4 .vip-btn:hover { background: #ff2a8d; color: #ffffff; box-shadow: 0 0 15px #ff2a8d; }
+
+        .vip-card.card-vip5 { border: 2px solid #ff4757; box-shadow: 0 0 16px rgba(255, 71, 87, 0.35), inset 0 0 10px rgba(255, 71, 87, 0.1); }
+        .vip-card.card-vip5 .vip-title, .vip-card.card-vip5 .vip-reward { color: #ff4757; }
+        .vip-card.card-vip5 .vip-crown { color: #ff4757; filter: drop-shadow(0 0 6px #ff4757); }
+        .vip-card.card-vip5 .vip-btn { border: 1.5px solid #ff4757; color: #ffffff; background: rgba(255, 71, 87, 0.08); box-shadow: 0 0 8px rgba(255, 71, 87, 0.2); }
+        .vip-card.card-vip5 .vip-btn:hover { background: #ff4757; color: #ffffff; box-shadow: 0 0 15px #ff4757; }
+
+        .vip-title { font-size: 15px; font-weight: 800; }
+        .vip-crown { font-size: 20px; margin: 2px 0; }
+        .vip-qs { font-size: 11.5px; font-weight: 700; color: #ffffff; }
+        .vip-reward { font-size: 13px; font-weight: 800; }
+        .vip-subtext { font-size: 10px; color: var(--text-muted); margin-top: -6px; }
+        .vip-price { font-size: 15px; font-weight: 900; color: #ffffff; margin: 2px 0; }
+        .vip-btn { width: 100%; padding: 8px 0; border-radius: 8px; font-size: 12px; font-weight: 800; cursor: pointer; transition: all 0.25s ease; }
+
+        .benefits-card {
+            background: linear-gradient(145deg, rgba(2, 10, 20, 0.95), rgba(0, 243, 166, 0.05));
+            border: 1px solid rgba(0, 243, 166, 0.4);
+            border-radius: 14px;
+            padding: 14px;
+            margin-top: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4), inset 0 0 12px rgba(0, 243, 166, 0.08);
+            animation: borderGlow 3.5s infinite alternate;
+        }
+
+        @keyframes borderGlow {
+            from { border-color: rgba(0, 243, 166, 0.2); }
+            to { border-color: rgba(0, 243, 166, 0.7); box-shadow: 0 4px 15px rgba(0,0,0,0.5), 0 0 18px rgba(0, 243, 166, 0.25); }
+        }
+
+        .benefits-header {
+            color: #ffffff;
+            font-size: 14px;
+            font-weight: 800;
+            margin-bottom: 12px;
+            text-align: right;
+            padding-right: 5px;
+            text-shadow: 0 0 5px rgba(255,255,255,0.3);
+        }
+
+        .benefits-grid {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 12px 20px;
+        }
+
+        .benefit-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--neon-cyan);
+            font-size: 13px;
+            font-weight: 800;
+        }
+
+        .benefit-icon {
+            color: var(--neon-cyan);
+            font-size: 14px;
+            filter: drop-shadow(0 0 6px var(--neon-cyan));
+        }
+
+        /* 5. البانر */
+        .hero-banner {
+            border-radius: 20px;
+            background: radial-gradient(circle at 50% 25%, #082032 0%, #020914 90%);
+            border: 1.5px solid rgba(0, 243, 166, 0.35);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.9), 0 0 25px rgba(0, 243, 166, 0.15);
+            padding: 22px 16px 12px 16px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.15s ease-out, box-shadow 0.3s ease;
+            cursor: pointer;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+
+        .hero-banner:hover {
+            box-shadow: 0 18px 35px rgba(0, 0, 0, 0.95), 0 0 35px rgba(0, 243, 166, 0.3);
+        }
+
+        .banner-content {
+            transform: translateZ(35px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            z-index: 5;
+        }
+
+        .banner-logo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 900;
+            font-size: 22px;
+            color: #ffffff;
+            letter-spacing: 0.5px;
+        }
+
+        .banner-logo i { color: #00f3a6; font-size: 20px; filter: drop-shadow(0 0 8px #00f3a6); }
+
+        .banner-slogan {
+            font-size: 17px;
+            font-weight: 800;
+            color: #ffffff;
+            line-height: 1.35;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+        }
+
+        .banner-slogan span {
+            color: #ffcc00;
+            font-size: 21px;
+            font-weight: 900;
+            text-shadow: 0 0 12px rgba(255, 204, 0, 0.7), 0 2px 4px rgba(0,0,0,0.8);
+            display: block;
+            margin-top: 2px;
+        }
+
+        .graphic-3d-stage {
+            transform: translateZ(50px) scale(0.78);
+            position: relative;
+            width: 100%;
+            height: 135px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 0px;
+            margin-bottom: -15px;
+        }
+
+        .glow-bg {
+            position: absolute;
+            width: 190px;
+            height: 100px;
+            background: radial-gradient(circle, rgba(0, 243, 166, 0.25) 0%, rgba(255, 204, 0, 0.15) 40%, transparent 75%);
+            filter: blur(15px);
+            bottom: 10px;
+            z-index: 1;
+        }
+
+        .coin-pedestal {
+            position: absolute;
+            bottom: 5px;
+            width: 170px;
+            height: 25px;
+            background: radial-gradient(ellipse at center, rgba(0, 243, 166, 0.6) 0%, rgba(0, 243, 166, 0.1) 60%, transparent 80%);
+            border-radius: 50%;
+            filter: blur(6px);
+            z-index: 1;
+            animation: pulsePedestal 2.5s infinite ease-in-out alternate;
+        }
+
+        @keyframes pulsePedestal {
+            0% { opacity: 0.5; transform: scale(0.9); }
+            100% { opacity: 1; transform: scale(1.1); }
+        }
+
+        .arrow-3d {
+            position: absolute;
+            z-index: 2;
+            filter: drop-shadow(0 0 10px #00f3a6);
+            animation: floatArrow 2.8s infinite ease-in-out alternate;
+        }
+
+        .arrow-left { width: 45px; left: 15px; bottom: 25px; transform: rotate(-15deg); animation-delay: 0s; }
+        .arrow-right { width: 55px; right: 10px; bottom: 30px; transform: rotate(12deg); animation-delay: 0.7s; }
+        .arrow-back-left { width: 32px; left: 60px; bottom: 75px; transform: rotate(-5deg); animation-delay: 1.2s; }
+
+        @keyframes floatArrow {
+            0% { transform: translateY(0px) scale(0.95); filter: drop-shadow(0 0 8px #00f3a6); }
+            100% { transform: translateY(-14px) scale(1.08); filter: drop-shadow(0 0 18px #00f3a6); }
+        }
+
+        .usdt-3d-graphic {
+            width: 250px;
+            height: 165px;
+            z-index: 3;
+            position: relative;
+            filter: drop-shadow(0 15px 15px rgba(0, 0, 0, 0.85));
+            animation: floatCoins 3s infinite ease-in-out alternate;
+        }
+
+        @keyframes floatCoins {
+            0% { transform: translateY(0px); }
+            100% { transform: translateY(-8px); }
+        }
+
+        .toast-notification {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-100px);
+            background: var(--neon-cyan);
+            color: #000;
+            padding: 10px 24px;
+            border-radius: 30px;
+            font-weight: 800;
+            font-size: 14px;
+            box-shadow: 0 0 25px var(--neon-cyan);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 1000;
+        }
+
+        .toast-notification.error {
+            background: var(--neon-red);
+            color: #fff;
+            box-shadow: 0 0 25px var(--red-glow);
+        }
+
+        .toast-notification.show {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* 6. تنسيقات شريط التنقل السفلي */ 
+        .bottom-nav {  
+            position: fixed; 
+            bottom: 0; 
+            left: 0; 
+            width: 100%; 
+            background-color: #000000; 
+            display: flex; 
+            justify-content: space-around; 
+            padding: 10px 0 15px; 
+            border-top: 1px solid #2b3139; 
+            z-index: 1000; 
+            direction: ltr; 
+        } 
+        
+        .nav-item { 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            color: #848e9c; 
+            font-size: 11px; 
+            gap: 6px; 
+            font-weight: bold; 
+            text-decoration: none; 
+            transition: color 0.3s;
+        } 
+        
+        .nav-item.active { 
+            color: #fcd535; 
+        } 
+        
+        .nav-item i { 
+            font-size: 20px; 
+        }
+    </style>
+</head>
+<body>
+
+    <div class="toast-notification" id="toast">إجابة صحيحة!</div>
+
+    <div class="phone-container">
+        <!-- 1. الهيدر -->
+        <div class="top-header">
+            <!-- زر الرجوع (تم استبداله بزر اللغة) -->
+            <div class="back-btn" onclick="history.back()">
+                <i class="fa-solid fa-arrow-right"></i>
+            </div>
+            
+            <div class="user-profile">
+                <div class="header-vip-badge free-level" id="header-vip-badge">
+                    <i class="fa-solid fa-user-shield"></i>
+                    <span id="header-vip-text">مجاني</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. شبكة الإحصائيات -->
+        <div class="stats-grid">
+            <div class="stat-box">
+                <i class="fa-solid fa-crown stat-icon"></i>
+                <div class="stat-title">المستوى الحالي</div>
+                <div class="stat-val" id="val-level">مجاني</div>
+            </div>
+            <div class="stat-box">
+                <i class="fa-solid fa-wallet stat-icon"></i>
+                <div class="stat-title">الرصيد الحالي</div>
+                <div class="stat-val"><span id="val-balance">0.00</span> <small style="font-size: 9px; color:#fff;">USDT</small></div>
+            </div>
+            <div class="stat-box">
+                <i class="fa-regular fa-gem stat-icon"></i>
+                <div class="stat-title">أيام العقد</div>
+                <div class="stat-val white">260</div>
+            </div>
+            <div class="stat-box">
+                <i class="fa-solid fa-bullseye stat-icon"></i>
+                <div class="stat-title">الأسئلة اليومية</div>
+                <div class="stat-val white" id="val-qs">0 / 5</div>
+            </div>
+            <div class="stat-box">
+                <i class="fa-solid fa-coins stat-icon"></i>
+                <div class="stat-title">ربح كل سؤال</div>
+                <div class="stat-val"><span id="val-reward">0.10</span> <small style="font-size: 9px; color:#fff;">USDT</small></div>
+            </div>
+            <div class="stat-box">
+                <i class="fa-regular fa-clock stat-icon"></i>
+                <div class="stat-title">إعادة المهام بعد</div>
+                <div class="stat-val gold" id="val-reset-timer">00:00:00</div>
+            </div>
+        </div>
+
+        <!-- 3. شاشة السؤال -->
+        <div class="question-section">
+            <div class="q-header-info">
+                <div class="q-counter">
+                    <i class="fa-solid fa-chart-simple" style="color: var(--neon-cyan);"></i>
+                    السؤال رقم <span id="q-curr">1</span> / <span id="q-total">5</span>
+                </div>
+                <div class="timer-badge">
+                    <i class="fa-regular fa-clock"></i>
+                    <span id="q-timer">00:12</span>
+                </div>
+            </div>
+
+            <div class="q-card">
+                <!-- واجهة السؤال -->
+                <div id="question-view">
+                    <div class="q-title">
+                        <i class="fa-solid fa-shapes" style="color: var(--neon-cyan); font-size: 16px;"></i>
+                        ما ناتج العملية التالية ؟
+                    </div>
+                    <div class="q-math" id="q-expression">12 × 4</div>
+
+                    <div class="options-grid" id="options-box"></div>
+
+                    <button class="confirm-btn" onclick="submitAnswer()">
+                        <i class="fa-solid fa-circle-check"></i> تأكيد الإجابة
+                    </button>
+                </div>
+
+                <!-- واجهة النتيجة (النجاح) -->
+                <div id="result-view">
+                    <div class="success-animation-container">
+                        <svg class="confetti-svg" viewBox="0 0 200 200">
+                            <circle cx="40" cy="50" r="4" fill="#ffcc00" filter="drop-shadow(0 0 4px #ffcc00)"/>
+                            <polygon points="160,60 165,70 155,70" fill="#ffcc00" transform="rotate(45 160 60)"/>
+                            <rect x="50" y="140" width="8" height="3" fill="#ffcc00" transform="rotate(-30 50 140)"/>
+                            <circle cx="150" cy="150" r="3" fill="#00f3a6" filter="drop-shadow(0 0 5px #00f3a6)"/>
+                            <polygon points="30,120 40,115 35,125" fill="#00f3a6" transform="rotate(20 30 120)"/>
+                            <rect x="170" y="90" width="10" height="4" fill="#00f3a6" transform="rotate(60 170 90)"/>
+                            <path d="M100,20 L100,10" stroke="#ffcc00" stroke-width="3" stroke-linecap="round"/>
+                            <path d="M180,100 L190,100" stroke="#00f3a6" stroke-width="3" stroke-linecap="round"/>
+                            <path d="M20,100 L10,100" stroke="#ffcc00" stroke-width="3" stroke-linecap="round"/>
+                            <path d="M100,180 L100,190" stroke="#00f3a6" stroke-width="3" stroke-linecap="round"/>
+                            <path d="M40,40 L30,30" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+                            <path d="M160,160 L170,170" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+
+                        <div class="success-circle">
+                            <i class="fa-solid fa-check"></i>
+                        </div>
+                    </div>
+
+                    <div class="result-text">إجابة صحيحة!</div>
+                    <div class="result-reward" id="result-earned">+ 0.00 USDT</div>
+
+                    <div class="streak-box">
+                        <i class="fa-solid fa-gift streak-icon"></i>
+                        <div class="streak-info">
+                            <span class="streak-title" id="streak-title">إجمالي ربح اليوم</span>
+                            <span class="streak-val" id="streak-val">+ 0.00 USDT</span>
+                        </div>
+                    </div>
+
+                    <button class="next-q-btn" onclick="nextQuestion()">
+                        السؤال التالي <i class="fa-solid fa-arrow-left"></i>
+                    </button>
+                </div>
+
+                <!-- واجهة النتيجة (الفشل) -->
+                <div id="wrong-view">
+                    <div class="failure-animation-container">
+                        <div class="failure-circle">
+                            <i class="fa-solid fa-xmark"></i>
+                        </div>
+                    </div>
+
+                    <div class="result-text" style="color: var(--neon-red); text-shadow: 0 0 10px var(--red-glow);">إجابة خاطئة!</div>
+                    
+                    <button class="hint-btn" onclick="showHint()">
+                        <i class="fa-solid fa-lightbulb"></i> عرض التلميح
+                    </button>
+
+                    <div class="hint-box" id="hint-box"></div>
+
+                    <button class="retry-btn" onclick="retryQuestion()">
+                        إعادة المحاولة <i class="fa-solid fa-rotate-right"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. قسم الاشتراكات -->
+        <div class="vip-section">
+            <div class="vip-header-title">
+                <i class="fa-solid fa-star"></i>
+                <span>الاشتراكات</span>
+            </div>
+
+           <div class="vip-cards-container">
+                <!-- 1. باقة مجاني -->
+                <div class="vip-card card-free">
+                    <div class="vip-title">مجاني</div>
+                    <i class="fa-solid fa-user-shield vip-crown"></i>
+                    <div class="vip-qs">5 أسئلة يومياً</div>
+                    <div class="vip-reward">0,10 USDT</div>
+                    <div class="vip-subtext">لكل سؤال</div>
+                    <div class="vip-price">مجاناً</div>
+                    <button class="vip-btn" onclick="changePlan('مجاني', 5, 0.10, 0)">التفعيل الآن</button>
+                </div>
+
+                <!-- 2. باقة VIP 1 -->
+                <div class="vip-card card-vip1">
+                    <div class="vip-title">VIP 1</div>
+                    <i class="fa-solid fa-crown vip-crown"></i>
+                    <div class="vip-qs">6 أسئلة يومياً</div>
+                    <div class="vip-reward">0,60 USDT</div>
+                    <div class="vip-subtext">لكل سؤال</div>
+                    <div class="vip-price">$10</div>
+                    <button class="vip-btn" onclick="changePlan('VIP 1', 6, 0.60, 10)">اشترك الآن</button>
+                </div>
+
+                <!-- 3. باقة VIP 2 -->
+                <div class="vip-card card-vip2">
+                    <div class="vip-title">VIP 2</div>
+                    <i class="fa-solid fa-crown vip-crown"></i>
+                    <div class="vip-qs">15 أسئلة يومياً</div>
+                    <div class="vip-reward">0,10 USDT</div>
+                    <div class="vip-subtext">لكل سؤال</div>
+                    <div class="vip-price">$25</div>
+                    <button class="vip-btn" onclick="changePlan('VIP 2', 15, 0.10, 25)">اشترك الآن</button>
+                </div>
+
+                <!-- 4. باقة VIP 3 -->
+                <div class="vip-card card-vip3">
+                    <div class="vip-title">VIP 3</div>
+                    <i class="fa-solid fa-crown vip-crown"></i>
+                    <div class="vip-qs">10 أسئلة يومياً</div>
+                    <div class="vip-reward">0,06 USDT</div>
+                    <div class="vip-subtext">لكل سؤال</div>
+                    <div class="vip-price">$50</div>
+                    <button class="vip-btn" onclick="changePlan('VIP 3', 10, 0.06, 50)">اشترك الآن</button>
+                </div>
+
+                <!-- 5. باقة VIP 4 -->
+                <div class="vip-card card-vip4">
+                    <div class="vip-title">VIP 4</div>
+                    <i class="fa-solid fa-crown vip-crown"></i>
+                    <div class="vip-qs">20 أسئلة يومياً</div>
+                    <div class="vip-reward">0,10 USDT</div>
+                    <div class="vip-subtext">لكل سؤال</div>
+                    <div class="vip-price">$100</div>
+                    <button class="vip-btn" onclick="changePlan('VIP 4', 20, 0.10, 100)">اشترك الآن</button>
+                </div>
+
+                <!-- 6. باقة VIP 5 -->
+                <div class="vip-card card-vip5">
+                    <div class="vip-title">VIP 5</div>
+                    <i class="fa-solid fa-gem vip-crown"></i>
+                    <div class="vip-qs">25 أسئلة يومياً</div>
+                    <div class="vip-reward">0,20 USDT</div>
+                    <div class="vip-subtext">لكل سؤال</div>
+                    <div class="vip-price">$200</div>
+                    <button class="vip-btn" onclick="changePlan('VIP 5', 25, 0.20, 200)">اشترك الآن</button>
+                </div>
+            </div>
+
+            <!-- صندوق المميزات الإضافي -->
+            <div class="benefits-card">
+                <div class="benefits-header">بعد الاشتراك يتم تحديث:</div>
+                <div class="benefits-grid">
+                    <div class="benefit-item">
+                        <i class="fa-solid fa-check-double benefit-icon"></i> 
+                        <span>عدد الأسئلة</span>
+                    </div>
+                    <div class="benefit-item">
+                        <i class="fa-solid fa-check-double benefit-icon"></i> 
+                        <span>مقدار الربح</span>
+                    </div>
+                    <div class="benefit-item">
+                        <i class="fa-solid fa-check-double benefit-icon"></i> 
+                        <span>المزايا الإضافية</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. البانر التفاعلي ثلاثي الأبعاد -->
+        <div class="hero-banner" id="bannerCard">
+            <div class="banner-content">
+                <div class="banner-logo">
+                    <i class="fa-solid fa-crown"></i>
+                </div>
+                <div class="banner-slogan">
+                    إجابتك اليوم ..<br><span>تصنع أرباحك غداً</span>
+                </div>
+            </div>
+
+            <div class="graphic-3d-stage">
+                <div class="glow-bg"></div>
+                
+                <svg class="arrow-3d arrow-left" viewBox="0 0 100 120" fill="none">
+                    <path d="M20 100 L20 40 L5 40 L30 10 L55 40 L40 40 L40 100 Z" fill="url(#greenGlow)" filter="url(#glowFilter)"/>
+                </svg>
+                <svg class="arrow-3d arrow-right" viewBox="0 0 100 120" fill="none">
+                    <path d="M20 100 L20 40 L5 40 L30 10 L55 40 L40 40 L40 100 Z" fill="url(#greenGlow)" filter="url(#glowFilter)"/>
+                </svg>
+                <svg class="arrow-3d arrow-back-left" viewBox="0 0 100 120" fill="none">
+                    <path d="M20 100 L20 40 L5 40 L30 10 L55 40 L40 40 L40 100 Z" fill="url(#greenGlow)" opacity="0.6"/>
+                </svg>
+
+                <div class="coin-pedestal"></div>
+
+                <svg class="usdt-3d-graphic" viewBox="0 0 320 220" fill="none">
+                    <defs>
+                        <linearGradient id="goldRim" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#FFEAA7"/>
+                            <stop offset="25%" stop-color="#FDCB6E"/>
+                            <stop offset="50%" stop-color="#E17055"/>
+                            <stop offset="75%" stop-color="#FDCB6E"/>
+                            <stop offset="100%" stop-color="#FFEAA7"/>
+                        </linearGradient>
+                        
+                        <linearGradient id="goldFace" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#FFF2A1"/>
+                            <stop offset="35%" stop-color="#D4AC0D"/>
+                            <stop offset="70%" stop-color="#9A7D0A"/>
+                            <stop offset="100%" stop-color="#7D6608"/>
+                        </linearGradient>
+
+                        <linearGradient id="greenGlow" x1="0%" y1="100%" x2="0%" y2="0%">
+                            <stop offset="0%" stop-color="#00b894"/>
+                            <stop offset="50%" stop-color="#00b894"/>
+                            <stop offset="100%" stop-color="#55efc4"/>
+                        </linearGradient>
+
+                        <filter id="glowFilter" x="-30%" y="-30%" width="160%" height="160%">
+                            <feGaussianBlur stdDeviation="6" result="blur" />
+                            <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                        </filter>
+                        
+                        <filter id="coinShadow" x="-20%" y="-20%" width="140%" height="140%">
+                            <feDropShadow dx="0" dy="12" stdDeviation="10" flood-color="#000000" flood-opacity="0.85"/>
+                        </filter>
+                    </defs>
+
+                    <g filter="url(#coinShadow)" transform="translate(170, 75)">
+                        <ellipse cx="60" cy="80" rx="45" ry="14" fill="url(#goldRim)"/>
+                        <path d="M 15 80 A 45 14 0 0 0 105 80 L 105 88 A 45 14 0 0 1 15 88 Z" fill="#7D6608"/>
+                        <ellipse cx="60" cy="70" rx="45" ry="14" fill="url(#goldRim)"/>
+                        <path d="M 15 70 A 45 14 0 0 0 105 70 L 105 78 A 45 14 0 0 1 15 78 Z" fill="#7D6608"/>
+                        <ellipse cx="60" cy="60" rx="45" ry="14" fill="url(#goldRim)"/>
+                        <path d="M 15 60 A 45 14 0 0 0 105 60 L 105 68 A 45 14 0 0 1 15 68 Z" fill="#7D6608"/>
+                        <ellipse cx="60" cy="50" rx="45" ry="14" fill="url(#goldFace)"/>
+                        <ellipse cx="60" cy="50" rx="38" ry="11" fill="none" stroke="#FFEAA7" stroke-width="1.5"/>
+                    </g>
+
+                    <g filter="url(#coinShadow)" transform="translate(10, 85)">
+                        <ellipse cx="70" cy="65" rx="50" ry="16" fill="url(#goldRim)"/>
+                        <path d="M 20 65 A 50 16 0 0 0 120 65 L 120 75 A 50 16 0 0 1 20 75 Z" fill="#5B4702"/>
+                        <ellipse cx="70" cy="65" rx="50" ry="16" fill="url(#goldFace)"/>
+                        <ellipse cx="70" cy="65" rx="42" ry="13" fill="none" stroke="#FFEAA7" stroke-width="1.5"/>
+                    </g>
+
+                    <g filter="url(#coinShadow)" transform="translate(85, 20)">
+                        <path d="M 12 75 A 68 68 0 0 0 138 92 L 144 102 A 68 68 0 0 1 18 85 Z" fill="#6E5605"/>
+                        <path d="M 10 70 A 68 68 0 0 0 138 90 L 138 96 A 68 68 0 0 1 10 76 Z" fill="url(#goldRim)"/>
+                        
+                        <ellipse cx="75" cy="70" rx="66" ry="60" fill="url(#goldFace)" transform="rotate(-12 75 70)"/>
+                        <ellipse cx="75" cy="70" rx="58" ry="52" fill="none" stroke="#FFF2A1" stroke-width="2.5" transform="rotate(-12 75 70)"/>
+                        <ellipse cx="75" cy="70" rx="52" ry="46" fill="none" stroke="#9A7D0A" stroke-width="1" stroke-dasharray="6 3" transform="rotate(-12 75 70)"/>
+
+                        <g transform="rotate(-12 75 70) translate(75, 70)">
+                            <path d="M -26 -22 H 26 V -10 H 10 V 4 H 18 V 11 H 10 V 24 H -10 V 11 H -18 V 4 H -10 V -10 H -26 Z" fill="#423503"/>
+                            <path d="M -24 -24 H 24 V -12 H 8 V 2 H 16 V 9 H 8 V 22 H -8 V 9 H -16 V 2 H -8 V -12 H -24 Z" fill="#FFFFFF"/>
+                            <rect x="-20" y="-20" width="40" height="4" fill="#E8F8F5" rx="1"/>
+                        </g>
+
+                        <ellipse cx="55" cy="42" rx="35" ry="12" fill="#FFFFFF" opacity="0.25" transform="rotate(-30 55 42)"/>
+                    </g>
+                </svg>
+            </div>
+        </div>
+    </div>
+
+    <!-- 6. شريط التنقل السفلي -->
+    <div class="bottom-nav"> 
+        <a href="home.html" class="nav-item"> 
+            <i class="fa-solid fa-house"></i> 
+            <span data-ar="بيت" data-en="Home">بيت</span> 
+        </a> 
+        <a href="quantify.html" class="nav-item active"> 
+            <i class="fa-solid fa-bolt"></i> 
+            <span data-ar="تحديد الكمية" data-en="Quantify">تحديد الكمية</span> 
+        </a> 
+        <a href="invite.html" class="nav-item"> 
+            <i class="fa-solid fa-share-from-square"></i> 
+            <span data-ar="ادعو أصدقاء" data-en="Invite">ادعو أصدقاء</span> 
+        </a> 
+        <a href="ana.html" class="nav-item"> 
+            <i class="fa-regular fa-user"></i> 
+            <span data-ar="أنا" data-en="Me">أنا</span> 
+        </a> 
+    </div>
+
+    <!-- Script -->
+    <script>
+        // 1. إعدادات التطبيق الافتراضية والاعتماد على اللغة من الملف الخارجي
+        let appData = {
+            balance: 0.00,       
+            level: null,         
+            reward: 0,
+            dailyLimit: 0,
+            solved: 0,
+            qIndex: 0,
+            selectedOpt: null, 
+            timerVal: 12,
+            timerInterval: null,
+            resetTimerInterval: null,
+            // يتم أخذ اللغة تلقائياً من الصفحة (والتي سيتم تعديلها عبر language.js)
+            language: document.documentElement.lang || window.localStorage.getItem('lang') || 'ar'
+        };
+
+        const questionsList = [
+            { q: "12 × 4", opts: ["32", "48", "36", "52"], ans: 1 },
+            { q: "7 + 8", opts: ["12", "14", "15", "16"], ans: 2 },
+            { q: "18 - 7", opts: ["9", "10", "11", "12"], ans: 2 },
+            { q: "9 × 5", opts: ["35", "40", "45", "50"], ans: 2 },
+            { q: "(12 + 8) × 2", opts: ["30", "32", "36", "40"], ans: 3 }
+        ];
+
+        // نصوص الترجمة الأساسية
+        const translations = {
+            ar: {
+                locked: "المهام مقفلة!",
+                lockedDesc: "يرجى تفعيل الباقة المجانية أو الاشتراك في باقة VIP للبدء.",
+                done: "تم إكمال المهام!",
+                doneDesc: "عد غداً لتجديد المهام. يبدأ المؤقت الآن.",
+                noNet: "لا يوجد اتصال بالإنترنت! يرجى التحقق من الشبكة.",
+                noBalance: "رصيدك غير كافٍ للاشتراك في هذه الباقة!",
+                activated: "تم تفعيل الباقة بنجاح!",
+                wrongAns: "إجابة خاطئة!",
+                correctAns: "إجابة صحيحة!",
+                timeout: "انتهى الوقت! انتقلت للسؤال التالي.",
+                notActive: "غير مفعل",
+                selectAns: "يرجى تحديد إجابة أولاً!",
+                correctIs: "الإجابة الصحيحة هي:",
+                alreadySub: "أنت مشترك في هذه الباقة بالفعل!"
+            },
+            en: {
+                locked: "Tasks Locked!",
+                lockedDesc: "Please activate Free plan or VIP subscription to start.",
+                done: "Tasks Completed!",
+                doneDesc: "Come back tomorrow. Timer starts now.",
+                noNet: "No Internet Connection! Please check your network.",
+                noBalance: "Insufficient balance for this subscription!",
+                activated: "Plan activated successfully!",
+                wrongAns: "Wrong Answer!",
+                correctAns: "Correct Answer!",
+                timeout: "Time out! Moved to next question.",
+                notActive: "Not Active",
+                selectAns: "Select an answer first!",
+                correctIs: "Correct answer is:",
+                alreadySub: "Already subscribed to this plan!"
+            }
+        };
+
+        function getText(key) {
+            // تحديث اللغة الحالية قبل استدعاء النص في حال تم تغييرها من الملف الخارجي
+            appData.language = document.documentElement.lang || window.localStorage.getItem('lang') || 'ar';
+            return translations[appData.language][key];
+        }
+
+        // 2. تحديث لوحة الإحصائيات
+        function renderDashboard() {
+            document.getElementById('val-level').innerText = appData.level || getText('notActive');
+            document.getElementById('val-balance').innerText = appData.balance.toFixed(2);
+            document.getElementById('val-reward').innerText = appData.reward.toFixed(2);
+            document.getElementById('val-qs').innerText = `${appData.solved} / ${appData.dailyLimit}`;
+            document.getElementById('q-total').innerText = appData.dailyLimit || "-";
+            document.getElementById('q-curr').innerText = appData.dailyLimit > 0 ? Math.min(appData.solved + 1, appData.dailyLimit) : "-";
+
+            const headerBadge = document.getElementById('header-vip-badge');
+            if (!appData.level || appData.level === 'مجاني' || appData.level === 'Free') {
+                headerBadge.className = 'header-vip-badge free-level';
+                headerBadge.innerHTML = `<i class="fa-solid fa-user-shield"></i> <span id="header-vip-text">${appData.level || '-'}</span>`;
+            } else {
+                headerBadge.className = 'header-vip-badge vip-level';
+                headerBadge.innerHTML = `<i class="fa-solid fa-crown"></i> <span id="header-vip-text">${appData.level}</span>`;
+            }
+        }
+
+        // 3. عرض السؤال أو رسائل القفل/الانتهاء
+        function renderQuestion() {
+            const qView = document.getElementById('question-view');
+            
+            if (!navigator.onLine) {
+                qView.innerHTML = `
+                    <div style="color: var(--neon-red); font-weight:900; font-size:20px; margin-top:20px;">
+                        <i class="fa-solid fa-wifi"></i> ${getText('noNet')}
+                    </div>`;
+                return;
+            }
+
+            if (!appData.level) {
+                qView.innerHTML = `
+                    <div style="color: var(--gold); font-weight:900; font-size:22px; margin-top:20px;">
+                        <i class="fa-solid fa-lock"></i> ${getText('locked')}
+                    </div>
+                    <div style="color: #fff; font-weight:700; margin-top:10px;">
+                        ${getText('lockedDesc')}
+                    </div>`;
+                clearInterval(appData.timerInterval);
+                document.getElementById('q-timer').innerText = "00:00";
+                return;
+            }
+
+            if (appData.solved >= appData.dailyLimit) {
+                qView.innerHTML = `
+                    <div style="color: var(--neon-cyan); font-weight:900; font-size:22px; margin-top:20px;">
+                        <i class="fa-solid fa-circle-check"></i> ${getText('done')}
+                    </div>
+                    <div style="color: #fff; font-weight:700; margin-top:10px;">
+                        ${getText('doneDesc')}
+                    </div>`;
+                clearInterval(appData.timerInterval);
+                document.getElementById('q-timer').innerText = "00:00";
+                
+                if (!appData.resetTimerInterval) startResetTimer(); 
+                return;
+            }
+
+            const curr = questionsList[appData.qIndex % questionsList.length];
+            qView.innerHTML = `
+                <div class="q-title">
+                    <i class="fa-solid fa-shapes" style="color: var(--neon-cyan); font-size: 16px;"></i>
+                    ما ناتج العملية التالية ؟
+                </div>
+                <div class="q-math" id="q-expression">${curr.q}</div>
+                <div class="options-grid" id="options-box"></div>
+                <button class="confirm-btn" onclick="submitAnswer()">
+                    <i class="fa-solid fa-circle-check"></i> تأكيد الإجابة
+                </button>
+            `;
+
+            const html = curr.opts.map((opt, i) => `
+                <button class="option-btn ${appData.selectedOpt === i ? 'active' : ''}" onclick="selectOption(${i})">
+                    <span class="opt-badge">${String.fromCharCode(65 + i)}</span>
+                    <span>${opt}</span>
+                </button>
+            `).join('');
+
+            document.getElementById('options-box').innerHTML = html;
+            startTimer();
+        }
+
+        function selectOption(index) {
+            if (!navigator.onLine) { showToast(getText('noNet'), true); return; }
+            appData.selectedOpt = index;
+            
+            const curr = questionsList[appData.qIndex % questionsList.length];
+            const html = curr.opts.map((opt, i) => `
+                <button class="option-btn ${appData.selectedOpt === i ? 'active' : ''}" onclick="selectOption(${i})">
+                    <span class="opt-badge">${String.fromCharCode(65 + i)}</span>
+                    <span>${opt}</span>
+                </button>
+            `).join('');
+            document.getElementById('options-box').innerHTML = html;
+        }
+
+        // 4. تأكيد الإجابة
+        function submitAnswer() {
+            if (!navigator.onLine) { showToast(getText('noNet'), true); return; }
+            if (appData.solved >= appData.dailyLimit || !appData.level) return;
+            
+            if (appData.selectedOpt === null) {
+                showToast(getText('selectAns'), false);
+                return;
+            }
+
+            const curr = questionsList[appData.qIndex % questionsList.length];
+            if (appData.selectedOpt === curr.ans) {
+                clearInterval(appData.timerInterval);
+                appData.balance += appData.reward;
+                appData.solved++;
+                
+                let todayProfit = appData.solved * appData.reward;
+                document.getElementById('result-earned').innerText = `+ ${appData.reward.toFixed(2)} USDT`;
+                document.getElementById('streak-val').innerText = `+ ${todayProfit.toFixed(2)} USDT`;
+                
+                showToast(`${getText('correctAns')} +${appData.reward.toFixed(2)} USDT`, false);
+
+                document.getElementById('question-view').style.display = 'none';
+                document.getElementById('wrong-view').style.display = 'none';
+                document.getElementById('result-view').style.display = 'flex';
+                
+                renderDashboard();
+            } else {
+                clearInterval(appData.timerInterval);
+                document.getElementById('question-view').style.display = 'none';
+                document.getElementById('result-view').style.display = 'none';
+                document.getElementById('wrong-view').style.display = 'flex';
+                document.getElementById('hint-box').style.display = 'none';
+            }
+        }
+
+        function showHint() {
+            const curr = questionsList[appData.qIndex % questionsList.length];
+            const correctValue = curr.opts[curr.ans];
+            const hintBox = document.getElementById('hint-box');
+            hintBox.innerHTML = `${getText('correctIs')} <span style="color:var(--gold); font-size:18px;">${correctValue}</span>`;
+            hintBox.style.display = 'block';
+        }
+
+        function retryQuestion() {
+            document.getElementById('wrong-view').style.display = 'none';
+            document.getElementById('question-view').style.display = 'flex';
+            appData.selectedOpt = null;
+            renderQuestion();
+        }
+
+        function nextQuestion() {
+            document.getElementById('result-view').style.display = 'none';
+            document.getElementById('wrong-view').style.display = 'none';
+            document.getElementById('question-view').style.display = 'flex';
+            
+            appData.selectedOpt = null;
+            appData.qIndex++;
+            renderDashboard();
+            renderQuestion();
+        }
+
+        // 5. إدارة المؤقتات
+        function startTimer() {
+            clearInterval(appData.timerInterval);
+            appData.timerVal = 12;
+            const timerEl = document.getElementById('q-timer');
+            timerEl.innerText = `00:${appData.timerVal < 10 ? '0' : ''}${appData.timerVal}`;
+
+            appData.timerInterval = setInterval(() => {
+                appData.timerVal--;
+                timerEl.innerText = `00:${appData.timerVal < 10 ? '0' : ''}${appData.timerVal}`;
+
+                if (appData.timerVal <= 0) {
+                    clearInterval(appData.timerInterval);
+                    showToast(getText('timeout'), true);
+                    appData.selectedOpt = null;
+                    appData.qIndex++;
+                    renderQuestion();
+                }
+            }, 1000);
+        }
+
+        function startResetTimer() {
+            clearInterval(appData.resetTimerInterval);
+            let sec = 86399; 
+            const el = document.getElementById('val-reset-timer');
+            
+            appData.resetTimerInterval = setInterval(() => {
+                let h = Math.floor(sec / 3600);
+                let m = Math.floor((sec % 3600) / 60);
+                let s = sec % 60;
+                el.innerText = `${h<10?'0':''}${h}:${m<10?'0':''}${m}:${s<10?'0':''}${s}`;
+                
+                if (sec > 0) sec--;
+                else {
+                    clearInterval(appData.resetTimerInterval);
+                    appData.resetTimerInterval = null;
+                    appData.solved = 0;
+                    renderDashboard();
+                    renderQuestion();
+                }
+            }, 1000);
+        }
+
+        // 6. نظام الاشتراكات
+        function changePlan(levelName, limit, rewardVal, price) {
+            if (!navigator.onLine) { showToast(getText('noNet'), true); return; }
+            
+            if (appData.level === levelName) {
+                showToast(getText('alreadySub'), true);
+                return;
+            }
+
+            if (price > 0 && appData.balance < price) {
+                showToast(getText('noBalance'), true);
+                return;
+            }
+
+            if (price > 0) {
+                appData.balance -= price;
+            }
+            
+            appData.level = levelName;
+            appData.dailyLimit = limit;
+            appData.reward = rewardVal;
+            appData.solved = 0;
+            appData.qIndex = 0;
+            appData.selectedOpt = null;
+            
+            clearInterval(appData.resetTimerInterval);
+            appData.resetTimerInterval = null;
+            document.getElementById('val-reset-timer').innerText = "00:00:00";
+            
+            document.getElementById('result-view').style.display = 'none';
+            document.getElementById('wrong-view').style.display = 'none';
+            document.getElementById('question-view').style.display = 'flex';
+
+            renderDashboard();
+            renderQuestion();
+            showToast(`${getText('activated')} (${levelName})`, false);
+        }
+
+        // 7. أدوات مساعدة
+        function showToast(msg, isError = false) {
+            const toast = document.getElementById('toast');
+            toast.innerText = msg;
+            if(isError) toast.classList.add('error');
+            else toast.classList.remove('error');
+
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        // 8. مراقبة حالة الإنترنت مباشرة
+        window.addEventListener('online', () => {
+            showToast(appData.language === 'ar' ? 'عاد الاتصال بالإنترنت' : 'Back Online', false);
+            renderQuestion();
+        });
+        window.addEventListener('offline', () => {
+            showToast(getText('noNet'), true);
+            renderQuestion();
+        });
+
+        // تهيئة التأثيرات ثلاثية الأبعاد
+        function init3DBanner() {
+            const card = document.getElementById('bannerCard');
+            if (!card) return;
+
+            const handleMove = (x, y, rect) => {
+                const rotateX = (-y / rect.height) * 20; 
+                const rotateY = (x / rect.width) * 20;
+                card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+            };
+
+            card.addEventListener('mousemove', (e) => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left - rect.width / 2;
+                const y = e.clientY - rect.top - rect.height / 2;
+                handleMove(x, y, rect);
+            });
+
+            card.addEventListener('mouseleave', () => card.style.transform = 'rotateX(0deg) rotateY(0deg)');
+        }
+
+        // بدء التشغيل
+        window.onload = () => {
+            appData.level = null; 
+            renderDashboard();
+            renderQuestion(); 
+            init3DBanner();
+        };
+
+        // تفاعل شريط التنقل السفلي
+        const navItems = document.querySelectorAll('.nav-item');
+        navItems.forEach(item => {
+            item.addEventListener('click', function(e) {
+                navItems.forEach(nav => nav.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+
+    </script>
+    
+    <!-- الاعتماد على ملف اللغة الخارجي لتغيير النصوص -->
+    <script src="language.js"></script>
+
+</body>
+</html>

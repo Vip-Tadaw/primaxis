@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" id="html-root">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Tadawulx - <span data-ar="أنا" data-en="Me">أنا</span></title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-main: #05070d;
+            --bg-card: rgba(18, 22, 33, 0.7);
+            --border-glow: #fcd535;
+            --text-main: #ffffff;
+            --text-muted: #848e9c;
+            --gold: #fcd535;
+            --gold-gradient: linear-gradient(90deg, #fcd535, #ffaa00);
+        }
+
+        * { box-sizing: border-box; font-family: 'Cairo', sans-serif; margin: 0; padding: 0; outline: none; -webkit-tap-highlight-color: transparent; }
+        
+        body { 
+            background-color: var(--bg-main); 
+            background-image: radial-gradient(circle at 50% 0%, #151a2e 0%, #05070d 40%);
+            background-attachment: fixed;
+            color: var(--text-main); 
+            user-select: none; 
+            padding-bottom: 90px; 
+            overflow-x: hidden;
+            max-width: 500px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        /* Header */
+        .top-header { 
+            display: flex; justify-content: space-between; align-items: center; 
+            padding: 15px 20px; font-size: 18px; font-weight: 700; 
+            position: sticky; top: 0; z-index: 100;
+            background: rgba(5, 7, 13, 0.9);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        
+        .back-btn {
+            width: 35px; height: 35px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            background: rgba(255,255,255,0.05); color: #fff;
+            cursor: pointer; transition: 0.2s; font-size: 16px;
+        }
+        .back-btn:active { background: rgba(255,255,255,0.1); transform: scale(0.9); }
+
+        [dir="ltr"] .back-btn i { transform: rotate(180deg); }
+
+        .header-title { 
+            display: flex; align-items: center; gap: 8px; color: var(--text-main);
+            position: absolute; left: 50%; transform: translateX(-50%);
+        }
+        .header-title i { color: var(--gold); font-size: 16px; }
+        
+        .header-spacer { width: 35px; }
+
+        /* Profile Card */
+        .profile-wrapper { padding: 15px; }
+        .profile-card {
+            background: var(--bg-card);
+            border: 1px solid rgba(252, 213, 53, 0.4);
+            box-shadow: 0 0 20px rgba(252, 213, 53, 0.15);
+            border-radius: 20px;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            position: relative;
+            backdrop-filter: blur(10px);
+            overflow: hidden;
+        }
+        .profile-card::before {
+            content: ""; position: absolute; top: 0; right: 0; width: 100%; height: 100%;
+            background: url('https://www.transparenttextures.com/patterns/stardust.png'); opacity: 0.2; z-index: 0; pointer-events: none;
+        }
+        
+        .avatar-container { position: relative; z-index: 1; margin-inline-end: 15px; cursor: pointer; }
+        .avatar-container img { width: 65px; height: 65px; border-radius: 50%; border: 2px solid var(--gold); object-fit: cover; }
+        .avatar-edit-icon {
+            position: absolute; top: 0; right: 0; background: var(--gold); color: #000;
+            width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center;
+            justify-content: center; font-size: 11px; border: 2px solid #05070d;
+        }
+        [dir="ltr"] .avatar-edit-icon { right: auto; left: 0; }
+        
+        .vip-badge { 
+            position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); 
+            background: var(--gold-gradient); color: #000; font-size: 10px; font-weight: 800; 
+            padding: 2px 10px; border-radius: 10px; white-space: nowrap; box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+        }
+        
+        .user-info { flex: 1; z-index: 1; }
+        .user-name { font-size: 18px; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 6px; margin-bottom: 2px; }
+        .user-name i { color: var(--gold); font-size: 14px; }
+        .user-phone { font-size: 13px; font-weight: 600; color: #d1d5db; margin-bottom: 6px; display: flex; align-items: center; gap: 5px; }
+        .user-phone i { color: var(--gold); }
+        
+        .user-id-box { 
+            display: inline-flex; align-items: center; gap: 8px; 
+            background-color: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 4px 12px; border-radius: 20px; font-size: 12px; color: #e2e8f0; cursor: pointer; transition: 0.2s; 
+        }
+        .user-id-box:active { transform: scale(0.95); background-color: rgba(255, 255, 255, 0.2); }
+        
+        .profile-right { display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 1; text-align: center; }
+        .motivation-text { font-size: 9px; color: var(--text-muted); margin-bottom: 5px; line-height: 1.4; }
+        .crown-icon { width: 50px; filter: drop-shadow(0 0 10px rgba(252,213,53,0.5)); margin-top: 5px; }
+
+        /* Action Buttons Wrapper */
+        .balance-wrapper { padding: 0 15px 15px; }
+        .action-buttons { display: flex; gap: 10px; }
+        .action-btn { 
+            flex: 1; border-radius: 12px; padding: 12px 10px; display: flex; align-items: center; justify-content: center;
+            gap: 10px; cursor: pointer; transition: 0.2s; border: 1px solid rgba(255,255,255,0.1); text-decoration: none;
+        }
+        .action-btn:active { transform: scale(0.96); }
+        .btn-icon-circle { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+        .btn-text { text-align: start; }
+        .btn-title { font-size: 13px; font-weight: 800; line-height: 1.2; }
+        .btn-sub { font-size: 9px; font-weight: 600; opacity: 0.7; }
+        
+        .btn-deposit { background: var(--gold-gradient); color: #000; border: none; }
+        .btn-deposit .btn-icon-circle { background: rgba(0,0,0,0.1); color: #000; }
+        
+        .btn-withdraw { background: rgba(26, 32, 46, 0.8); color: #fff; }
+        .btn-withdraw .btn-icon-circle { background: rgba(255,255,255,0.1); color: #fff; }
+
+        /* Menu List */
+        .menu-wrapper { margin: 0 15px 15px; }
+        .menu-list { background: var(--bg-card); border-radius: 16px; border: 1px solid rgba(255,255,255,0.05); overflow: hidden; }
+        .menu-item { 
+            display: flex; justify-content: space-between; align-items: center; 
+            padding: 16px; border-bottom: 1px solid rgba(255,255,255,0.05); cursor: pointer; transition: 0.2s; 
+        }
+        .menu-item:last-child { border-bottom: none; }
+        .menu-item:active { background-color: rgba(255,255,255,0.05); }
+        
+        .menu-content-left { display: flex; align-items: center; gap: 15px; }
+        .menu-icon-box { 
+            width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 18px; 
+        }
+        .menu-text-wrap { display: flex; flex-direction: column; gap: 3px; }
+        .menu-title { font-size: 14px; font-weight: 800; color: #fff; }
+        .menu-subtitle { font-size: 10px; font-weight: 600; color: var(--text-muted); }
+        .menu-arrow { color: var(--text-muted); font-size: 12px; }
+        [dir="ltr"] .menu-arrow { transform: rotate(180deg); }
+
+        .icon-lock { background: rgba(0, 168, 255, 0.1); color: #00a8ff; }
+        .icon-shield { background: rgba(252, 213, 53, 0.1); color: #fcd535; }
+        .icon-news { background: rgba(157, 78, 221, 0.1); color: #9d4edd; }
+        .icon-support { background: rgba(0, 136, 204, 0.1); color: #0088cc; }
+
+        /* Logout */
+        .logout-wrap { margin: 0 15px 20px; }
+        .logout-item { 
+            background: rgba(246, 70, 93, 0.05); border: 1px solid rgba(246, 70, 93, 0.3); 
+            border-radius: 16px; padding: 16px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; 
+        }
+        .logout-item:active { background: rgba(246, 70, 93, 0.1); }
+        .logout-icon-box { width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 18px; background: rgba(246, 70, 93, 0.1); color: #f6465d; }
+        .logout-title { font-size: 14px; font-weight: 800; color: #f6465d; }
+        .logout-subtitle { font-size: 10px; font-weight: 600; color: #f6465d; opacity: 0.7; }
+
+        /* Modals */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); z-index: 2000; display: none; opacity: 0; transition: 0.3s; }
+        .modal-overlay.active { display: block; opacity: 1; }
+        .modal-content { 
+            position: fixed; bottom: -100%; left: 0; width: 100%; max-width: 500px;
+            background: #121621; border-top: 1px solid rgba(252,213,53,0.3);
+            border-top-left-radius: 25px; border-top-right-radius: 25px; padding: 25px 20px; z-index: 2010; 
+            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+            margin: 0 auto; right: 0;
+        }
+        .modal-content.active { bottom: 0; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; font-size: 18px; font-weight: 800; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 15px; }
+        .modal-header i { font-size: 22px; color: var(--text-muted); cursor: pointer; }
+        .input-group { margin-bottom: 15px; }
+        .input-group label { display: block; font-size: 13px; font-weight: 600; color: #d1d5db; margin-bottom: 8px; }
+        .input-group input { width: 100%; background: #05070d; border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 14px 15px; border-radius: 12px; font-size: 14px; transition: 0.3s; }
+        .input-group input:focus { border-color: var(--gold); box-shadow: 0 0 10px rgba(252,213,53,0.1); }
+        .submit-btn { width: 100%; background: var(--gold-gradient); color: #000; border: none; padding: 15px; border-radius: 12px; font-size: 16px; font-weight: 800; cursor: pointer; margin-top: 10px; }
+        .submit-btn:active { transform: scale(0.98); }
+
+        /* Toast */
+        .toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(100px); background: #02c076; color: #fff; padding: 14px 30px; border-radius: 20px; font-size: 14px; font-weight: 700; z-index: 3000; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 10px 25px rgba(0,0,0,0.5); opacity: 0; white-space: nowrap;}
+        .toast.error { background: #f6465d; }
+        .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+        /* Bottom Nav - موحد ومطابق للصفحة الرئيسية */
+        .bottom-nav { 
+            position: fixed; bottom: 0; left: 0; right: 0; margin: 0 auto; width: 100%; max-width: 500px; 
+            background-color: #0c101b; display: flex; justify-content: space-around; 
+            padding: 12px 0 20px; border-top: 1px solid rgba(255,255,255,0.05); z-index: 100; backdrop-filter: blur(10px);
+        }
+        .nav-item { display: flex; flex-direction: column; align-items: center; color: var(--text-muted); font-size: 11px; gap: 6px; font-weight: 700; text-decoration: none; transition: 0.3s; }
+        .nav-item.active { color: var(--gold); }
+        .nav-item i { font-size: 22px; }
+        .nav-item.active i { filter: drop-shadow(0 0 8px rgba(252,213,53,0.6)); }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <div class="top-header">
+        <div class="back-btn" onclick="history.back()" title="رجوع">
+            <i class="fa-solid fa-arrow-right"></i>
+        </div>
+        
+        <div class="header-title">
+            <span data-ar="أنا" data-en="Me">أنا</span>
+            <i class="fa-solid fa-crown"></i>
+        </div>
+        
+        <div class="header-spacer"></div>
+    </div>
+
+    <!-- Profile Card -->
+    <div class="profile-wrapper">
+        <div class="profile-card">
+            <div class="avatar-container" onclick="document.getElementById('avatar-input').click()" title="انقر لتغيير الصورة">
+                <img src="photo_٢٠٢٦-٠٩-٣٠_٠٠-٤١-٣٧.jpg" id="user-avatar" alt="Avatar">
+                <div class="avatar-edit-icon"><i class="fa-solid fa-camera"></i></div>
+                <div class="vip-badge" id="vip-level">VIP 1</div>
+            </div>
+            <input type="file" id="avatar-input" accept="image/*" style="display: none;">
+            
+            <div class="user-info">
+                <div class="user-name">
+                    <span id="user-name-display" data-ar="جاري التحميل..." data-en="Loading...">جاري التحميل...</span>
+                    <i class="fa-solid fa-circle-check"></i>
+                </div>
+                <div class="user-phone">
+                    <i class="fa-solid fa-phone"></i>
+                    <span id="user-phone-display" data-ar="جاري التحميل..." data-en="Loading...">جاري التحميل...</span>
+                </div>
+                <div class="user-id-box" onclick="copyUID()">
+                    <span>UID:</span>
+                    <span id="uid-text">------</span>
+                    <i class="fa-regular fa-copy"></i>
+                </div>
+            </div>
+
+            <div class="profile-right">
+                <div class="motivation-text" data-ar="كل خطوة اليوم ..<br>تصنع مستقبلك غداً" data-en="Every step today..<br>creates your future tomorrow">
+                    كل خطوة اليوم ..<br>تصنع مستقبلك غداً
+                </div>
+                <img src="https://cdn-icons-png.flaticon.com/512/1086/1086745.png" class="crown-icon" alt="Crown">
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="balance-wrapper">
+        <div class="action-buttons">
+            <a href="recharge.html" class="action-btn btn-deposit">
+                <div class="btn-icon-circle"><i class="fa-solid fa-wallet"></i></div>
+                <div class="btn-text">
+                    <div class="btn-title" data-ar="شحن" data-en="Recharge">شحن</div>
+                    <div class="btn-sub" data-ar="إضافة أموال لحسابك" data-en="Add funds to your account">إضافة أموال لحسابك</div>
+                </div>
+            </a>
+            
+            <a href="withdraw.html" class="action-btn btn-withdraw">
+                <div class="btn-icon-circle"><i class="fa-solid fa-arrow-up-from-bracket"></i></div>
+                <div class="btn-text">
+                    <div class="btn-title" data-ar="سحب" data-en="Withdraw">سحب</div>
+                    <div class="btn-sub" data-ar="سحب أموالك" data-en="Withdraw your money">سحب أموالك</div>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <!-- Menu List -->
+    <div class="menu-wrapper">
+        <div class="menu-list">
+            <div class="menu-item" onclick="openModal('changeLoginPwdModal')">
+                <i class="fa-solid fa-chevron-left menu-arrow"></i>
+                <div class="menu-content-left">
+                    <div class="menu-text-wrap">
+                        <span class="menu-title" data-ar="تغيير كلمة مرور الدخول" data-en="Change Login Password">تغيير كلمة مرور الدخول</span>
+                        <span class="menu-subtitle" data-ar="قم بتحديث كلمة مرور حسابك" data-en="Update your account password">قم بتحديث كلمة مرور حسابك</span>
+                    </div>
+                    <div class="menu-icon-box icon-lock"><i class="fa-solid fa-lock"></i></div>
+                </div>
+            </div>
+
+            <div class="menu-item" onclick="openChangeSecPwdModal()">
+                <i class="fa-solid fa-chevron-left menu-arrow"></i>
+                <div class="menu-content-left">
+                    <div class="menu-text-wrap">
+                        <span class="menu-title" data-ar="تغيير كلمة مرور السحب" data-en="Change Withdrawal Password">تغيير كلمة مرور السحب</span>
+                        <span class="menu-subtitle" data-ar="أمان أكبر لحسابك" data-en="More security for your account">أمان أكبر لحسابك</span>
+                    </div>
+                    <div class="menu-icon-box icon-shield"><i class="fa-solid fa-shield-halved"></i></div>
+                </div>
+            </div>
+
+            <div class="menu-item" onclick="window.location.href='help.html'">
+                <i class="fa-solid fa-chevron-left menu-arrow"></i>
+                <div class="menu-content-left">
+                    <div class="menu-text-wrap">
+                        <span class="menu-title" data-ar="الأخبار والمساعدة" data-en="News & Help">الأخبار والمساعدة</span>
+                        <span class="menu-subtitle" data-ar="كل ما تحتاجه من معلومات ودعم" data-en="All info & support you need">كل ما تحتاجه من معلومات ودعم</span>
+                    </div>
+                    <div class="menu-icon-box icon-news"><i class="fa-regular fa-newspaper"></i></div>
+                </div>
+            </div>
+
+            <div class="menu-item" onclick="window.location.href='https://t.me/Jumana96mp'">
+                <i class="fa-solid fa-chevron-left menu-arrow"></i>
+                <div class="menu-content-left">
+                    <div class="menu-text-wrap">
+                        <span class="menu-title" data-ar="خدمة الزبائن" data-en="Customer Service">خدمة الزبائن</span>
+                        <span class="menu-subtitle" data-ar="تواصل معنا عبر تيليجرام" data-en="Contact us via Telegram">تواصل معنا عبر تيليجرام</span>
+                    </div>
+                    <div class="menu-icon-box icon-support"><i class="fa-brands fa-telegram"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Logout Wrapper -->
+    <div class="logout-wrap" onclick="performLogout()">
+        <div class="logout-item">
+            <i class="fa-solid fa-chevron-left menu-arrow" style="color: #f6465d;"></i>
+            <div class="menu-content-left">
+                <div class="menu-text-wrap">
+                    <span class="logout-title" data-ar="تسجيل الخروج" data-en="Logout">تسجيل الخروج</span>
+                    <span class="logout-subtitle" data-ar="وداعاً، نراك قريباً" data-en="Goodbye, see you soon">وداعاً، نراك قريباً</span>
+                </div>
+                <div class="logout-icon-box"><i class="fa-solid fa-right-from-bracket"></i></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div class="modal-overlay" id="modalOverlay" onclick="closeAllModals()"></div>
+
+    <div class="modal-content" id="changeLoginPwdModal">
+        <div class="modal-header">
+            <span data-ar="تغيير كلمة مرور الدخول" data-en="Change Login Password">تغيير كلمة مرور الدخول</span>
+            <i class="fa-solid fa-xmark" onclick="closeAllModals()"></i>
+        </div>
+        <div class="input-group">
+            <label data-ar="كلمة المرور القديمة" data-en="Old Password">كلمة المرور القديمة</label>
+            <input type="password" id="login-old-pwd" placeholder="" data-placeholder-ar="أدخل كلمة المرور الحالية" data-placeholder-en="Enter current password">
+        </div>
+        <div class="input-group">
+            <label data-ar="كلمة المرور الجديدة" data-en="New Password">كلمة المرور الجديدة</label>
+            <input type="password" id="login-new-pwd" placeholder="" data-placeholder-ar="أدخل كلمة المرور الجديدة" data-placeholder-en="Enter new password">
+        </div>
+        <div class="input-group">
+            <label data-ar="تأكيد كلمة المرور" data-en="Confirm Password">تأكيد كلمة المرور</label>
+            <input type="password" id="login-confirm-pwd" placeholder="" data-placeholder-ar="أعد إدخال كلمة المرور الجديدة" data-placeholder-en="Re-enter new password">
+        </div>
+        <button class="submit-btn" onclick="submitChangeLoginPwd()" data-ar="حفظ التغييرات" data-en="Save Changes">حفظ التغييرات</button>
+    </div>
+
+    <div class="modal-content" id="changeSecPwdModal">
+        <div class="modal-header">
+            <span data-ar="تغيير كلمة مرور السحب" data-en="Change Withdrawal Password">تغيير كلمة مرور السحب</span>
+            <i class="fa-solid fa-xmark" onclick="closeAllModals()"></i>
+        </div>
+        <div class="input-group">
+            <label data-ar="كلمة مرور السحب الحالية" data-en="Current Withdrawal Password">كلمة مرور السحب الحالية</label>
+            <input type="password" id="change-sec-old" placeholder="" data-placeholder-ar="أدخل الكلمة الحالية" data-placeholder-en="Enter current password">
+        </div>
+        <div class="input-group">
+            <label data-ar="كلمة مرور السحب الجديدة" data-en="New Withdrawal Password">كلمة مرور السحب الجديدة</label>
+            <input type="password" id="change-sec-new" placeholder="" data-placeholder-ar="أدخل الكلمة الجديدة" data-placeholder-en="Enter new password">
+        </div>
+        <div class="input-group">
+            <label data-ar="تأكيد كلمة المرور" data-en="Confirm Password">تأكيد كلمة المرور</label>
+            <input type="password" id="change-sec-confirm" placeholder="" data-placeholder-ar="أعد إدخال الكلمة الجديدة" data-placeholder-en="Re-enter new password">
+        </div>
+        <button class="submit-btn" onclick="submitChangeSecPwd()" data-ar="تغيير الكلمة" data-en="Change Password">تغيير الكلمة</button>
+    </div>
+
+    <div class="toast" id="system-toast"></div>
+    
+    <!-- القائمة السفلية (مطابقة لـ home.html) -->
+    <div class="bottom-nav">
+        <a href="home.html" class="nav-item">
+            <i class="fa-solid fa-house"></i>
+            <span data-ar="الرئيسية" data-en="Home">الرئيسية</span>
+        </a>
+        <a href="quantify.html" class="nav-item">
+            <i class="fa-solid fa-bolt"></i>
+            <span data-ar="تحديد الكمية" data-en="Quantify">تحديد الكمية</span>
+        </a>
+        <a href="invite.html" class="nav-item">
+            <i class="fa-solid fa-share-nodes"></i>
+            <span data-ar="ادعو أصدقاء" data-en="Invite">ادعو أصدقاء</span>
+        </a>
+        <a href="ana.html" class="nav-item active">
+            <i class="fa-solid fa-user"></i>
+            <span data-ar="أنا" data-en="Me">أنا</span>
+        </a>
+    </div>
+
+    <!-- SCRIPT BEGIN -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, updatePassword, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+        import { getFirestore, doc, onSnapshot, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCa3nVSth5Jhhuhvblw23w0uxzR1VJHLOo",
+            authDomain: "yaqoout-b4c83.firebaseapp.com",
+            projectId: "yaqoout-b4c83",
+            storageBucket: "yaqoout-b4c83.firebasestorage.app",
+            messagingSenderId: "21558070357",
+            appId: "1:21558070357:web:6237dcf59b162b5dae18dc"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let fullUID = ""; 
+        let currentUID = "------";
+        let userDbSecPwd = null;
+
+        function applyLanguage() {
+            const currentLang = localStorage.getItem('selectedLanguage') || 'ar';
+            const htmlRoot = document.getElementById('html-root');
+            
+            if (currentLang === 'en') {
+                htmlRoot.setAttribute('lang', 'en');
+                htmlRoot.setAttribute('dir', 'ltr');
+            } else {
+                htmlRoot.setAttribute('lang', 'ar');
+                htmlRoot.setAttribute('dir', 'rtl');
+            }
+
+            document.querySelectorAll('[data-ar]').forEach(el => {
+                const text = el.getAttribute(`data-${currentLang}`);
+                if (text) el.innerHTML = text;
+            });
+
+            document.querySelectorAll('[data-placeholder-ar]').forEach(input => {
+                const placeholder = input.getAttribute(`data-placeholder-${currentLang}`);
+                if (placeholder) input.setAttribute('placeholder', placeholder);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', applyLanguage);
+        applyLanguage();
+
+        onAuthStateChanged(auth, (user) => {
+            const currentLang = localStorage.getItem('selectedLanguage') || 'ar';
+            if (user) {
+                fullUID = user.uid; 
+                currentUID = user.uid.substring(0, 8).toUpperCase();
+                document.getElementById('uid-text').innerText = currentUID;
+                
+                const defaultUserText = currentLang === 'en' ? 'Tadawulx User' : 'مستخدم Tadawulx';
+                document.getElementById('user-phone-display').innerText = user.phoneNumber || user.email || defaultUserText;
+                
+                onSnapshot(doc(db, "users", user.uid), (docSnap) => {
+                    if(docSnap.exists()) {
+                        let data = docSnap.data();
+                        
+                        let dbName = data.name || data.fullName || user.displayName || defaultUserText;
+                        document.getElementById('user-name-display').innerText = dbName;
+                        
+                        document.getElementById('vip-level').innerText = `VIP ${data.activeVipId || 0}`;
+                        if (data.avatarUrl) {
+                            document.getElementById('user-avatar').src = data.avatarUrl;
+                        }
+                        userDbSecPwd = data.withdrawPassword || null;
+                    }
+                });
+            } else {
+                window.location.href = 'index.html'; 
+            }
+        });
+
+        document.getElementById('avatar-input').addEventListener('change', function(e) {
+            const lang = localStorage.getItem('selectedLanguage') || 'ar';
+            const file = e.target.files[0];
+            if (file) {
+                if (file.size > 2 * 1024 * 1024) {
+                    showToast(lang === 'en' ? "Image size too large (Max 2MB)" : "حجم الصورة كبير جداً (الحد الأقصى 2 ميجابايت)", true);
+                    return;
+                }
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const base64Image = event.target.result;
+                    document.getElementById('user-avatar').src = base64Image;
+                    if (auth.currentUser) {
+                        updateDoc(doc(db, "users", auth.currentUser.uid), {
+                            avatarUrl: base64Image
+                        }).then(() => {
+                            showToast(lang === 'en' ? "Profile picture updated!" : "تم تحديث صورة الملف الشخصي!");
+                        }).catch(() => {
+                            showToast(lang === 'en' ? "Error saving image" : "حدث خطأ أثناء حفظ الصورة", true);
+                        });
+                    }
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        window.openModal = function(modalId) {
+            document.querySelectorAll('input[type="password"]').forEach(i => i.value = '');
+            document.getElementById('modalOverlay').classList.add('active');
+            document.getElementById(modalId).classList.add('active');
+        };
+
+        window.closeAllModals = function() {
+            document.getElementById('modalOverlay').classList.remove('active');
+            document.querySelectorAll('.modal-content').forEach(el => el.classList.remove('active'));
+        };
+
+        window.openChangeSecPwdModal = function() {
+            const lang = localStorage.getItem('selectedLanguage') || 'ar';
+            if(!userDbSecPwd) {
+                return showToast(lang === 'en' ? "Please create a withdrawal password first!" : "يرجى إنشاء كلمة مرور السحب أولاً!", true);
+            }
+            openModal('changeSecPwdModal');
+        };
+
+        window.submitChangeSecPwd = function() {
+            const lang = localStorage.getItem('selectedLanguage') || 'ar';
+            let oldPwd = document.getElementById('change-sec-old').value;
+            let newPwd = document.getElementById('change-sec-new').value;
+            let confirmPwd = document.getElementById('change-sec-confirm').value;
+
+            if(!oldPwd || !newPwd || !confirmPwd) return showToast(lang === 'en' ? "Please fill all fields!" : "يرجى ملء جميع الحقول!", true);
+            if(oldPwd !== userDbSecPwd) return showToast(lang === 'en' ? "Incorrect current password!" : "كلمة المرور الحالية غير صحيحة!", true);
+            if(newPwd !== confirmPwd) return showToast(lang === 'en' ? "New passwords do not match!" : "كلمة المرور الجديدة غير متطابقة!", true);
+            if(newPwd.length < 6) return showToast(lang === 'en' ? "Must be at least 6 characters" : "يجب أن تتكون من 6 أرقام/أحرف على الأقل", true);
+
+            updateDoc(doc(db, "users", auth.currentUser.uid), {
+                withdrawPassword: newPwd
+            }).then(() => {
+                closeAllModals();
+                showToast(lang === 'en' ? "Withdrawal password updated successfully!" : "تم تغيير كلمة مرور السحب بنجاح!");
+            }).catch(err => showToast(lang === 'en' ? "Connection error" : "حدث خطأ في الاتصال", true));
+        };
+
+        window.submitChangeLoginPwd = function() {
+            const lang = localStorage.getItem('selectedLanguage') || 'ar';
+            let oldPwd = document.getElementById('login-old-pwd').value;
+            let newPwd = document.getElementById('login-new-pwd').value;
+            let confirmPwd = document.getElementById('login-confirm-pwd').value;
+
+            if(!oldPwd || !newPwd || !confirmPwd) return showToast(lang === 'en' ? "Please fill all fields!" : "يرجى ملء جميع الحقول!", true);
+            if(newPwd !== confirmPwd) return showToast(lang === 'en' ? "New passwords do not match!" : "كلمة المرور الجديدة غير متطابقة!", true);
+            if(newPwd.length < 6) return showToast(lang === 'en' ? "Must be at least 6 characters" : "يجب أن تتكون من 6 أحرف أو أرقام على الأقل", true);
+
+            updatePassword(auth.currentUser, newPwd).then(() => {
+                closeAllModals();
+                showToast(lang === 'en' ? "Login password updated successfully!" : "تم تغيير كلمة مرور الدخول بنجاح!");
+            }).catch((error) => {
+                if(error.code === 'auth/requires-recent-login') {
+                    showToast(lang === 'en' ? "Please relogin for security reasons" : "يرجى تسجيل الخروج والدخول مجدداً لأسباب أمنية", true);
+                } else {
+                    showToast(lang === 'en' ? "Error occurred, try again" : "حدث خطأ، يرجى إعادة المحاولة", true);
+                }
+            });
+        };
+
+        window.copyUID = function() {
+            const lang = localStorage.getItem('selectedLanguage') || 'ar';
+            if (!fullUID) return; 
+            const msg = lang === 'en' ? "ID copied successfully!" : "تم نسخ الـ ID بنجاح!";
+            navigator.clipboard.writeText(fullUID).then(() => showToast(msg)).catch(err => {
+                let ta = document.createElement("textarea"); 
+                ta.value = fullUID; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); 
+                showToast(msg);
+            });
+        };
+
+        window.performLogout = function() { 
+            const lang = localStorage.getItem('selectedLanguage') || 'ar';
+            signOut(auth).then(() => window.location.href = 'index.html').catch(() => showToast(lang === 'en' ? "Logout Error" : "خطأ في الخروج", true)); 
+        };
+        
+        window.showToast = function(message, isError = false) {
+            let toast = document.getElementById('system-toast');
+            toast.innerText = message; 
+            toast.className = `toast ${isError ? 'error' : ''}`;
+            toast.classList.add('show'); 
+            setTimeout(() => toast.classList.remove('show'), 2500);
+        };
+    </script>
+    <script src="language.js"></script>
+</body>
+</html>

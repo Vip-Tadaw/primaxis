@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html dir="ltr" lang="en" id="appHtml">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Primaxis</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-main: #02030a;
+            --neon-blue: #00d2ff;
+            --neon-purple: #8a2be2;
+            --neon-cyan: #00f3ff;
+            --gold: #fcd535;
+            --text-main: #ffffff;
+            --text-muted: #8b9bb4;
+            --card-bg: rgba(13, 17, 33, 0.6);
+            --card-border: rgba(62, 82, 169, 0.3);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Cairo', sans-serif; text-decoration: none; -webkit-tap-highlight-color: transparent; }
+        
+        body { 
+            background-color: var(--bg-main); 
+            background-image: radial-gradient(circle at 50% -20%, #1a153a 0%, #02030a 50%);
+            background-attachment: fixed;
+            color: var(--text-main); 
+            padding-bottom: 90px; 
+            transition: direction 0.3s ease; 
+            overflow-x: hidden; 
+            width: 100%; /* ضمان التناسب مع الهاتف */
+        }
+
+        /* ---------------- الشريط العلوي ---------------- */
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; position: sticky; top: 0; z-index: 50; backdrop-filter: blur(10px); }
+        .logo-area { display: flex; align-items: center; gap: 10px; }
+        .logo-icon { width: 35px; height: 35px; background: url('photo_٢٠٢٦-٠٩-٣٠_٠٠-٤١-٣٧.jpg') center/cover; border-radius: 50%; box-shadow: 0 0 15px rgba(0, 210, 255, 0.5); }
+        .logo-text-box { display: flex; flex-direction: column; }
+        .logo-title { font-weight: 800; font-size: 20px; letter-spacing: 1px; background: linear-gradient(90deg, #fff, #b3c2ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; line-height: 1.2; }
+        .logo-sub { font-size: 8px; color: var(--text-muted); letter-spacing: 2px; }
+        
+        .header-icons { display: flex; align-items: center; gap: 12px; }
+        .lang-btn { display: flex; align-items: center; gap: 5px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 5px 12px; border-radius: 20px; font-size: 12px; color: #fff; cursor: pointer; position: relative; }
+        .icon-circle { width: 35px; height: 35px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: center; align-items: center; color: #fff; position: relative; cursor: pointer; background: rgba(0,0,0,0.3); }
+        .icon-circle.support { border-color: var(--gold); color: var(--gold); box-shadow: 0 0 10px rgba(252, 213, 53, 0.2); }
+        .notif-dot { position: absolute; top: 5px; right: 5px; width: 8px; height: 8px; background: #ff3b30; border-radius: 50%; box-shadow: 0 0 5px #ff3b30; }
+
+        /* قائمة اللغات */
+        .lang-dropdown { display: none; position: absolute; top: 40px; left: 0; background-color: rgba(13, 17, 33, 0.95); border: 1px solid var(--card-border); border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.9); z-index: 1000; min-width: 100%; backdrop-filter: blur(10px); }
+        html[dir="ltr"] .lang-dropdown { left: auto; right: 0; }
+        .lang-dropdown.show { display: block; }
+        .lang-option { padding: 10px; color: #fff; font-size: 13px; cursor: pointer; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .lang-option:last-child { border-bottom: none; }
+
+        /* ---------------- بطاقة الحساب (Hero Card) ---------------- */
+        .hero-card { margin: 10px 15px 20px; background: linear-gradient(135deg, rgba(17,24,60,0.8) 0%, rgba(10,13,38,0.9) 100%); border: 1px solid var(--neon-blue); border-radius: 24px; padding: 20px; position: relative; box-shadow: 0 0 20px rgba(0, 210, 255, 0.15), inset 0 0 20px rgba(138, 43, 226, 0.2); overflow: hidden; }
+        .hero-card::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(138,43,226,0.15) 0%, transparent 50%); pointer-events: none; }
+        
+        .profile-top { display: flex; justify-content: space-between; align-items: flex-start; position: relative; z-index: 2; margin-bottom: 20px; }
+        .user-info-wrap { display: flex; align-items: center; gap: 15px; }
+        .avatar-box { position: relative; }
+        .avatar-box img { width: 60px; height: 60px; border-radius: 50%; border: 2px solid var(--neon-cyan); box-shadow: 0 0 15px rgba(0, 243, 255, 0.4); object-fit: cover; }
+        .vip-badge { position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); background: linear-gradient(90deg, #fcd535, #ffaa00); color: #000; font-size: 10px; font-weight: 800; padding: 2px 12px; border-radius: 10px; white-space: nowrap; }
+        
+        .user-details { display: flex; flex-direction: column; gap: 3px; }
+        .welcome-text { font-size: 11px; color: var(--text-muted); }
+        .user-name { font-size: 16px; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 5px; }
+        .user-name i { color: var(--gold); font-size: 12px; }
+        .user-phone { font-size: 12px; color: #b0c4de; }
+        .uid-box { display: inline-flex; align-items: center; gap: 5px; background: rgba(255,255,255,0.1); padding: 3px 10px; border-radius: 15px; font-size: 11px; margin-top: 5px; border: 1px solid rgba(255,255,255,0.2); }
+        
+        .crown-icon { width: 70px; opacity: 0.9; filter: drop-shadow(0 0 10px rgba(138, 43, 226, 0.5)); }
+        
+        .balance-section { border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px; position: relative; z-index: 2; }
+        .balance-title { font-size: 13px; color: #fff; display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
+        .balance-amount { font-size: 32px; font-weight: 800; text-shadow: 0 0 10px rgba(255,255,255,0.3); display: flex; align-items: baseline; gap: 5px; flex-wrap: wrap; }
+        .balance-amount span { font-size: 16px; font-weight: 600; color: var(--text-muted); }
+        .balance-change { color: #0ecb81; font-size: 12px; font-weight: 700; margin-top: 5px; display: flex; align-items: center; gap: 5px; }
+
+        /* ---------------- أزرار الإجراءات السريعة ---------------- */
+        .action-row { display: flex; gap: 10px; padding: 0 15px 20px; }
+        .action-btn { flex: 1; border-radius: 16px; padding: 12px; display: flex; align-items: center; gap: 10px; text-decoration: none; position: relative; overflow: hidden; }
+        .action-btn::after { content: ''; position: absolute; left: 10px; top: 50%; transform: translateY(-50%); width: 6px; height: 6px; border-top: 2px solid #fff; border-left: 2px solid #fff; transform: translateY(-50%) rotate(135deg); opacity: 0.5; }
+        html[dir="ltr"] .action-btn::after { left: auto; right: 10px; transform: translateY(-50%) rotate(-45deg); }
+        
+        .btn-deposit { background: linear-gradient(135deg, rgba(138,43,226,0.3), rgba(75,0,130,0.6)); border: 1px solid rgba(138,43,226,0.5); box-shadow: 0 0 15px rgba(138,43,226,0.2); }
+        .btn-withdraw { background: linear-gradient(135deg, rgba(0,102,255,0.3), rgba(0,51,153,0.6)); border: 1px solid rgba(0,102,255,0.5); box-shadow: 0 0 15px rgba(0,102,255,0.2); }
+        
+        .action-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; justify-content: center; align-items: center; font-size: 16px; color: #fff; min-width: 36px; }
+        .btn-deposit .action-icon { background: rgba(138,43,226,0.5); }
+        .btn-withdraw .action-icon { background: rgba(0,102,255,0.5); }
+        
+        .action-text { display: flex; flex-direction: column; }
+        .action-title { color: #fff; font-size: 13px; font-weight: 800; }
+        .action-sub { color: rgba(255,255,255,0.6); font-size: 9px; }
+
+        /* ---------------- شبكة الإحصائيات ---------------- */
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 0 15px 25px; }
+        .stat-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 15px; position: relative; overflow: hidden; backdrop-filter: blur(5px); }
+        
+        .stat-header { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+        .stat-icon { width: 30px; height: 30px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 12px; min-width: 30px; }
+        .stat-card:nth-child(1) .stat-icon { background: rgba(0, 243, 255, 0.1); color: #00f3ff; }
+        .stat-card:nth-child(2) .stat-icon { background: rgba(0, 102, 255, 0.1); color: #0066ff; }
+        .stat-card:nth-child(3) .stat-icon { background: rgba(138, 43, 226, 0.1); color: #8a2be2; }
+        .stat-card:nth-child(4) .stat-icon { background: rgba(252, 213, 53, 0.1); color: #fcd535; }
+        
+        .stat-title { font-size: 12px; color: #fff; font-weight: 600; }
+        .stat-val { font-size: 18px; font-weight: 800; color: #fff; font-family: monospace; margin-bottom: 5px; word-break: break-word; }
+        .stat-change { font-size: 11px; font-weight: 700; color: #0ecb81; display: flex; align-items: center; gap: 4px; }
+        
+        /* ---------------- الخدمات السريعة ---------------- */
+        .section-header { display: flex; justify-content: space-between; align-items: center; padding: 0 15px 15px; }
+        .section-title { font-size: 16px; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 8px; }
+        .view-all { font-size: 12px; color: var(--text-muted); display: flex; align-items: center; gap: 5px; }
+        
+        .quick-services { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 0 15px 25px; }
+        .q-service-item { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 15px 5px; display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center; }
+        .qs-icon { width: 45px; height: 45px; border-radius: 12px; display: flex; justify-content: center; align-items: center; font-size: 20px; }
+        .qs-1 { background: rgba(252, 213, 53, 0.1); color: #fcd535; border: 1px solid rgba(252, 213, 53, 0.3); }
+        .qs-2 { background: rgba(0, 243, 255, 0.1); color: #00f3ff; border: 1px solid rgba(0, 243, 255, 0.3); }
+        .qs-3 { background: rgba(0, 102, 255, 0.1); color: #0066ff; border: 1px solid rgba(0, 102, 255, 0.3); }
+        .qs-4 { background: rgba(138, 43, 226, 0.1); color: #8a2be2; border: 1px solid rgba(138, 43, 226, 0.3); }
+        .q-service-item span { font-size: 11px; font-weight: 700; color: #fff; }
+
+        /* ---------------- شريط الإشعارات ---------------- */
+        .marquee-wrapper { margin: 0 15px 25px; padding: 2px; border-radius: 12px; background: linear-gradient(90deg, rgba(138,43,226,0.5), rgba(0,210,255,0.5)); }
+        .marquee-inner { background: #0a0d26; border-radius: 10px; padding: 10px 15px; display: flex; align-items: center; overflow: hidden; }
+        .modern-ticker { display: inline-block; white-space: nowrap; color: #fff; font-size: 12px; font-weight: bold; animation: tickerMove 25s linear infinite; }
+        @keyframes tickerMove { 0% { transform: translateX(-100%); } 100% { transform: translateX(100vw); } }
+
+        /* ---------------- قائمة أسعار العملات ---------------- */
+        .crypto-list { padding: 0 15px 20px; display: flex; flex-direction: column; gap: 10px; }
+        .crypto-item { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 15px; display: flex; align-items: center; justify-content: space-between; }
+        .c-left { display: flex; align-items: center; gap: 12px; width: 35%; }
+        .c-icon { font-size: 24px; min-width: 24px; }
+        .c-name { font-size: 14px; font-weight: 800; color: #fff; }
+        .c-pair { font-size: 10px; color: var(--text-muted); }
+        .c-mid { width: 30%; text-align: center; }
+        .c-price { font-size: 15px; font-weight: bold; font-family: monospace; color: #fff; transition: 0.3s; }
+        .c-change { font-size: 11px; font-weight: bold; margin-top: 3px; }
+        .c-right { width: 35%; display: flex; align-items: center; justify-content: flex-end; gap: 10px; }
+        .sparkline { width: 50px; height: 25px; filter: drop-shadow(0 0 5px rgba(246, 70, 93, 0.5)); }
+        .spark-up { filter: drop-shadow(0 0 5px rgba(14, 203, 129, 0.5)); }
+        
+        .price-up { color: #0ecb81 !important; text-shadow: 0 0 8px rgba(14, 203, 129, 0.5); }
+        .price-down { color: #f6465d !important; text-shadow: 0 0 8px rgba(246, 70, 93, 0.5); }
+        .text-red { color: #f6465d; }
+        .text-green { color: #0ecb81; }
+
+        /* سجل السحوبات الحية */
+        .live-withdraw-box { margin: 0 15px 25px; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 12px; overflow: hidden; box-shadow: 0 0 10px rgba(0,0,0,0.5); }
+        .live-title { color: #fff; font-size: 13px; font-weight: bold; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+        
+        /* ---------------- البانر السفلي ---------------- */
+        .bottom-banner { margin: 0 15px 20px; background: linear-gradient(90deg, rgba(20,20,50,0.8), rgba(40,20,80,0.8)); border: 1px solid rgba(138,43,226,0.4); border-radius: 16px; padding: 15px; display: flex; justify-content: space-between; align-items: center; }
+        .bb-text { display: flex; flex-direction: column; gap: 5px; }
+        .bb-title { font-size: 14px; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 8px; }
+        .bb-sub { font-size: 10px; color: #b0c4de; }
+        .bb-icon { font-size: 30px; color: var(--neon-purple); opacity: 0.8; }
+
+        /* ---------------- القائمة السفلية ---------------- */
+        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background-color: rgba(5, 5, 15, 0.95); backdrop-filter: blur(10px); display: flex; justify-content: space-around; padding: 12px 0 15px; border-top: 1px solid rgba(138,43,226,0.3); z-index: 100; direction: ltr; box-shadow: 0 -5px 20px rgba(0,0,0,0.8); }
+        .nav-item { display: flex; flex-direction: column; align-items: center; color: #6b7280; font-size: 11px; gap: 6px; font-weight: bold; text-decoration: none; transition: 0.3s; flex: 1; }
+        .nav-item.active { color: #a855f7; text-shadow: 0 0 10px rgba(168, 85, 247, 0.5); }
+        .nav-item i { font-size: 20px; }
+
+        /* تحسينات إضافية للهواتف ذات الشاشات الصغيرة جداً */
+        @media (max-width: 380px) {
+            .quick-services { gap: 5px; padding: 0 10px 20px; }
+            .q-service-item { padding: 10px 2px; }
+            .q-service-item span { font-size: 9px; }
+            .qs-icon { width: 38px; height: 38px; font-size: 16px; }
+            .balance-amount { font-size: 26px; }
+            .stat-val { font-size: 15px; }
+            .action-btn { padding: 10px 8px; }
+            .action-title { font-size: 11px; }
+            .action-icon { width: 30px; height: 30px; font-size: 14px; min-width: 30px; }
+            .c-price { font-size: 13px; }
+            .c-name { font-size: 12px; }
+            .sparkline { width: 40px; }
+            .user-info-wrap { gap: 10px; }
+            .avatar-box img { width: 50px; height: 50px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- الشريط العلوي -->
+    <div class="header">
+        <div class="logo-area">
+            <div class="logo-icon"></div>
+            <div class="logo-text-box">
+                <span class="logo-title">Primaxis</span>
+                <span class="logo-sub">INVEST • TRADE • EARN</span>
+            </div>
+        </div>
+        
+        <div class="header-icons">
+            <div class="lang-btn" onclick="toggleLangMenu(event)">
+                <i class="fa-solid fa-globe"></i>
+                <span data-ar="عربي" data-en="EN">EN</span>
+                <i class="fa-solid fa-chevron-down" style="font-size:10px;"></i>
+                <div class="lang-dropdown" id="langMenu">
+                    <div class="lang-option" onclick="setLanguage('ar')">العربية</div>
+                    <div class="lang-option" onclick="setLanguage('en')">English</div>
+                </div>
+            </div>
+            <a href="activity.html" class="icon-circle">
+                <i class="fa-regular fa-bell"></i>
+                <div class="notif-dot"></div>
+            </a>
+            <a href="https://t.me/Jumana96mp" target="_blank" class="icon-circle support">
+                <i class="fa-solid fa-headset"></i>
+            </a>
+        </div>
+    </div>
+
+    <!-- بطاقة الحساب الرئيسية -->
+    <div class="hero-card">
+        <div class="profile-top">
+            <div class="user-info-wrap">
+                <div class="avatar-box">
+                    <img src="photo_٢٠٢٦-٠٩-٣٠_٠٠-٤١-٣٧.jpg" alt="Avatar">
+                    <div class="vip-badge"><i class="fa-solid fa-crown" style="font-size:8px;"></i> VIP 1</div>
+                </div>
+               <div class="user-details">
+                    <span class="welcome-text" data-ar="مرحباً" data-en="Welcome">Welcome</span>
+                    <div class="user-name"><span id="displayUserName">جاري التحميل...</span> <i class="fa-solid fa-circle-check"></i></div>
+                    <div class="user-phone"><i class="fa-solid fa-phone" style="color:var(--gold); font-size:10px;"></i> <span id="displayUserPhone">---</span></div>
+                    <div class="uid-box">UID: <span id="displayUserUid">---</span> <i class="fa-regular fa-copy" style="cursor:pointer;"></i></div>
+                </div>
+            </div>
+            <img src="photo_٢٠٢٦-٠٩-٣٠_٠٠-٤١-٣٧.jpg" class="crown-icon" alt="Crown">
+        </div>
+        
+        <div class="balance-section">
+            <div class="balance-title">
+                <span data-ar="إجمالي الأصول (USDT)" data-en="Total Assets (USDT)">Total Assets (USDT)</span>
+                <i class="fa-regular fa-eye" style="cursor:pointer; color:var(--text-muted);"></i>
+            </div>
+            <div class="balance-amount"><span id="displayUserBalance">0.00</span> <span>USDT</span></div>
+            <div class="balance-change"><i class="fa-solid fa-caret-up"></i> +12.5% <span style="color:var(--text-muted); font-size:10px; margin-right:5px; font-weight:normal;" data-ar="من أمس" data-en="from yesterday">from yesterday</span></div>
+        </div>
+    </div>
+
+    <!-- أزرار الإجراءات -->
+    <div class="action-row">
+        <a href="recharge.html" class="action-btn btn-deposit">
+            <div class="action-icon"><i class="fa-solid fa-wallet"></i></div>
+            <div class="action-text">
+                <span class="action-title" data-ar="إيداع" data-en="Deposit">Deposit</span>
+                <span class="action-sub" data-ar="إضافة أموال لحسابك" data-en="Add funds">Add funds</span>
+            </div>
+        </a>
+        <a href="withdraw.html" class="action-btn btn-withdraw">
+            <div class="action-icon"><i class="fa-solid fa-arrow-up-from-bracket"></i></div>
+            <div class="action-text">
+                <span class="action-title" data-ar="سحب" data-en="Withdraw">Withdraw</span>
+                <span class="action-sub" data-ar="سحب أموالك" data-en="Withdraw funds">Withdraw funds</span>
+            </div>
+        </a>
+    </div>
+
+    <!-- شبكة الإحصائيات -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-header">
+                <div class="stat-icon"><i class="fa-solid fa-chart-line"></i></div>
+                <span class="stat-title" data-ar="أرباح اليوم" data-en="Today's Profit">Today's Profit</span>
+            </div>
+            <div class="stat-val">$ 178.60</div>
+            <div class="stat-change"><i class="fa-solid fa-caret-up"></i> +9.7%</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-header">
+                <div class="stat-icon"><i class="fa-regular fa-calendar-check"></i></div>
+                <span class="stat-title" data-ar="أرباح أمس" data-en="Yesterday's Profit">Yesterday's Profit</span>
+            </div>
+            <div class="stat-val">$ 125.32</div>
+            <div class="stat-change"><i class="fa-solid fa-caret-up"></i> +5.6%</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-header">
+                <div class="stat-icon"><i class="fa-solid fa-users"></i></div>
+                <span class="stat-title" data-ar="عمولات الفريق" data-en="Team Comm.">Team Comm.</span>
+            </div>
+            <div class="stat-val">$ 628.75</div>
+            <div class="stat-change"><i class="fa-solid fa-caret-up"></i> +12.3%</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-header">
+                <div class="stat-icon"><i class="fa-solid fa-coins"></i></div>
+                <span class="stat-title" data-ar="إجمالي الإيرادات" data-en="Total Revenue">Total Revenue</span>
+            </div>
+            <div class="stat-val">$ 3,248.50</div>
+            <div class="stat-change"><i class="fa-solid fa-caret-up"></i> +8.4%</div>
+        </div>
+    </div>
+
+    <!-- الخدمات السريعة -->
+    <div class="section-header">
+        <div class="section-title"><i class="fa-solid fa-bolt" style="color: var(--neon-purple);"></i> <span data-ar="الخدمات السريعة" data-en="Quick Services">Quick Services</span></div>
+        <div class="view-all"><span data-ar="عرض الكل" data-en="View All">View All</span> <i class="fa-solid fa-chevron-left"></i></div>
+    </div>
+    
+    <div class="quick-services">
+        <a href="recharge.html" class="q-service-item">
+            <div class="qs-icon qs-1"><i class="fa-solid fa-wallet"></i></div>
+            <span data-ar="تعبئة رصيد" data-en="Recharge">Recharge</span>
+        </a>
+        <a href="withdraw.html" class="q-service-item">
+            <div class="qs-icon qs-2"><i class="fa-solid fa-hand-holding-dollar"></i></div>
+            <span data-ar="سحب" data-en="Withdraw">Withdraw</span>
+        </a>
+        <a href="invite.html" class="q-service-item">
+            <div class="qs-icon qs-3"><i class="fa-solid fa-user-plus"></i></div>
+            <span data-ar="ادعو أصدقاء" data-en="Invite">Invite</span>
+        </a>
+        <a href="team.html" class="q-service-item">
+            <div class="qs-icon qs-4"><i class="fa-solid fa-users-gear"></i></div>
+            <span data-ar="فريق" data-en="Team">Team</span>
+        </a>
+    </div>
+
+    <!-- شريط الإعلانات -->
+    <div class="marquee-wrapper" id="marqueeContainer">
+        <div class="marquee-inner">
+            <i class="fa-solid fa-bullhorn" style="color: var(--gold); margin: 0 10px;"></i>
+            <div style="flex: 1; overflow: hidden; display: flex; align-items: center; position: relative; height: 20px;">
+                <span id="marqueeText" class="modern-ticker" data-ar="عرض خاص: اربح حتى 12% من قيمة إعادة الشحن. لا تفوت الفرصة!" data-en="Special offer: Earn up to 12% on recharges. Don't miss out!">Special offer: Earn up to 12% on recharges. Don't miss out!</span>
+            </div>
+            <i class="fa-solid fa-chevron-left" style="color:var(--text-muted); font-size:12px; margin:0 10px;"></i>
+        </div>
+    </div>
+
+    <!-- سجل السحوبات الحية -->
+    <div class="live-withdraw-box">
+        <div class="live-title">
+            <i class="fa-solid fa-money-bill-transfer" style="color: var(--neon-cyan);"></i> <span data-ar="سجل السحوبات الحية للمنصة" data-en="Live Withdrawal Logs">Live Withdrawal Logs</span>
+        </div>
+        <div style="height: 120px; overflow: hidden; position: relative;">
+            <div id="homeLeaderboardList" style="display: flex; flex-direction: column; gap: 10px; position: absolute; left: 0; right: 0; transition: transform 0.5s ease;">
+                <!-- يتم توليده بالـ JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- أسعار العملات الرقمية -->
+    <div class="section-header" style="padding-top: 10px;">
+        <div class="section-title"><i class="fa-solid fa-chart-simple" style="color:var(--neon-blue);"></i> <span data-ar="أسعار العملات الرقمية" data-en="Crypto Prices">Crypto Prices</span></div>
+        <div class="view-all"><span data-ar="عرض الكل" data-en="View All">View All</span> <i class="fa-solid fa-chevron-left"></i></div>
+    </div>
+
+    <div class="crypto-list">
+        <!-- BTC -->
+        <div class="crypto-item">
+            <div class="c-left">
+                <i class="fa-brands fa-bitcoin c-icon" style="color:#fcd535;"></i>
+                <div>
+                    <div class="c-name">BTC</div>
+                    <div class="c-pair">/USDT</div>
+                </div>
+            </div>
+            <div class="c-mid">
+                <div class="c-price sim-p" data-base="62516.20">$62516.20</div>
+                <div class="c-change text-red"><i class="fa-solid fa-caret-down"></i> 2.91%</div>
+            </div>
+            <div class="c-right">
+                <svg class="sparkline text-red" viewBox="0 0 100 30" preserveAspectRatio="none">
+                    <path d="M0,15 Q10,5 20,20 T40,10 T60,25 T80,10 T100,20" fill="none" stroke="#f6465d" stroke-width="2"/>
+                </svg>
+                <i class="fa-solid fa-chevron-left" style="color:var(--text-muted); font-size:12px;"></i>
+            </div>
+        </div>
+        <!-- ETH -->
+        <div class="crypto-item">
+            <div class="c-left">
+                <i class="fa-brands fa-ethereum c-icon" style="color:#627eea;"></i>
+                <div>
+                    <div class="c-name">ETH</div>
+                    <div class="c-pair">/USDT</div>
+                </div>
+            </div>
+            <div class="c-mid">
+                <div class="c-price sim-p" data-base="1665.23">$1665.23</div>
+                <div class="c-change text-red"><i class="fa-solid fa-caret-down"></i> 4.05%</div>
+            </div>
+            <div class="c-right">
+                <svg class="sparkline text-red" viewBox="0 0 100 30" preserveAspectRatio="none">
+                    <path d="M0,10 Q15,25 30,15 T60,25 T80,5 T100,20" fill="none" stroke="#f6465d" stroke-width="2"/>
+                </svg>
+                <i class="fa-solid fa-chevron-left" style="color:var(--text-muted); font-size:12px;"></i>
+            </div>
+        </div>
+        <!-- BNB -->
+        <div class="crypto-item">
+            <div class="c-left">
+                <i class="fa-brands fa-bnb c-icon" style="color:#f3ba2f;"></i>
+                <div>
+                    <div class="c-name">BNB</div>
+                    <div class="c-pair">/USDT</div>
+                </div>
+            </div>
+            <div class="c-mid">
+                <div class="c-price sim-p" data-base="576.60">$576.60</div>
+                <div class="c-change text-red"><i class="fa-solid fa-caret-down"></i> 2.57%</div>
+            </div>
+            <div class="c-right">
+                <svg class="sparkline text-red" viewBox="0 0 100 30" preserveAspectRatio="none">
+                    <path d="M0,20 Q20,10 40,25 T70,10 T100,15" fill="none" stroke="#f6465d" stroke-width="2"/>
+                </svg>
+                <i class="fa-solid fa-chevron-left" style="color:var(--text-muted); font-size:12px;"></i>
+            </div>
+        </div>
+        <!-- XRP -->
+        <div class="crypto-item">
+            <div class="c-left">
+                <i class="fa-solid fa-xmark c-icon" style="color:#fff;"></i>
+                <div>
+                    <div class="c-name">XRP</div>
+                    <div class="c-pair">/USDT</div>
+                </div>
+            </div>
+            <div class="c-mid">
+                <div class="c-price sim-p" data-base="1.104">$1.104</div>
+                <div class="c-change text-red"><i class="fa-solid fa-caret-down"></i> 2.37%</div>
+            </div>
+            <div class="c-right">
+                <svg class="sparkline text-red" viewBox="0 0 100 30" preserveAspectRatio="none">
+                    <path d="M0,15 Q25,25 50,15 T80,25 T100,10" fill="none" stroke="#f6465d" stroke-width="2"/>
+                </svg>
+                <i class="fa-solid fa-chevron-left" style="color:var(--text-muted); font-size:12px;"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- البانر السفلي -->
+    <div class="bottom-banner">
+        <div class="bb-text">
+            <div class="bb-title"><i class="fa-solid fa-crown" style="color: var(--gold);"></i> <span data-ar="منصة استثمارية عالمية" data-en="Global Investment Platform">Global Investment Platform</span></div>
+            <div class="bb-sub" data-ar="آمنة • موثوقة • أرباح مستدامة" data-en="Secure • Reliable • Sustainable Profits">Secure • Reliable • Sustainable Profits</div>
+        </div>
+        <div class="bb-icon">
+            <i class="fa-brands fa-bitcoin"></i>
+        </div>
+    </div>
+
+    <!-- القائمة السفلية -->
+    <div class="bottom-nav">
+        <a href="home.html" class="nav-item active">
+            <i class="fa-solid fa-house"></i>
+            <span data-ar="الرئيسية" data-en="Home">Home</span>
+        </a>
+        <a href="quantify.html" class="nav-item">
+            <i class="fa-solid fa-bolt"></i>
+            <span data-ar="تحديد الكمية" data-en="Quantify">Quantify</span>
+        </a>
+        <a href="invite.html" class="nav-item">
+            <i class="fa-solid fa-share-nodes"></i>
+            <span data-ar="ادعو أصدقاء" data-en="Invite">Invite</span>
+        </a>
+        <a href="ana.html" class="nav-item">
+            <i class="fa-solid fa-user"></i>
+            <span data-ar="أنا" data-en="Me">Me</span>
+        </a>
+    </div>
+
+    <!-- الأكواد البرمجية المستقلة -->
+    <script>
+        // محاكاة حركة الأسعار 
+        function updatePrices() {
+            document.querySelectorAll('.sim-p').forEach(el => {
+                let base = parseFloat(el.getAttribute('data-base'));
+                let change = (Math.random() * (base * 0.0005)) * (Math.random() > 0.5 ? 1 : -1); 
+                let newPrice = (base + change);
+                let currentPrice = parseFloat(el.innerText.replace('$', ''));
+                
+                let decimals = base < 10 ? 3 : 2;
+                
+                let parentItem = el.closest('.crypto-item');
+                let changeEl = parentItem.querySelector('.c-change');
+                let sparkline = parentItem.querySelector('.sparkline');
+                
+                if (newPrice > currentPrice) {
+                    el.classList.add('price-up');
+                    el.classList.remove('price-down');
+                    changeEl.className = 'c-change text-green';
+                    changeEl.innerHTML = `<i class="fa-solid fa-caret-up"></i> ${(Math.random() * 2 + 1).toFixed(2)}%`;
+                    sparkline.classList.remove('text-red');
+                    sparkline.classList.add('spark-up');
+                    sparkline.querySelector('path').setAttribute('stroke', '#0ecb81');
+                } else if (newPrice < currentPrice) {
+                    el.classList.add('price-down');
+                    el.classList.remove('price-up');
+                    changeEl.className = 'c-change text-red';
+                    changeEl.innerHTML = `<i class="fa-solid fa-caret-down"></i> ${(Math.random() * 2 + 1).toFixed(2)}%`;
+                    sparkline.classList.remove('spark-up');
+                    sparkline.classList.add('text-red');
+                    sparkline.querySelector('path').setAttribute('stroke', '#f6465d');
+                }
+                
+                el.innerText = '$' + newPrice.toFixed(decimals);
+                
+                setTimeout(() => {
+                    el.classList.remove('price-up', 'price-down');
+                }, 1000);
+            });
+        }
+        setInterval(updatePrices, 2500);
+
+        // نظام السحوبات الحية 
+        function initHomeLiveLeaderboard() {
+            const listElement = document.getElementById('homeLeaderboardList');
+            if(!listElement) return; 
+            
+            listElement.innerHTML = ""; 
+            const prefixes = ['0770', '0771', '0772', '0780', '0781', '0790', '0750'];
+            
+            for(let i = 0; i < 20; i++) {
+                let randomPrefix = prefixes[Math.floor(Math.random() * prefixes.length)];
+                let phone = `${randomPrefix}***${Math.floor(100 + Math.random() * 899)}`;
+                let amount = (Math.random() * 300 + 10).toFixed(2); 
+                
+                let item = document.createElement('div');
+                item.style.cssText = "display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.03); height: 40px; padding: 0 15px; border-radius: 10px; font-size: 13px; border: 1px solid rgba(255,255,255,0.05); box-sizing: border-box;";
+                
+                item.innerHTML = `
+                    <div style="color: #eaecef; font-weight: bold; direction: ltr; display: flex; align-items: center; gap: 8px;">
+                        <i class="fa-solid fa-circle-check" style="color:#0ecb81; font-size: 14px;"></i> ${phone}
+                    </div>
+                    <div style="color: #00d2ff; font-weight: bold; font-family: monospace; font-size: 14px;">
+                        ${amount} USDT
+                    </div>
+                `;
+                listElement.appendChild(item);
+            }
+
+            let currentIndex = 0;
+            const stepHeight = 50;
+
+            setInterval(() => {
+                currentIndex++;
+                if(currentIndex > 17) {
+                    listElement.style.transition = 'none';
+                    listElement.style.transform = `translateY(0px)`;
+                    currentIndex = 0;
+                    setTimeout(() => { listElement.style.transition = 'transform 0.5s ease'; }, 50);
+                } else {
+                    listElement.style.transform = `translateY(-${currentIndex * stepHeight}px)`; 
+                }
+            }, 2500); 
+        }
+
+        initHomeLiveLeaderboard();
+    </script>
+
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+      import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+      import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+
+      const firebaseConfig = {
+          apiKey: "AIzaSyCa3nVSth5Jhhuhvblw23w0uxzR1VJHLOo",
+          authDomain: "yaqoout-b4c83.firebaseapp.com",
+          projectId: "yaqoout-b4c83",
+          storageBucket: "yaqoout-b4c83.firebasestorage.app",
+          messagingSenderId: "21558070357",
+          appId: "1:21558070357:web:6237dcf59b162b5dae18dc"
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const db = getFirestore(app);
+      const auth = getAuth(app);
+
+      onAuthStateChanged(auth, (user) => {
+          if (user) {
+              const userDocRef = doc(db, "users", user.uid);
+              
+              onSnapshot(userDocRef, (docSnap) => {
+                  if (docSnap.exists()) {
+                      const userData = docSnap.data();
+                      
+                      document.getElementById('displayUserName').innerText = userData.name || "مستخدم";
+                      document.getElementById('displayUserPhone').innerText = userData.phone || "لا يوجد رقم";
+                      document.getElementById('displayUserUid').innerText = userData.myInviteCode || user.uid.substring(0, 8);
+                      
+                      const balance = userData.balance || 0;
+                      document.getElementById('displayUserBalance').innerText = parseFloat(balance).toFixed(2);
+                  }
+              });
+          } else {
+              window.location.href = "login.html"; 
+          }
+      });
+
+      const globalSettingsRef = doc(db, "settings", "global");
+      onSnapshot(globalSettingsRef, (docSnap) => {
+          if (docSnap.exists()) {
+              const data = docSnap.data();
+              
+              const mText = document.getElementById("marqueeText");
+              const mContainer = document.getElementById("marqueeContainer");
+              
+              mContainer.style.display = "block"; 
+
+              if (data.marqueeText && data.marqueeText.trim() !== "") {
+                  mText.innerText = data.marqueeText;
+              }
+
+              if (data.maintenanceMode === true) {
+                  document.body.innerHTML = `
+                      <div style="display:flex; flex-direction:column; justify-content:center; align-items:center; height:100vh; background:#02030a;">
+                          <i class="fa-solid fa-triangle-exclamation" style="font-size:70px; color:#8a2be2; margin-bottom:20px; filter:drop-shadow(0 0 10px rgba(138,43,226,0.5));"></i>
+                          <h1 style="color:#fff; text-align:center; font-size:24px;">System under maintenance / المنصة تحت الصيانة</h1>
+                          <p style="color:#b0c4de; text-align:center; margin-top:10px; padding: 0 20px; font-size:14px;">We are updating the system. Please check back later.<br>يرجى العودة لاحقاً.</p>
+                      </div>
+                  `;
+              }
+          }
+      });
+    </script>
+    
+    <!-- تم إبقاء استدعاء ملف اللغة الخارجي هنا ليعمل على تغيير اللغة -->
+    <script src="language.js"></script>
+
+</body>
+</html>

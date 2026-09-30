@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة التحكم الإدارية | Tadawulx</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            margin: 0; padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #0b0e11; color: #eaeaea;
+            direction: rtl;
+        }
+        /* الهيدر العلوي */
+        .admin-header {
+            background-color: #141517; padding: 15px 20px;
+            display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px solid #1e2329; position: sticky; top: 0; z-index: 100;
+        }
+        .admin-header h1 { font-size: 18px; color: #fcd535; margin: 0; display: flex; align-items: center; gap: 10px; }
+        
+        /* حاوية الأقسام الرئيسية */
+        .dashboard-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 15px; padding: 20px; max-width: 1200px; margin: 0 auto;
+        }
+        .menu-card {
+            background-color: #141517; border: 1px solid #1e2329; border-radius: 6px;
+            padding: 20px; text-align: center; cursor: pointer; transition: all 0.3s ease;
+        }
+        .menu-card i { font-size: 28px; color: #fcd535; margin-bottom: 10px; display: block; }
+        .menu-card span { font-size: 14px; font-weight: bold; }
+        .menu-card:hover, .menu-card.active {
+            background-color: #1e2329; border-color: #fcd535; transform: translateY(-3px);
+        }
+
+        /* حاويات المحتوى الداخلي */
+        .content-container { max-width: 1200px; margin: 0 auto; padding: 0 20px 40px; }
+        .section-content { display: none; background-color: #141517; border: 1px solid #1e2329; border-radius: 6px; padding: 20px; animation: fadeIn 0.4s ease; }
+        .section-content.active { display: block; }
+        .section-header { font-size: 18px; font-weight: bold; color: #ffffff; margin-bottom: 20px; border-bottom: 1px solid #1e2329; padding-bottom: 10px; }
+
+        /* تصميم الكروت البرمجية للطلبات */
+        .request-card {
+            background-color: #1e2329; border-radius: 6px; padding: 15px; margin-bottom: 15px;
+            border-right: 4px solid #fcd535; display: flex; flex-direction: column; gap: 8px;
+        }
+        .request-row { display: flex; justify-content: space-between; align-items: center; font-size: 13px; border-bottom: 1px dashed #333b45; padding-bottom: 5px; }
+        .request-row .label { color: #848e9c; }
+        .request-row .val { color: #ffffff; font-weight: 500; direction: ltr; }
+        
+        /* حاوية البيانات المدمجة */
+        .extra-data-box { background-color: #141517; padding: 10px; border-radius: 6px; border: 1px solid #2b3139; display: flex; flex-direction: column; gap: 5px; margin: 5px 0; }
+        .extra-data-box .request-row { border-bottom: none; padding-bottom: 0; }
+
+        .action-buttons { display: flex; gap: 10px; margin-top: 10px; }
+        .btn { flex: 1; padding: 10px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 13px; transition: 0.2s; }
+        .btn-approve { background-color: #0ecb81; color: #ffffff; }
+        .btn-reject { background-color: #d84545; color: #ffffff; }
+        .btn:hover { opacity: 0.8; }
+
+        /* نموذج التحويل عبر الـ ID */
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; font-size: 13px; color: #848e9c; margin-bottom: 8px; }
+        .form-input { width: 100%; background-color: #1e2329; border: 1px solid #333b45; border-radius: 6px; padding: 12px; color: white; box-sizing: border-box; outline: none; }
+        .form-input:focus { border-color: #fcd535; }
+        .radio-group { display: flex; gap: 20px; margin: 10px 0; }
+        .radio-label { display: flex; align-items: center; gap: 5px; cursor: pointer; }
+        .btn-submit { background-color: #fcd535; color: black; width: 100%; padding: 14px; border: none; border-radius: 6px; font-size: 15px; font-weight: bold; cursor: pointer; }
+        .badge { padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; }
+        .badge.pending { background-color: rgba(252, 213, 53, 0.15); color: #fcd535; }
+        .badge.approved { background-color: rgba(14, 203, 129, 0.15); color: #0ecb81; }
+        .badge.rejected { background-color: rgba(216, 69, 69, 0.15); color: #d84545; }
+
+        /* رسالة فارغة */
+        .empty-message { text-align: center; color: #848e9c; padding: 30px 0; font-size: 14px; }
+
+        /* التوست الخاص بالإشعارات */
+        #custom-toast {
+            visibility: hidden; min-width: 250px; background-color: #1e2329; color: #fff; text-align: center; 
+            border-radius: 6px; padding: 15px; position: fixed; z-index: 10000; left: 50%; bottom: 30px; 
+            transform: translateX(-50%); border: 1px solid #333b45; font-size: 14px; box-shadow: 0 4px 12px rgba(0,0,0,0.5); transition: 0.3s; opacity: 0;
+        }
+        #custom-toast.show { visibility: visible; opacity: 1; bottom: 50px; }
+        #custom-toast.success { border-bottom: 3px solid #0ecb81; }
+        #custom-toast.error { border-bottom: 3px solid #d84545; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+    <div id="custom-toast"></div>
+
+    <div class="admin-header">
+        <h1><i class="fa-solid fa-gauge-high"></i> لوحة تحكم المنصة ED-Ai</h1>
+        <span style="font-size: 12px; color: #848e9c;">مسؤول النظام</span>
+    </div>
+
+    <div class="dashboard-grid">
+        <div class="menu-card active" onclick="switchSection('deposit-section', this)">
+            <i class="fa-solid fa-wallet"></i>
+            <span>طلبات الإيداع</span>
+        </div>
+        <div class="menu-card" onclick="switchSection('withdraw-section', this)">
+            <i class="fa-solid fa-money-bill-transfer"></i>
+            <span>طلبات السحب</span>
+        </div>
+        <div class="menu-card" onclick="switchSection('history-section', this)">
+            <i class="fa-solid fa-clock-history"></i>
+            <span>سجل العمليات</span>
+        </div>
+        <div class="menu-card" onclick="switchSection('transfer-section', this)">
+            <i class="fa-solid fa-user-gear"></i>
+            <span>تحويل عبر الـ ID</span>
+        </div>
+    </div>
+
+    <div class="content-container">
+
+        <div id="deposit-section" class="section-content active">
+            <div class="section-header">طلبات الإيداع المعلقة</div>
+            <div id="deposit-list"><div class="empty-message">جاري تحميل طلبات الإيداع...</div></div>
+        </div>
+
+        <div id="withdraw-section" class="section-content">
+            <div class="section-header">طلبات السحب المعلقة</div>
+            <div id="withdraw-list"><div class="empty-message">جاري تحميل طلبات السحب...</div></div>
+        </div>
+
+        <div id="history-section" class="section-content">
+            <div class="section-header">سجل العمليات المكتملة (إيداع وسحب)</div>
+            <div id="history-list"><div class="empty-message">لا توجد عمليات مأرشفة حالياً.</div></div>
+        </div>
+
+       <div id="transfer-section" class="section-content">
+            <div class="section-header">التحويل المباشر والتحكم برصيد المستخدم</div>
+            <div style="max-width: 500px; margin: 0 auto;">
+                
+                <div class="form-group">
+                    <label>معرف المستخدم (User ID)</label>
+                    <div style="display: flex; gap: 10px;">
+                        <input type="text" id="target-uid" class="form-input" placeholder="أدخل الـ ID الخاص بالمستلم" oninput="resetTransferForm()">
+                        <button class="btn btn-approve" style="flex: 0.3; font-size: 14px;" onclick="checkUserBeforeTransfer()">فحص الحساب</button>
+                    </div>
+                </div>
+
+                <div id="user-info-preview" style="display: none; background: #141517; padding: 15px; border-radius: 6px; margin-bottom: 15px; border: 1px dashed #fcd535;">
+                    </div>
+
+                <div class="form-group">
+                    <label>المبلغ المراد إرساله/خصمه (USDT)</label>
+                    <input type="number" id="transfer-amount" class="form-input" placeholder="0.00" disabled>
+                </div>
+                
+                <div class="form-group">
+                    <label>نوع العملية</label>
+                    <div class="radio-group">
+                        <label class="radio-label"><input type="radio" name="op-type" value="add" checked disabled> إضافة رصيد للمستقبل</label>
+                        <label class="radio-label"><input type="radio" name="op-type" value="deduct" disabled> خصم رصيد من الحساب</label>
+                    </div>
+                </div>
+                
+                <button class="btn-submit" id="btn-transfer" onclick="executeAdminTransfer()" disabled style="opacity: 0.5; cursor: not-allowed;">تنفيذ العملية الفورية</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getFirestore, collection, doc, onSnapshot, updateDoc, runTransaction, addDoc, query, where, orderBy, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCa3nVSth5Jhhuhvblw23w0uxzR1VJHLOo",
+            authDomain: "yaqoout-b4c83.firebaseapp.com",
+            projectId: "yaqoout-b4c83",
+            storageBucket: "yaqoout-b4c83.firebasestorage.app",
+            messagingSenderId: "21558070357",
+            appId: "1:21558070357:web:6237dcf59b162b5dae18dc"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        window.showAdminToast = function(message, type = "success") {
+            const toast = document.getElementById("custom-toast");
+            if (toast) {
+                toast.innerText = message;
+                toast.className = "show " + type;
+                setTimeout(() => { toast.className = ""; }, 4000);
+            } else {
+                alert(message);
+            }
+        };
+
+        window.switchSection = function(sectionId, element) {
+            document.querySelectorAll('.section-content').forEach(sec => sec.classList.remove('active'));
+            document.querySelectorAll('.menu-card').forEach(card => card.classList.remove('active'));
+            document.getElementById(sectionId).classList.add('active');
+            element.classList.add('active');
+        };
+
+        // دالة مخصصة لجلب بيانات المستخدم وتوزيعها على الكارت حسب النوع (سحب أو إيداع)
+        async function fetchAndEmbedUserData(userId, cardId, requestType) {
+            try {
+                const userSnap = await getDoc(doc(db, "users", userId));
+                const extraInfoBox = document.getElementById(`extra-info-${requestType}-${cardId}`);
+                const avatarImg = document.getElementById(`avatar-${requestType}-${cardId}`);
+                
+                if (userSnap.exists()) {
+                    const uData = userSnap.data();
+                    
+                    // تحديث الصورة
+                    if (avatarImg && uData.photoURL) {
+                        avatarImg.src = uData.photoURL;
+                    }
+
+                    // تحديث البيانات الحية
+                    if (extraInfoBox) {
+                        const vipLevel = uData.activeVipId && uData.activeVipId > 0 ? `VIP ${uData.activeVipId}` : 'مستخدم عادي';
+                        const currentBalance = parseFloat(uData.balance || 0).toFixed(2);
+                        const currentProfits = parseFloat(uData.totalTeamRewards || uData.totalEarnings || 0).toFixed(2);
+
+                        extraInfoBox.innerHTML = `
+                            <div class="request-row"><span class="label">الباقة الحالية (VIP)</span><span class="val" style="color:#fcd535; font-weight:bold;">${vipLevel}</span></div>
+                            <div class="request-row"><span class="label">رصيد الحساب المتوفر (قبل العملية)</span><span class="val" style="color:#0ecb81; font-weight:bold;">${currentBalance} USDT</span></div>
+                            <div class="request-row"><span class="label">الأرباح المتوفرة للمستخدم</span><span class="val" style="color:#0ecb81">${currentProfits} USDT</span></div>
+                        `;
+                    }
+                } else {
+                    if (extraInfoBox) extraInfoBox.innerHTML = `<div class="request-row"><span class="label" style="color:#d84545;">⚠️ لم يتم العثور على بيانات الحساب</span></div>`;
+                }
+            } catch (err) {
+                console.error("خطأ أثناء جلب بيانات المستخدم المدمجة:", err);
+            }
+        }
+
+        // ==========================================
+        // 1. نظام إدارة السحوبات (الآن مع البيانات الحية)
+        // ==========================================
+        const withdrawQuery = query(collection(db, "withdraws"), where("status", "==", "pending"), orderBy("timestamp", "desc"));
+        onSnapshot(withdrawQuery, (snapshot) => {
+            const withdrawList = document.getElementById("withdraw-list");
+            withdrawList.innerHTML = "";
+            if(snapshot.empty) {
+                withdrawList.innerHTML = `<div class="empty-message">لا توجد طلبات سحب معلقة حالياً 🎉</div>`;
+                return;
+            }
+            snapshot.forEach((docSnap) => {
+                const data = docSnap.data();
+                const id = docSnap.id;
+                const time = data.timestamp ? new Date(data.timestamp.seconds * 1000).toLocaleString('ar-EG') : 'قيد المعالجة';
+                
+                withdrawList.innerHTML += `
+                    <div class="request-card" style="border-right-color: #fcd535;">
+                        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px; border-bottom: 1px solid #333b45; padding-bottom: 8px;">
+                            <img id="avatar-withdraw-${id}" src="https://cdn-icons-png.flaticon.com/512/4140/4140047.png" style="width: 42px; height: 42px; border-radius: 50%; object-fit: cover; border: 1px solid #333b45;">
+                            <div>
+                                <div style="font-size: 13px; font-weight: bold; color: #ffffff;">${data.userEmail || 'بدون إيميل'}</div>
+<div style="font-size: 11px; color: #848e9c; direction: ltr; display: flex; justify-content: flex-end; align-items: center; gap: 8px;">
+    <span>ID: ${data.userId}</span>
+    <i class="fa-regular fa-copy" 
+       style="color: #fcd535; font-size: 14px; cursor: pointer; transition: 0.2s;" 
+       onclick="copyUserId('${data.userId}')" 
+       title="نسخ الآيدي"></i>
+</div>                            </div>
+                        </div>
+
+                        <div class="extra-data-box" id="extra-info-withdraw-${id}">
+                            <div class="request-row"><span class="label" style="color:#848e9c; font-size:11px;"><i class="fa-solid fa-spinner fa-spin"></i> جاري جلب الرصيد والباقة...</span></div>
+                        </div>
+<div class="request-row"><span class="label">الشبكة المطلوبة</span><span class="val" style="color:#fcd535; font-weight:bold; font-size:14px;">${data.network || 'USDT'}</span></div>
+                        <div class="request-row"><span class="label">المبلغ المطلوب سحبه</span><span class="val" style="color:#d84545; font-weight:bold; font-size:15px;">${data.amount} USDT</span></div>
+                        <div class="request-row"><span class="label">الصافي الذي يجب دفعه للمستخدم</span><span class="val" style="color:#fcd535; font-size: 15px;">${data.netAmount || data.amount} USDT</span></div>
+                        <div class="request-row">
+    <span class="label">عنوان المحفظة</span>
+    <span class="val" style="color:#0ecb81; font-size:11px; display: flex; align-items: center; gap: 8px; direction: ltr;">
+        ${data.address}
+        <i class="fa-regular fa-copy" 
+           style="color: #fcd535; font-size: 14px; cursor: pointer; padding: 2px;" 
+           onclick="copyAddress('${data.address}')" 
+           title="نسخ عنوان المحفظة"></i>
+    </span>
+</div>
+                        <div class="request-row"><span class="label">تاريخ الطلب</span><span class="val">${time}</span></div>
+                        
+                        <div class="action-buttons">
+                            <button class="btn btn-approve" onclick="manageWithdraw('${id}', '${data.userId}', ${data.amount}, 'approve')">تأكيد الدفع</button>
+                            <button class="btn btn-reject" onclick="manageWithdraw('${id}', '${data.userId}', ${data.amount}, 'reject')">رفض وإرجاع الرصيد</button>
+                        </div>
+                    </div>
+                `;
+
+                // تشغيل الجلب التلقائي لمعلومات السحب
+                fetchAndEmbedUserData(data.userId, id, 'withdraw');
+            });
+        });
+
+        window.manageWithdraw = async function(reqId, userId, amount, action) {
+            if(!confirm("هل أنت متأكد من اتخاذ هذا الإجراء؟")) return;
+            try {
+                if(action === "approve") {
+                    await updateDoc(doc(db, "withdraws", reqId), { status: "approved" });
+                    showAdminToast("تمت الموافقة على طلب السحب. (المستخدم تم إشعاره)", "success");
+                } else if(action === "reject") {
+                    const userRef = doc(db, "users", userId);
+                    await runTransaction(db, async (transaction) => {
+                        const userDoc = await transaction.get(userRef);
+                        if (!userDoc.exists()) throw "المستخدم غير موجود لإعادة المال!";
+                        let currentBal = parseFloat(userDoc.data().balance || 0);
+                        transaction.update(userRef, { balance: currentBal + amount });
+                    });
+                    await updateDoc(doc(db, "withdraws", reqId), { status: "rejected" });
+                    showAdminToast("تم رفض الطلب وإعادة المبلغ لحساب المستخدم بأمان", "error");
+                }
+            } catch (err) {
+                showAdminToast("حدث خطأ: " + err, "error");
+            }
+        };
+
+        // ==========================================
+        // 2. نظام إدارة الإيداعات (مع البيانات الحية)
+        // ==========================================
+        const depositQuery = query(collection(db, "deposits"), where("status", "==", "pending"), orderBy("timestamp", "desc"));
+        onSnapshot(depositQuery, (snapshot) => {
+            const depositList = document.getElementById("deposit-list");
+            depositList.innerHTML = "";
+            if(snapshot.empty) {
+                depositList.innerHTML = `<div class="empty-message">لا توجد طلبات إيداع معلقة حالياً 🎉</div>`;
+                return;
+            }
+            snapshot.forEach((docSnap) => {
+                const data = docSnap.data();
+                const id = docSnap.id;
+                const time = data.timestamp ? new Date(data.timestamp.seconds * 1000).toLocaleString('ar-EG') : 'قيد المعالجة';
+                
+                const imageHtml = data.screenshotUrl 
+                    ? `<div class="request-row" style="flex-direction: column; align-items: center; border-bottom: none; background: #141517; padding: 10px; border-radius: 6px; margin: 10px 0;">
+                           <span class="label" style="margin-bottom: 8px; font-weight:bold;">إيصال التحويل (اضغط للتكبير)</span>
+                           <a href="${data.screenshotUrl}" target="_blank">
+                               <img src="${data.screenshotUrl}" alt="الإيصال" style="max-width: 100%; max-height: 160px; border-radius: 6px; object-fit: contain; border: 1px solid #333b45;">
+                           </a>
+                       </div>`
+                    : `<div class="request-row" style="justify-content: center;"><span class="label" style="color:#d84545;">⚠️ لا توجد صورة مرفقة</span></div>`;
+
+                depositList.innerHTML += `
+                    <div class="request-card" style="border-right-color: #0ecb81;">
+                        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px; border-bottom: 1px solid #333b45; padding-bottom: 8px;">
+                            <img id="avatar-deposit-${id}" src="https://cdn-icons-png.flaticon.com/512/4140/4140047.png" style="width: 42px; height: 42px; border-radius: 50%; object-fit: cover; border: 1px solid #333b45;">
+                            <div>
+                                <div style="font-size: 13px; font-weight: bold; color: #ffffff;">${data.userEmail || 'بدون إيميل'}</div>
+<div style="font-size: 11px; color: #848e9c; direction: ltr; display: flex; justify-content: flex-end; align-items: center; gap: 8px;">
+    <span>ID: ${data.userId}</span>
+    <i class="fa-regular fa-copy" 
+       style="color: #fcd535; font-size: 14px; cursor: pointer; transition: 0.2s;" 
+       onclick="copyUserId('${data.userId}')" 
+       title="نسخ الآيدي"></i>
+</div>                            </div>
+                        </div>
+
+                        <div class="extra-data-box" id="extra-info-deposit-${id}">
+                            <div class="request-row"><span class="label" style="color:#848e9c; font-size:11px;"><i class="fa-solid fa-spinner fa-spin"></i> جاري جلب الرصيد والباقة...</span></div>
+                        </div>
+
+                        <div class="request-row"><span class="label">طريقة الإيداع المستخدمة</span><span class="val" style="color:#fcd535; font-weight:bold;">${data.method || data.paymentMethod || 'غير محددة'}</span></div>
+                        <div class="request-row"><span class="label">الرصيد المطلوب إيداعه</span><span class="val" style="color:#0ecb81; font-size:16px; font-weight:bold;">${data.amount} USDT</span></div>
+                        
+                        ${imageHtml}
+                        <div class="request-row"><span class="label">تاريخ العملية</span><span class="val">${time}</span></div>
+                        
+                        <div class="action-buttons">
+                            <button class="btn btn-approve" onclick="manageDeposit('${id}', '${data.userId}', ${data.amount}, 'approve')">تأكيد وشحن الرصيد</button>
+                            <button class="btn btn-reject" onclick="manageDeposit('${id}', '${data.userId}', ${data.amount}, 'reject')">إلغاء ورفض الإيداع</button>
+                        </div>
+                    </div>
+                `;
+
+                // تشغيل الجلب التلقائي لمعلومات الإيداع
+                fetchAndEmbedUserData(data.userId, id, 'deposit');
+            });
+        });
+
+        window.manageDeposit = async function(reqId, userId, amount, action) {
+            if(!confirm("هل أنت متأكد من معالجة إيداع هذا العميل؟")) return;
+            try {
+                if(action === "approve") {
+                    const userRef = doc(db, "users", userId);
+                    await runTransaction(db, async (transaction) => {
+                        const userDoc = await transaction.get(userRef);
+                        if (!userDoc.exists()) throw "المستخدم غير موجود بالنظام!";
+                        let currentBal = parseFloat(userDoc.data().balance || 0); 
+                        transaction.update(userRef, { balance: currentBal + amount });
+                    });
+                    await updateDoc(doc(db, "deposits", reqId), { status: "approved" });
+                    showAdminToast("تم شحن رصيد المستخدم بنجاح! (تم إشعاره)", "success");
+                } else if(action === "reject") {
+                    await updateDoc(doc(db, "deposits", reqId), { status: "rejected" });
+                    showAdminToast("تم رفض وإلغاء طلب الإيداع", "error");
+                }
+            } catch (err) {
+                showAdminToast("حدث خطأ: " + err, "error");
+            }
+        };
+
+        // ==========================================
+        // 3. سجل العمليات المكتملة
+        // ==========================================
+        const historyQuery = query(collection(db, "withdraws"), where("status", "in", ["approved", "rejected"]), orderBy("timestamp", "desc"));
+        onSnapshot(historyQuery, (snapshot) => {
+            const historyList = document.getElementById("history-list");
+            if(snapshot.empty) return;
+            historyList.innerHTML = "";
+            snapshot.forEach((docSnap) => {
+                const data = docSnap.data();
+                const statusClass = data.status === "approved" ? "approved" : "rejected";
+                const statusText = data.status === "approved" ? "مقبول ومكتمل" : "مرفوض وملغى";
+                
+                historyList.innerHTML += `
+                    <div class="request-card" style="border-right-color: #333b45; opacity:0.8;">
+                        <div class="request-row"><span class="label">الحالة</span><span class="badge ${statusClass}">${statusText}</span></div>
+<div class="request-row">
+    <span class="label">آيدي المستخدم</span>
+    <span class="val" style="display: flex; align-items: center; gap: 8px;">
+        ${data.userId}
+        <i class="fa-regular fa-copy" 
+           style="color: #fcd535; font-size: 14px; cursor: pointer;" 
+           onclick="copyUserId('${data.userId}')" 
+           title="نسخ الآيدي"></i>
+    </span>
+</div>                        <div class="request-row"><span class="label">المبلغ</span><span class="val">${data.amount} USDT</span></div>
+                    </div>
+                `;
+            });
+        });
+        // ==========================================
+        // 4. فحص الحساب والتحويل المباشر
+        // ==========================================
+        
+        // دالة لإعادة قفل الأزرار عند تغيير الـ ID (للحماية)
+        window.resetTransferForm = function() {
+            document.getElementById("user-info-preview").style.display = "none";
+            document.getElementById("transfer-amount").disabled = true;
+            document.querySelectorAll('input[name="op-type"]').forEach(r => r.disabled = true);
+            const btn = document.getElementById("btn-transfer");
+            btn.disabled = true;
+            btn.style.opacity = "0.5";
+            btn.style.cursor = "not-allowed";
+        };
+
+        // دالة فحص وجلب بيانات المستخدم قبل التحويل
+        window.checkUserBeforeTransfer = async function() {
+            const targetUid = document.getElementById("target-uid").value.trim();
+            if(!targetUid) return showAdminToast("يرجى إدخال الـ User ID أولاً", "error");
+
+            const previewDiv = document.getElementById("user-info-preview");
+            previewDiv.style.display = "block";
+            previewDiv.innerHTML = `<div style="text-align:center; color:#848e9c;"><i class="fa-solid fa-spinner fa-spin"></i> جاري البحث عن بيانات المستخدم...</div>`;
+
+            try {
+                const userRef = doc(db, "users", targetUid);
+                const userSnap = await getDoc(userRef);
+
+                if(userSnap.exists()) {
+                    const uData = userSnap.data();
+                    const email = uData.email || uData.userEmail || "مستخدم بدون إيميل";
+                    const currentBal = parseFloat(uData.balance || 0).toFixed(2);
+                    const vipLevel = uData.activeVipId && uData.activeVipId > 0 ? `VIP ${uData.activeVipId}` : 'مستخدم عادي';
+                    const avatar = uData.photoURL || "https://cdn-icons-png.flaticon.com/512/4140/4140047.png";
+
+                    previewDiv.innerHTML = `
+                        <div style="display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #333b45; padding-bottom: 10px; margin-bottom: 10px;">
+                            <img src="${avatar}" style="width: 45px; height: 45px; border-radius: 50%; border: 1px solid #fcd535; object-fit: cover;">
+                            <div>
+                                <div style="color: #ffffff; font-weight: bold; font-size: 14px;">${email}</div>
+                                <div style="color: #fcd535; font-size: 12px; margin-top: 3px;">الباقة الحالية: ${vipLevel}</div>
+                            </div>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; font-size: 14px;">
+                            <span style="color: #848e9c;">رصيده المتوفر حالياً:</span>
+                            <span style="color: #0ecb81; font-weight: bold;">${currentBal} USDT</span>
+                        </div>
+                    `;
+
+                    // تفعيل الحقول وزر التحويل بعد التأكد من صحة الحساب
+                    document.getElementById("transfer-amount").disabled = false;
+                    document.querySelectorAll('input[name="op-type"]').forEach(r => r.disabled = false);
+                    const btn = document.getElementById("btn-transfer");
+                    btn.disabled = false;
+                    btn.style.opacity = "1";
+                    btn.style.cursor = "pointer";
+
+                } else {
+                    previewDiv.innerHTML = `<div style="text-align:center; color:#d84545; font-weight:bold;">⚠️ لم يتم العثور على مستخدم بهذا الـ ID!</div>`;
+                    window.resetTransferForm();
+                }
+            } catch(err) {
+                previewDiv.innerHTML = `<div style="text-align:center; color:#d84545;">❌ حدث خطأ أثناء البحث: ${err}</div>`;
+                window.resetTransferForm();
+            }
+        };
+
+       // دالة التنفيذ الفعلي للتحويل (معدلة لتسجيل النشاط)
+        window.executeAdminTransfer = async function() {
+            const targetUid = document.getElementById("target-uid").value.trim();
+            const amountInput = parseFloat(document.getElementById("transfer-amount").value);
+            const opType = document.querySelector('input[name="op-type"]:checked').value;
+            const btn = document.getElementById("btn-transfer");
+
+            if(isNaN(amountInput) || amountInput <= 0) return showAdminToast("يرجى كتابة مبلغ صحيح أكبر من الصفر", "error");
+
+            if(!confirm("هل أنت متأكد من تنفيذ هذه العملية على رصيد المستخدم؟")) return;
+
+            btn.disabled = true;
+            btn.innerText = "جاري تنفيذ العملية الآمنة...";
+
+            try {
+                const userRef = doc(db, "users", targetUid);
+                let userEmail = "غير محدد"; // لحفظ إيميل المستخدم للنشاط
+
+                await runTransaction(db, async (transaction) => {
+                    const userDoc = await transaction.get(userRef);
+                    if(!userDoc.exists()) throw "لم نجد مستخدم مسجل بهذا الـ ID!";
+                    
+                    userEmail = userDoc.data().email || userDoc.data().userEmail || "غير محدد";
+                    let currentBal = parseFloat(userDoc.data().balance || 0); 
+                    
+                    if(opType === "add") {
+                        transaction.update(userRef, { balance: currentBal + amountInput });
+                    } else {
+                        if(currentBal < amountInput) throw` لا يمكن الخصم! رصيد العميل الحالي (${currentBal} $) أقل من المبلغ المطلوب خصمه.`;
+                        transaction.update(userRef, { balance: currentBal - amountInput });
+                    }
+                });
+
+                // --- الإضافة الجديدة: تسجيل العملية في سجل نشاط المستخدم ---
+                if(opType === "add") {
+                    // إذا كانت العملية إضافة، نسجلها كإيداع (مكافأة)
+                    await addDoc(collection(db, "deposits"), {
+                        userId: targetUid,
+                        userEmail: userEmail,
+                        amount: amountInput,
+                        status: "approved",
+                        method: "مكافأة إدارية", // هذا النوع راح نستخدمه حتى نظهر أيقونة هدية للمستخدم
+                        timestamp: new Date(),
+                        type: "admin_gift" // تمييز العملية كهدية من الإدارة
+                    });
+                } else {
+                    // إذا كانت العملية خصم، نسجلها كسحب (خصم إداري)
+                    await addDoc(collection(db, "withdraws"), {
+                        userId: targetUid,
+                        userEmail: userEmail,
+                        amount: amountInput,
+                        status: "approved",
+                        network: "خصم إداري", 
+                        netAmount: amountInput,
+                        timestamp: new Date(),
+                        type: "admin_deduction"
+                    });
+                }
+                // --------------------------------------------------------
+
+                showAdminToast("تم تنفيذ العملية بنجاح! الرصيد تغير وتم إشعار العميل.", "success");
+                
+                // تصفير الحقول بعد نجاح العملية
+                document.getElementById("target-uid").value = "";
+                document.getElementById("transfer-amount").value = "";
+                window.resetTransferForm();
+                document.getElementById("user-info-preview").style.display = "none";
+                btn.innerText = "تنفيذ العملية الفورية";
+
+            } catch(err) {
+                showAdminToast("❌ فشل التحويل: " + err, "error");
+                btn.disabled = false;
+                btn.innerText = "تنفيذ العملية الفورية";
+            }
+        };
+// دالة نسخ الآيدي
+        window.copyUserId = function(uid) {
+            navigator.clipboard.writeText(uid).then(() => {
+                showAdminToast("تم نسخ الآيدي بنجاح!", "success");
+            }).catch(err => {
+                showAdminToast("❌ فشل النسخ، يرجى التحديد والنسخ يدوياً.", "error");
+            });
+        };
+        // دالة نسخ عنوان المحفظة
+        window.copyAddress = function(address) {
+            navigator.clipboard.writeText(address).then(() => {
+                showAdminToast("تم نسخ عنوان المحفظة بنجاح! 💸", "success");
+            }).catch(err => {
+                showAdminToast("❌ فشل النسخ، يرجى النسخ يدوياً.", "error");
+            });
+        };
+
+    </script>
+</body>
+</html>
+

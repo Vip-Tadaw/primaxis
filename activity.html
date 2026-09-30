@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" id="html-root">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-ar="Tadawulx - الإشعارات" data-en="Tadawulx - Activity & Notifications">Tadawulx - النشاط والإشعارات</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #000000; color: #ffffff; display: flex; justify-content: center; min-height: 100vh; user-select: none; }
+        .app-container { width: 100%; max-width: 400px; background-color: #000000; position: relative; display: flex; flex-direction: column; padding-bottom: 30px; }
+        
+        /* الهيدر العلوي */
+        .top-header { display: flex; justify-content: space-between; align-items: center; padding: 20px; font-size: 16px; font-weight: bold; border-bottom: 1px solid #1e2329; background-color: #141517; position: sticky; top: 0; z-index: 10; }
+        .top-header i { cursor: pointer; font-size: 18px; }
+        html[dir="ltr"] .top-header i { transform: rotate(180deg); }
+
+        /* حاوية الإشعارات والأنشطة */
+        .notifications-container { padding: 15px; display: flex; flex-direction: column; gap: 12px; }
+
+        /* الكارت الموحد للإشعار */
+        .notification-card { background-color: #141517; border: 1px solid #1e2329; border-radius: 12px; padding: 15px; display: flex; gap: 15px; align-items: flex-start; transition: transform 0.2s; }
+
+        /* تصميم الدائرة الملونة للأيقونات */
+        .notif-icon-box { width: 40px; height: 40px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 16px; flex-shrink: 0; }
+
+        /* محتوى تفاصيل الإشعار */
+        .notif-details { display: flex; flex-direction: column; gap: 5px; width: 100%; }
+        .notif-header { display: flex; justify-content: space-between; align-items: center; }
+        .notif-title { font-size: 14px; font-weight: bold; color: #ffffff; }
+
+        /* الألوان الخاصة بكل حالة للطلبات */
+        .status-badge { font-size: 11px; padding: 2px 8px; border-radius: 4px; font-weight: bold; }
+        .status-success { background-color: rgba(14, 203, 129, 0.15); color: #0ecb81; }
+        .status-pending { background-color: rgba(252, 213, 53, 0.15); color: #fcd535; }
+        .status-rejected { background-color: rgba(246, 70, 93, 0.15); color: #f6465d; }
+
+        .notif-message { font-size: 13px; color: #848e9c; line-height: 1.5; }
+        .notif-time { font-size: 11px; color: #5e6673; display: flex; align-items: center; gap: 5px; margin-top: 2px; }
+
+        /* واجهة فارغ */
+        .empty-state { display: none; flex-direction: column; align-items: center; justify-content: center; padding: 80px 0; color: #848e9c; font-size: 14px; }
+        .empty-state img { width: 70px; opacity: 0.5; margin-bottom: 15px; }
+        
+        /* مؤشر التحميل */
+        .loading-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 50px 0; color: #fcd535; font-size: 14px; }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div class="top-header">
+            <i class="fa-solid fa-chevron-right" onclick="history.back()"></i>
+            <span data-ar="مركز الأنشطة والإشعارات" data-en="Activity & Notification Center">مركز الأنشطة والإشعارات</span>
+            <div></div>
+        </div>
+
+        <div class="loading-state" id="loading-activities">
+            <i class="fa-solid fa-spinner fa-spin" style="font-size: 24px; margin-bottom: 10px;"></i>
+            <span data-ar="جاري المزامنة مع الخادم..." data-en="Syncing with server...">جاري المزامنة مع الخادم...</span>
+        </div>
+
+        <div class="notifications-container" id="notifications-list" style="display: none;"></div>
+
+        <div class="empty-state" id="empty-activities">
+            <img src="https://cdn-icons-png.flaticon.com/512/7486/7486744.png" alt="Empty">
+            <span data-ar="لا توجد أنشطة أو إشعارات حالياً" data-en="No activities or notifications currently">لا توجد أنشطة أو إشعارات حالياً</span>
+        </div>
+    </div>
+
+   <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+        import { getFirestore, collection, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCa3nVSth5Jhhuhvblw23w0uxzR1VJHLOo",
+            authDomain: "yaqoout-b4c83.firebaseapp.com",
+            projectId: "yaqoout-b4c83",
+            storageBucket: "yaqoout-b4c83.firebasestorage.app",
+            messagingSenderId: "21558070357",
+            appId: "1:21558070357:web:6237dcf59b162b5dae18dc"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let allUserActivities = []; 
+        let depositsLoaded = false;
+        let withdrawsLoaded = false;
+        let transactionsLoaded = false;
+
+        // دالة عرض وتحديث الواجهة
+        function renderActivities() {
+            const container = document.getElementById('notifications-list');
+            const emptyView = document.getElementById('empty-activities');
+            const loadingView = document.getElementById('loading-activities');
+
+            // ترتيب العمليات من الأحدث للأقدم
+            allUserActivities.sort((a, b) => b.sortTime - a.sortTime);
+
+            loadingView.style.display = 'none';
+            container.innerHTML = "";
+
+            if (allUserActivities.length === 0) {
+                emptyView.style.display = 'flex';
+                container.style.display = 'none';
+                if (window.updateLanguage) window.updateLanguage();
+                return;
+            }
+
+            emptyView.style.display = 'none';
+            container.style.display = 'flex';
+
+            const lang = localStorage.getItem('selectedLanguage') || 'ar';
+            const locale = lang === 'ar' ? 'ar-EG' : 'en-US';
+
+            allUserActivities.forEach(item => {
+                let card = document.createElement('div');
+                card.className = 'notification-card';
+                
+                let iconClass = "fa-solid fa-bell";
+                let iconBg = "rgba(255, 255, 255, 0.1)";
+                let iconColor = "#ffffff";
+                let badgeClass = "status-pending";
+                
+                if (item.status === 'approved') {
+                    if (item.subType === 'admin_gift') {
+                        iconClass = "fa-solid fa-gift";
+                        iconColor = "#fcd535";
+                        iconBg = "rgba(252, 213, 53, 0.15)";
+                        badgeClass = "status-success";
+                    } else if (item.subType === 'admin_deduction') {
+                        iconClass = "fa-solid fa-triangle-exclamation";
+                        iconColor = "#f6465d";
+                        iconBg = "rgba(246, 70, 93, 0.15)";
+                        badgeClass = "status-rejected";
+                    } else if (item.type === 'team_reward') {
+                        iconClass = "fa-solid fa-users";
+                        iconColor = "#00f646";
+                        iconBg = "rgba(0, 246, 70, 0.15)";
+                        badgeClass = "status-success";
+                    } else {
+                        iconClass = item.type === 'deposit' ? "fa-solid fa-wallet" : "fa-solid fa-money-bill-transfer";
+                        iconColor = "#0ecb81";
+                        iconBg = "rgba(14, 203, 129, 0.1)";
+                        badgeClass = "status-success";
+                    }
+                } else if (item.status === 'pending') {
+                    iconClass = "fa-solid fa-clock";
+                    iconColor = "#fcd535";
+                    iconBg = "rgba(252, 213, 53, 0.1)";
+                    badgeClass = "status-pending";
+                } else if (item.status === 'rejected') {
+                    iconClass = "fa-solid fa-circle-xmark";
+                    iconColor = "#f6465d";
+                    iconBg = "rgba(246, 70, 93, 0.1)";
+                    badgeClass = "status-rejected";
+                }
+
+                const displayTime = item.dateObj.toLocaleString(locale, {hour12: true, hour: '2-digit', minute:'2-digit', year:'numeric', month:'2-digit', day:'2-digit'});
+
+                card.innerHTML = `
+                    <div class="notif-icon-box" style="background-color: ${iconBg}; color: ${iconColor};">
+                        <i class="${iconClass}"></i>
+                    </div>
+                    <div class="notif-details">
+                        <div class="notif-header">
+                            <span class="notif-title" data-ar="${item.titleAr}" data-en="${item.titleEn}">${item.titleAr}</span>
+                            <span class="status-badge ${badgeClass}" data-ar="${item.statusTextAr}" data-en="${item.statusTextEn}">${item.statusTextAr}</span>
+                        </div>
+                        <span class="notif-message" data-ar="${item.messageAr}" data-en="${item.messageEn}">${item.messageAr}</span>
+                        <div class="notif-time">
+                            <i class="fa-regular fa-clock"></i>
+                            <span style="direction: ltr;">${displayTime}</span>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+
+            if (window.updateLanguage) window.updateLanguage();
+        }
+
+        // الاستماع لحالة الدخول وجلب البيانات الحقيقية
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // 1. جلب الإيداعات
+                const qDep = query(collection(db, "deposits"), where("userId", "==", user.uid));
+                onSnapshot(qDep, (snapshot) => {
+                    allUserActivities = allUserActivities.filter(a => a.type !== 'deposit');
+                    
+                    snapshot.forEach((docSnap) => {
+                        let data = docSnap.data();
+                        let timeObj = data.timestamp ? new Date(data.timestamp.seconds * 1000) : new Date();
+                        
+                        let titleAr = "طلب إيداع رصيد";
+                        let titleEn = "Deposit Request";
+                        let statusAr = "قيد المعالجة";
+                        let statusEn = "Pending";
+                        let msgAr = `جاري مراجعة طلب إيداعك بقيمة ${data.amount} USDT من قبل النظام.`;
+                        let msgEn = `Your deposit request of ${data.amount} USDT is being reviewed by system.`;
+                        
+                        if(data.status === 'approved') {
+                            if (data.type === 'admin_gift') {
+                                titleAr = "مكافأة من الإدارة 🎁"; 
+                                titleEn = "Admin Reward 🎁";
+                                statusAr = "مكتمل";
+                                statusEn = "Completed";
+                                msgAr = `تهانينا! لقد تلقيت مكافأة مباشرة من الإدارة بقيمة ${data.amount} USDT في حسابك.`;
+                                msgEn = `Congratulations! You received a direct reward of ${data.amount} USDT from admin.`;
+                            } else {
+                                titleAr = "إيداع مكتمل"; 
+                                titleEn = "Deposit Completed";
+                                statusAr = "مكتمل";
+                                statusEn = "Completed";
+                                msgAr = `تم تأكيد عملية شحن حسابك بمبلغ ${data.amount} USDT بنجاح.`;
+                                msgEn = `Your account top-up of ${data.amount} USDT was confirmed successfully.`;
+                            }
+                        } else if(data.status === 'rejected') {
+                            titleAr = "إيداع مرفوض"; 
+                            titleEn = "Deposit Rejected";
+                            statusAr = "مرفوض";
+                            statusEn = "Rejected";
+                            msgAr = `تم رفض طلب الإيداع بقيمة ${data.amount} USDT، يرجى مراجعة الدعم.`;
+                            msgEn = `Your deposit request of ${data.amount} USDT was rejected. Please contact support.`;
+                        }
+
+                        allUserActivities.push({
+                            id: docSnap.id,
+                            type: 'deposit',
+                            subType: data.type || '',
+                            amount: data.amount,
+                            status: data.status,
+                            titleAr: titleAr,
+                            titleEn: titleEn,
+                            statusTextAr: statusAr,
+                            statusTextEn: statusEn,
+                            messageAr: msgAr,
+                            messageEn: msgEn,
+                            sortTime: timeObj.getTime(),
+                            dateObj: timeObj
+                        });
+                    });
+                    depositsLoaded = true;
+                    if(withdrawsLoaded && transactionsLoaded) renderActivities();
+                });
+
+                // 2. جلب السحوبات
+                const qWith = query(collection(db, "withdraws"), where("userId", "==", user.uid));
+                onSnapshot(qWith, (snapshot) => {
+                    allUserActivities = allUserActivities.filter(a => a.type !== 'withdraw');
+                    
+                    snapshot.forEach((docSnap) => {
+                        let data = docSnap.data();
+                        let timeObj = data.timestamp ? new Date(data.timestamp.seconds * 1000) : new Date();
+                        
+                        let titleAr = "طلب سحب رصيد";
+                        let titleEn = "Withdrawal Request";
+                        let statusAr = "قيد المعالجة";
+                        let statusEn = "Pending";
+                        let msgAr = `جاري مراجعة طلب السحب الخاص بك بقيمة ${data.amount} USDT.`;
+                        let msgEn = `Your withdrawal request of ${data.amount} USDT is under review.`;
+                        
+                        if(data.status === 'approved') {
+                            if (data.type === 'admin_deduction') {
+                                titleAr = "خصم إداري ⚠️"; 
+                                titleEn = "Admin Deduction ⚠️";
+                                statusAr = "مكتمل";
+                                statusEn = "Completed";
+                                msgAr = `تم إجراء خصم إداري من رصيد حسابك بقيمة ${data.amount} USDT.`;
+                                msgEn = `An admin deduction of ${data.amount} USDT was processed from your balance.`;
+                            } else {
+                                titleAr = "سحب مكتمل"; 
+                                titleEn = "Withdrawal Completed";
+                                statusAr = "مكتمل";
+                                statusEn = "Completed";
+                                msgAr = `تمت الموافقة بنجاح على تحويل مبلغ ${data.amount} USDT إلى محفظتك.`;
+                                msgEn = `Transfer of ${data.amount} USDT to your wallet has been approved.`;
+                            }
+                        } else if(data.status === 'rejected') {
+                            titleAr = "سحب مرفوض"; 
+                            titleEn = "Withdrawal Rejected";
+                            statusAr = "مرفوض";
+                            statusEn = "Rejected";
+                            msgAr = `تم رفض طلب سحب بقيمة ${data.amount} USDT، وتم إعادة الرصيد لحسابك.`;
+                            msgEn = `Withdrawal request of ${data.amount} USDT was rejected, balance refunded to account.`;
+                        }
+
+                        allUserActivities.push({
+                            id: docSnap.id,
+                            type: 'withdraw',
+                            subType: data.type || '',
+                            amount: data.amount,
+                            status: data.status,
+                            titleAr: titleAr,
+                            titleEn: titleEn,
+                            statusTextAr: statusAr,
+                            statusTextEn: statusEn,
+                            messageAr: msgAr,
+                            messageEn: msgEn,
+                            sortTime: timeObj.getTime(),
+                            dateObj: timeObj
+                        });
+                    });
+                    withdrawsLoaded = true;
+                    if(depositsLoaded && transactionsLoaded) renderActivities();
+                });
+
+                // 3. جلب أرباح الفريق والمكافآت
+                const qTrans = query(collection(db, "transactions"), where("userId", "==", user.uid));
+                onSnapshot(qTrans, (snapshot) => {
+                    allUserActivities = allUserActivities.filter(a => a.type !== 'team_reward');
+                    
+                    snapshot.forEach((docSnap) => {
+                        let data = docSnap.data();
+                        let timeObj = data.createdAt ? new Date(data.createdAt.seconds * 1000) : new Date();
+                        
+                        allUserActivities.push({
+                            id: docSnap.id,
+                            type: 'team_reward',
+                            subType: data.type || '',
+                            amount: data.amount,
+                            status: 'approved',
+                            titleAr: "مكافأة فريق 💸",
+                            titleEn: "Team Reward 💸",
+                            statusTextAr: "مكتمل",
+                            statusTextEn: "Completed",
+                            messageAr: data.description || `حصلت على عمولة بقيمة ${data.amount} USDT.`,
+                            messageEn: data.descriptionEn || `You received a commission of ${data.amount} USDT.`,
+                            sortTime: timeObj.getTime(),
+                            dateObj: timeObj
+                        });
+                    });
+                    transactionsLoaded = true;
+                    if(depositsLoaded && withdrawsLoaded) renderActivities();
+                });
+
+            } else {
+                document.getElementById('loading-activities').style.display = 'none';
+                document.getElementById('empty-activities').style.display = 'flex';
+                if (window.updateLanguage) window.updateLanguage();
+            }
+        });
+</script>
+
+<!-- استدعاء ملف اللغة الخارجي -->
+<script src="language.js"></script>
+
+</body>
+</html>

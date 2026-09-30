@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" id="html-root">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-ar="Primaxis - الجيل الجديد من الاستثمار الذكي" data-en="Primaxis - Next-Gen Smart Investing">Primaxis - الجيل الجديد من الاستثمار الذكي</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* الإعدادات الأساسية والخلفية */
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Tajawal', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #000000;
+            color: #ffffff;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+            user-select: none;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 420px;
+            background-color: #0b0e11;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            padding-bottom: 40px;
+            min-height: 100vh;
+        }
+
+        /* الهيدر العلوي */
+        .top-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 18px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            background-color: #12161c;
+            border-bottom: 1px solid #1e2329;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        .top-header i { cursor: pointer; font-size: 18px; color: #848e9c; transition: 0.2s; }
+        .top-header i:hover { color: #fcd535; }
+        html[dir="ltr"] .top-header i { transform: rotate(180deg); }
+
+        .help-profile {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .help-profile img {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 1.5px solid #00f2fe;
+            background: #1e2329;
+        }
+
+        /* شارة الدولة والاعتماد */
+        .canada-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(0, 242, 254, 0.3);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            color: #00f2fe;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        /* جسم المقالة */
+        .article-body {
+            padding: 20px;
+            color: #c9d1d9;
+            font-size: 14px;
+            line-height: 1.8;
+        }
+        
+        html[dir="rtl"] .article-body { text-align: right; }
+        html[dir="ltr"] .article-body { text-align: left; }
+
+        .article-body h2 {
+            font-size: 20px;
+            color: #ffffff;
+            margin-top: 5px;
+            line-height: 1.5;
+            font-weight: 800;
+            background: linear-gradient(90deg, #ffffff, #00f2fe);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .article-date {
+            color: #848e9c;
+            font-size: 12px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* بطاقات المميزات الأنيقة */
+        .feature-card {
+            background: #161a1e;
+            border: 1px solid #2b313a;
+            border-radius: 8px;
+            padding: 14px;
+            margin: 12px 0;
+        }
+        .feature-card h4 {
+            margin: 0 0 6px 0;
+            color: #fcd535;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .article-body p {
+            margin-bottom: 18px;
+        }
+        
+        /* الملخص السفلي */
+        .article-summary {
+            background: linear-gradient(135deg, #1e2329 0%, #14181d 100%);
+            padding: 18px;
+            border-radius: 8px;
+            margin-top: 25px;
+            color: #ffffff;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+
+        html[dir="rtl"] .article-summary { border-right: 4px solid #00f2fe; }
+        html[dir="ltr"] .article-summary { border-left: 4px solid #00f2fe; }
+
+        .summary-title {
+            color: #00f2fe;
+            font-weight: bold;
+            font-size: 15px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        
+        <!-- الهيدر العلوي -->
+        <div class="top-header">
+            <i class="fa-solid fa-chevron-right" onclick="history.back()"></i>
+            <div class="help-profile">
+                <img src="https://cdn-icons-png.flaticon.com/512/4140/4140047.png" alt="Primaxis AI">
+                <span data-ar="مركز المعرفة (Primaxis)" data-en="Knowledge Hub (Primaxis)">مركز المعرفة (Primaxis)</span>
+            </div>
+            <div></div> 
+        </div>
+
+        <!-- محتوى المقال -->
+        <div class="article-body">
+            
+            <div class="canada-badge">
+                🇨🇦 <span data-ar="المقر الرئيسي: تورونتو، كندا" data-en="Headquartered in Toronto, Canada">المقر الرئيسي: تورونتو، كندا</span>
+            </div>
+
+            <h2 data-ar="كيف تستغل خوارزميات Primaxis الذكية فروق أسعار الكريبتو لتحقيق عائدات يومية مستقرة؟" 
+                data-en="How Primaxis Smart Algorithms Capitalize on Crypto Price Spreads for Consistent Daily Returns">
+                كيف تستغل خوارزميات Primaxis الذكية فروق أسعار الكريبتو لتحقيق عائدات يومية مستقرة؟
+            </h2>
+            
+            <div class="article-date">
+                <i class="fa-regular fa-calendar"></i>
+                <span>2026/09/30</span>
+            </div>
+            
+            <p>
+                <strong data-ar="مقدمة عن الحقبة الجديدة:" data-en="Introduction to the New Era:">مقدمة عن الحقبة الجديدة:</strong><br>
+                <span data-ar="في ظل التسارع الهائل في سوق العملات الرقمية، أصبحت أساليب التداول التقليدية غير كافية لمواكبة تقلبات السوق. هنا يأتي دور منصة Primaxis المبتكرة، المسجلة والمستقرة في مدينة تورونتو الكندية 🇨🇦. نقدم لكم منظومة تداول كمي فائقة الذكاء تعتمد على خوارزميات التعلم العميق لاقتناص فرقت الأسعار (المراجعة - Arbitrage) بين أكبر المنصات العالمية خلال أجزاء من الثانية."
+                      data-en="With the massive acceleration of the crypto market, traditional trading methods are no longer enough. Enter Primaxis, an innovative platform headquartered in Toronto, Canada 🇨🇦. We offer a ultra-smart quantitative trading ecosystem powered by deep learning algorithms designed to execute arbitrage across global exchanges in milliseconds.">
+                    في ظل التسارع الهائل في سوق العملات الرقمية، أصبحت أساليب التداول التقليدية غير كافية لمواكبة تقلبات السوق. هنا يأتي دور منصة Primaxis المبتكرة، المسجلة والمستقرة في مدينة تورونتو الكندية 🇨🇦. نقدم لكم منظومة تداول كمي فائقة الذكاء تعتمد على خوارزميات التعلم العميق لاقتناص فرقت الأسعار (المراجعة - Arbitrage) بين أكبر المنصات العالمية خلال أجزاء من الثانية.
+                </span>
+            </p>
+
+            <p>
+                <strong data-ar="ما هي استراتيجية المراجعة الذكية (Arbitrage)؟" data-en="What is Smart Arbitrage?">ما هي استراتيجية المراجعة الذكية (Arbitrage)؟</strong><br>
+                <span data-ar="المراجعة هي استراتيجية استثمارية آمنة خالية من المخاطر عالية التقلب؛ حيث تعتمد على شراء العملة الرقمية من منصة تبيع بسعر أقل، وبيعها فوراً في منصة أخرى تعرض سعراً أعلى. روبوتات Primaxis تنفذ هذه العملية آلياً وبدون أي تدخل بشري."
+                      data-en="Arbitrage is a low-risk investment strategy that avoids high volatility. It buys a digital asset on an exchange offering a lower price and instantly sells it on another exchange offering a higher price. Primaxis bots execute this automatically without human intervention.">
+                    المراجعة هي استراتيجية استثمارية آمنة خالية من المخاطر عالية التقلب؛ حيث تعتمد على شراء العملة الرقمية من منصة تبيع بسعر أقل، وبيعها فوراً في منصة أخرى تعرض سعراً أعلى. روبوتات Primaxis تنفذ هذه العملية آلياً وبدون أي تدخل بشري.
+                </span>
+            </p>
+
+            <p>
+                <strong data-ar="لماذا تعتبر Primaxis الخيار الأول للمستثمرين؟" data-en="Why Choose Primaxis?">لماذا تعتبر Primaxis الخيار الأول للمستثمرين؟</strong>
+            </p>
+
+            <div class="feature-card">
+                <h4><i class="fa-solid fa-microchip"></i> <span data-ar="محرك ذكاء اصطناعي كندي متطور" data-en="Advanced Canadian AI Engine">محرك ذكاء اصطناعي كندي متطور</span></h4>
+                <span data-ar="تم تطوير نظام التداول في كندا بأحدث تقنيات المعالجة السحابية، مما يضمن معالجة أكثر من 10,000 صفقة في الثانية بدقة متناهية."
+                      data-en="Engineered in Canada with top-tier cloud technology, processing over 10,000 transactions per second with pinpoint accuracy.">
+                    تم تطوير نظام التداول في كندا بأحدث تقنيات المعالجة السحابية، مما يضمن معالجة أكثر من 10,000 صفقة في الثانية بدقة متناهية.
+                </span>
+            </div>
+
+            <div class="feature-card">
+                <h4><i class="fa-solid fa-shield-halved"></i> <span data-ar="حماية وأمان بمرتبة بنكية" data-en="Bank-Grade Security">حماية وأمان بمرتبة بنكية</span></h4>
+                <span data-ar="نضع أمان أموالك في المقدمة من خلال تشفير البيانات بتقنية 256-bit والاحتفاظ بالسيولة في محافظ باردة موثوقة."
+                      data-en="We prioritize fund safety using 256-bit encryption and securing liquidity in trusted cold wallets.">
+                    نضع أمان أموالك في المقدمة من خلال تشفير البيانات بتقنية 256-bit والاحتفاظ بالسيولة في محافظ باردة موثوقة.
+                </span>
+            </div>
+
+            <div class="feature-card">
+                <h4><i class="fa-solid fa-chart-line"></i> <span data-ar="عائدات يومية تراكمية" data-en="Consistent Daily Returns">عائدات يومية تراكمية</span></h4>
+                <span data-ar="تتيح لك منصتنا متابعة نمو أرباحك لحظة بلحظة مع إمكانية سحب الأرباح بسهولة وسرعة فائقة على مدار 24 ساعة."
+                      data-en="Track your earnings growth in real-time with 24/7 fast and seamless withdrawal access.">
+                    تتيح لك منصتنا متابعة نمو أرباحك لحظة بلحظة مع إمكانية سحب الأرباح بسهولة وسرعة فائقة على مدار 24 ساعة.
+                </span>
+            </div>
+
+            <div class="article-summary">
+                <div class="summary-title">
+                    <i class="fa-solid fa-rocket"></i>
+                    <span data-ar="خلاصة القول:" data-en="In Summary:">خلاصة القول:</span>
+                </div>
+                <span data-ar="مع منصة Primaxis الكندية، لم يعد الاستثمار في الكريبتو محصوراً على المحترفين. نحن نضع بين يديك تقنيات التداول الكمي المتقدمة لتضمن لنفسك دخلاً رقمياً مستقراً وآمناً. انضم اليوم إلى آلاف المستثمرين حول العالم وابدأ رحلتك نحو الاستقلال المالي مع Primaxis."
+                      data-en="With Canada’s Primaxis, crypto investing is no longer restricted to pros. We put advanced quantitative trading tools at your fingertips to secure consistent and safe digital income. Join thousands of investors worldwide today and launch your path to financial freedom with Primaxis.">
+                    مع منصة Primaxis الكندية، لم يعد الاستثمار في الكريبتو محصوراً على المحترفين. نحن نضع بين يديك تقنيات التداول الكمي المتقدمة لتضمن لنفسك دخلاً رقمياً مستقراً وآمناً. انضم اليوم إلى آلاف المستثمرين حول العالم وابدأ رحلتك نحو الاستقلال المالي مع Primaxis.
+                </span>
+            </div>
+
+        </div>
+
+    </div>
+
+<!-- استدعاء ملف اللغة الخارجي -->
+<script src="language.js"></script>
+
+</body>
+</html>

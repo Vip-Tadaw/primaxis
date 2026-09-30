@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html dir="rtl" id="html-root">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Tadawulx</title>
+    
+    <!-- Font Awesome & Tajawal Font -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-color: #08090a;
+            --card-bg: #121316;
+            --card-border: #1e222d;
+            --accent-yellow: #fcd535;
+            --accent-green: #0ecb81;
+            --text-primary: #ffffff;
+            --text-secondary: #848e9c;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Tajawal', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            min-height: 100vh;
+            width: 100%;
+            overflow-x: hidden;
+            user-select: none;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 420px;
+            background-color: var(--bg-color);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            padding: 12px 16px 30px;
+            min-height: 100vh;
+        }
+
+        /* Top Header */
+        .top-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 4px 16px;
+            width: 100%;
+        }
+        .top-header .back-btn {
+            font-size: 18px;
+            color: #fff;
+            cursor: pointer;
+            padding: 4px;
+        }
+        html[dir="ltr"] .back-btn {
+            transform: rotate(180deg);
+        }
+        .top-header .page-title {
+            font-size: 18px;
+            font-weight: 800;
+            text-align: center;
+            flex-grow: 1;
+        }
+        .top-header .header-spacer {
+            width: 18px;
+        }
+
+        /* Hero Banner Card */
+        .hero-banner {
+            background: linear-gradient(135deg, #1d1b18 0%, #111215 100%);
+            border: 1px solid #2e2819;
+            border-radius: 16px;
+            padding: 16px 18px;
+            margin-bottom: 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .hero-content {
+            z-index: 2;
+        }
+        .hero-title-box {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 6px;
+        }
+        .hero-icon {
+            width: 32px;
+            height: 32px;
+            background: rgba(252, 213, 53, 0.15);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent-yellow);
+            font-size: 15px;
+        }
+        .hero-title {
+            font-size: 18px;
+            font-weight: 800;
+            color: #ffffff;
+        }
+        .hero-subtitle {
+            font-size: 12px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+        .hero-subtitle span {
+            color: #ffffff;
+            border-bottom: 2px solid var(--accent-yellow);
+            padding-bottom: 1px;
+        }
+        .hero-illustration {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .crown-graphic {
+            width: 75px;
+            height: 50px;
+            object-fit: contain;
+            filter: drop-shadow(0 4px 10px rgba(252, 213, 53, 0.3));
+        }
+
+        /* Stats 2x2 Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+        .stat-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 10px 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .stat-icon-box {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            flex-shrink: 0;
+        }
+        .stat-icon-box.green { background: rgba(14, 203, 129, 0.15); color: var(--accent-green); }
+        .stat-icon-box.yellow { background: rgba(252, 213, 53, 0.15); color: var(--accent-yellow); }
+        .stat-icon-box.purple { background: rgba(156, 39, 176, 0.15); color: #ab47bc; }
+        .stat-icon-box.blue { background: rgba(33, 150, 243, 0.15); color: #42a5f5; }
+
+        .stat-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            overflow: hidden;
+        }
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 10px;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            overflow: hidden;
+        }
+        .stat-val {
+            font-size: 16px;
+            font-weight: 800;
+            color: #ffffff;
+            direction: ltr;
+            text-align: right;
+        }
+        html[dir="ltr"] .stat-val {
+            text-align: left;
+        }
+        .stat-val.green-text { color: var(--accent-green); }
+
+        /* Tabs Container */
+        .tabs-container {
+            background-color: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            display: flex;
+            padding: 4px;
+            margin-bottom: 16px;
+        }
+        .tab-btn {
+            flex: 1;
+            padding: 10px 4px;
+            border: none;
+            border-radius: 9px;
+            background: none;
+            color: var(--text-secondary);
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+        .tab-btn.active {
+            background-color: var(--accent-yellow);
+            color: #000000;
+        }
+
+        /* Section Sub Header */
+        .section-sub-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding: 0 2px;
+        }
+        .section-title-box {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            font-weight: 700;
+        }
+        .level-dropdown {
+            background-color: var(--card-bg);
+            color: #ffffff;
+            border: 1px solid var(--card-border);
+            padding: 6px 10px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 600;
+            outline: none;
+            cursor: pointer;
+        }
+
+        /* Table Header */
+        .table-header {
+            display: grid;
+            grid-template-columns: 1.3fr 1fr 1.2fr;
+            padding: 8px 8px;
+            margin-bottom: 8px;
+            font-size: 10px;
+            color: var(--text-secondary);
+            text-align: center;
+            align-items: center;
+        }
+        .table-header span {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+
+        /* Members List */
+        .members-list {
+            display: none;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .member-row {
+            display: grid;
+            grid-template-columns: 1.3fr 1fr 1.2fr;
+            background-color: var(--card-bg);
+            border: 1px solid var(--card-border);
+            padding: 10px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            align-items: center;
+            transition: transform 0.15s;
+        }
+        .member-row:active {
+            transform: scale(0.98);
+        }
+
+        /* Account Column */
+        .account-col {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            overflow: hidden;
+        }
+        .account-details {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            overflow: hidden;
+        }
+        .member-id {
+            color: #ffffff;
+            font-weight: 700;
+            font-size: 12px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .member-id i {
+            font-size: 10px;
+            color: var(--text-secondary);
+        }
+        .member-phone {
+            color: var(--text-secondary);
+            font-size: 10px;
+            direction: ltr;
+        }
+
+        /* Degree Column */
+        .degree-col {
+            text-align: center;
+            display: flex;
+            justify-content: center;
+        }
+        .vip-pill {
+            background: rgba(14, 203, 129, 0.12);
+            color: var(--accent-green);
+            border: 1px solid rgba(14, 203, 129, 0.3);
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .vip-pill i {
+            color: var(--accent-yellow);
+            font-size: 9px;
+        }
+        .normal-pill {
+            background: rgba(255, 255, 255, 0.05);
+            color: #848e9c;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: 600;
+        }
+
+        /* Date Column */
+        .date-col {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .date-time-box {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 2px;
+        }
+        .member-date {
+            color: var(--text-secondary);
+            font-size: 10px;
+        }
+        .member-time {
+            color: var(--text-secondary);
+            font-size: 9px;
+        }
+        .row-arrow {
+            color: #474d57;
+            font-size: 10px;
+        }
+        html[dir="ltr"] .row-arrow {
+            transform: rotate(180deg);
+        }
+
+        /* Empty State */
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 0;
+            color: var(--text-secondary);
+            font-size: 13px;
+        }
+        .empty-box {
+            width: 70px;
+            height: 70px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: var(--card-bg);
+            border-radius: 50%;
+        }
+        .empty-box img {
+            width: 40px;
+            opacity: 0.4;
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--accent-green);
+            color: #fff;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            z-index: 2000;
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            opacity: 0;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+        }
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    
+    <!-- Top Header -->
+    <div class="top-header">
+        <i class="fa-solid fa-chevron-right back-btn" onclick="history.back()"></i>
+        <span class="page-title" data-ar="فريق" data-en="Team">فريق</span>
+        <div class="header-spacer"></div>
+    </div>
+
+    <!-- Hero Banner Card -->
+    <div class="hero-banner">
+        <div class="hero-content">
+            <div class="hero-title-box">
+                <div class="hero-icon">
+                    <i class="fa-solid fa-users"></i>
+                </div>
+                <span class="hero-title" data-ar="فريقك" data-en="Your Team">فريقك</span>
+            </div>
+            <div class="hero-subtitle">
+                <span data-ar="معًا" data-en="Together">معًا</span> <span data-ar="نحقق المزيد" data-en="We achieve more">نحقق المزيد</span>
+            </div>
+        </div>
+        <div class="hero-illustration">
+            <svg class="crown-graphic" viewBox="0 0 100 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M50 5L61 25L82 10L75 45H25L18 10L39 25L50 5Z" fill="url(#crown_grad)" stroke="#FFE066" stroke-width="1.5"/>
+                <circle cx="50" cy="5" r="3" fill="#FFF"/>
+                <circle cx="18" cy="10" r="2.5" fill="#FFF"/>
+                <circle cx="82" cy="10" r="2.5" fill="#FFF"/>
+                <circle cx="30" cy="52" r="10" fill="#fcd535" opacity="0.8"/>
+                <circle cx="50" cy="50" r="14" fill="#fcd535"/>
+                <circle cx="70" cy="52" r="10" fill="#fcd535" opacity="0.8"/>
+                <defs>
+                    <linearGradient id="crown_grad" x1="50" y1="5" x2="50" y2="45" gradientUnits="userSpaceOnUse">
+                        <stop stop-color="#FFE066"/>
+                        <stop offset="1" stop-color="#D4A017"/>
+                    </linearGradient>
+                </defs>
+            </svg>
+        </div>
+    </div>
+
+    <!-- Stats 2x2 Grid -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon-box green">
+                <i class="fa-solid fa-chart-line"></i>
+            </div>
+            <div class="stat-info">
+                <span class="stat-label" data-ar="أرباح اليوم (USDT)" data-en="Today Profits (USDT)">أرباح اليوم (USDT)</span>
+                <span class="stat-val green-text" id="today-rewards">0.00</span>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon-box yellow">
+                <i class="fa-solid fa-wallet"></i>
+            </div>
+            <div class="stat-info">
+                <span class="stat-label" data-ar="إجمالي الإيرادات (USDT)" data-en="Total Revenue (USDT)">إجمالي الإيرادات (USDT)</span>
+                <span class="stat-val" id="total-revenue">0.00</span>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon-box purple">
+                <i class="fa-solid fa-user-plus"></i>
+            </div>
+            <div class="stat-info">
+                <span class="stat-label" data-ar="تسجيل جديد اليوم" data-en="New Signups Today">تسجيل جديد اليوم</span>
+                <span class="stat-val" id="today-signups">0</span>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon-box blue">
+                <i class="fa-solid fa-users"></i>
+            </div>
+            <div class="stat-info">
+                <span class="stat-label" data-ar="مجموع الناس" data-en="Total People">مجموع الناس</span>
+                <span class="stat-val" id="total-people">0</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabs Container -->
+    <div class="tabs-container">
+        <button class="tab-btn" id="tab-contribution" onclick="switchTab('contribution')">
+            <i class="fa-solid fa-chart-simple"></i> <span data-ar="مساهمة الفريق" data-en="Team Contribution">مساهمة الفريق</span>
+        </button>
+        <button class="tab-btn active" id="tab-members" onclick="switchTab('members')">
+            <i class="fa-solid fa-user-group"></i> <span data-ar="أعضاء الفريق" data-en="Team Members">أعضاء الفريق</span>
+        </button>
+    </div>
+
+    <!-- Section Sub Header Controls -->
+    <div class="section-sub-header">
+        <div class="section-title-box">
+            <i class="fa-solid fa-user" style="color: #ffffff; font-size: 13px;"></i>
+            <span id="section-dynamic-title-label" data-ar="تسجيل جديد اليوم " data-en="New signups today ">تسجيل جديد اليوم </span>
+            <span id="section-dynamic-title-count">0</span>
+        </div>
+        <select class="level-dropdown" id="level-select" onchange="filterAndRender()">
+            <option value="all" data-ar="كل الأعضاء" data-en="All Members">كل الأعضاء</option>
+            <option value="vip" data-ar="أعضاء VIP فقط" data-en="VIP Members Only">أعضاء VIP فقط</option>
+            <option value="normal" data-ar="المستخدمين العاديين" data-en="Normal Users">المستخدمين العاديين</option>
+        </select>
+    </div>
+
+    <!-- Table Header -->
+    <div class="table-header" id="table-header-titles">
+        <span><i class="fa-solid fa-user"></i> <span data-ar="الحساب" data-en="Account">الحساب</span></span>
+        <span><i class="fa-solid fa-crown"></i> <span data-ar="درجة" data-en="Grade">درجة</span></span>
+        <span><i class="fa-regular fa-clock"></i> <span data-ar="وقت التسجيل" data-en="Reg Time">وقت التسجيل</span></span>
+    </div>
+
+    <!-- Members List Container -->
+    <div class="members-list" id="list-container"></div>
+
+    <!-- Empty View -->
+    <div class="empty-state" id="empty-view">
+        <div class="empty-box">
+            <img src="https://cdn-icons-png.flaticon.com/512/7486/7486744.png" alt="Empty Box">
+        </div>
+        <span data-ar="فارغ" data-en="Empty">فارغ</span>
+    </div>
+
+</div>
+
+<div class="toast" id="copy-toast"><i class="fa-solid fa-check"></i> <span id="toast-text" data-ar="تم نسخ الـ ID بنجاح!" data-en="ID copied successfully!">تم نسخ الـ ID بنجاح!</span></div>
+
+<!-- Firebase Modular SDK -->
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+    import { getFirestore, collection, query, where, onSnapshot, doc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyCa3nVSth5Jhhuhvblw23w0uxzR1VJHLOo",
+        authDomain: "yaqoout-b4c83.firebaseapp.com",
+        projectId: "yaqoout-b4c83",
+        storageBucket: "yaqoout-b4c83.firebasestorage.app",
+        messagingSenderId: "21558070357",
+        appId: "1:21558070357:web:6237dcf59b162b5dae18dc"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    let currentTab = 'members';
+    let rawTeamMembers = [];
+    let todaySignupsGlobalCount = 0;
+
+    window.copyMemberId = function(id) {
+        navigator.clipboard.writeText(id).then(() => {
+            let toast = document.getElementById('copy-toast');
+            toast.classList.add('show');
+            setTimeout(() => { toast.classList.remove('show'); }, 2000);
+        });
+    };
+
+    window.switchTab = function(type) {
+        currentTab = type;
+        let contribBtn = document.getElementById('tab-contribution');
+        let membersBtn = document.getElementById('tab-members');
+        let tableHeader = document.getElementById('table-header-titles');
+        
+        if (type === 'contribution') {
+            contribBtn.classList.add('active');
+            membersBtn.classList.remove('active');
+            tableHeader.innerHTML = `<span><i class="fa-solid fa-user"></i> <span data-ar="الحساب" data-en="Account">الحساب</span></span><span data-ar="النوع المالي" data-en="Financial Type">النوع المالي</span><span data-ar="سجل الوقت" data-en="Time Log">سجل الوقت</span><span data-ar="دخل" data-en="Income">دخل</span>`;
+            tableHeader.style.gridTemplateColumns = "1.2fr 1fr 1fr 0.8fr";
+        } else {
+            membersBtn.classList.add('active');
+            contribBtn.classList.remove('active');
+            tableHeader.innerHTML = `<span><i class="fa-solid fa-user"></i> <span data-ar="الحساب" data-en="Account">الحساب</span></span><span><i class="fa-solid fa-crown"></i> <span data-ar="درجة" data-en="Grade">درجة</span></span><span><i class="fa-regular fa-clock"></i> <span data-ar="وقت التسجيل" data-en="Reg Time">وقت التسجيل</span></span>`;
+            tableHeader.style.gridTemplateColumns = "1.3fr 1fr 1.2fr";
+        }
+        
+        filterAndRender();
+    };
+
+    window.filterAndRender = function() {
+        const listContainer = document.getElementById('list-container');
+        const emptyView = document.getElementById('empty-view');
+        const filterValue = document.getElementById('level-select').value;
+        
+        let filteredData = rawTeamMembers; 
+        if (filterValue === 'vip') {
+            filteredData = rawTeamMembers.filter(m => m.activeVipId && m.activeVipId > 0);
+        } else if (filterValue === 'normal') {
+            filteredData = rawTeamMembers.filter(m => !m.activeVipId || m.activeVipId === 0);
+        }
+
+        if (filteredData.length === 0) {
+            listContainer.style.display = 'none';
+            emptyView.style.display = 'flex';
+            if(window.updateLanguage) window.updateLanguage();
+            return;
+        }
+
+        emptyView.style.display = 'none';
+        listContainer.style.display = 'flex';
+        listContainer.innerHTML = "";
+
+        filteredData.forEach((member) => {
+            let row = document.createElement('div');
+            row.className = 'member-row';
+
+            let regDateStr = '---';
+            let regTimeStr = '';
+            if (member.createdAt) {
+                const dateObj = new Date(member.createdAt.seconds * 1000);
+                const yyyy = dateObj.getFullYear();
+                const mm = String(dateObj.getMonth() + 1).padStart(2, '0');
+                const dd = String(dateObj.getDate()).padStart(2, '0');
+                regDateStr = `${yyyy}-${mm}-${dd}`;
+                regTimeStr = dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            }
+
+            const activeVip = member.activeVipId;
+            const degreeHtml = (activeVip && activeVip > 0)
+                ? `<span class="vip-pill"><i class="fa-solid fa-crown"></i> VIP ${activeVip}</span>`
+                : `<span class="normal-pill" data-ar="مستخدم عادي" data-en="Normal User">مستخدم عادي</span>`;
+
+            const phoneStr = member.phone || "---";
+            const maskedPhone = phoneStr.length >= 10 ? phoneStr.substring(0, 5) + "*** " + phoneStr.substring(phoneStr.length - 3) : phoneStr;
+            const realId = member.userId || member.myInviteCode || "N/A";
+
+            if (currentTab === 'members') {
+                row.style.gridTemplateColumns = "1.3fr 1fr 1.2fr";
+                row.innerHTML = `
+                    <div class="account-col">
+                        <div class="account-details">
+                            <span class="member-id" onclick="copyMemberId('${realId}')" title="Copy" style="direction: ltr;">
+                                ${realId} <i class="fa-regular fa-copy"></i>
+                            </span>
+                            <span class="member-phone">${maskedPhone}</span>
+                        </div>
+                    </div>
+                    <div class="degree-col">
+                        ${degreeHtml}
+                    </div>
+                    <div class="date-col">
+                        <div class="date-time-box">
+                            <span class="member-date">${regDateStr}</span>
+                            <span class="member-time">${regTimeStr}</span>
+                        </div>
+                        <i class="fa-solid fa-chevron-left row-arrow"></i>
+                    </div>
+                `;
+            } else if (currentTab === 'contribution') {
+                row.style.gridTemplateColumns = "1.2fr 1fr 1fr 0.8fr";
+                const contributionAmount = parseFloat(member.myContribution || 0).toFixed(2);
+                
+                const arText = (activeVip && activeVip > 0) ? "عمولة ترقية" : "أرباح كمية";
+                const enText = (activeVip && activeVip > 0) ? "Upgrade Comm." : "Quant Profits";
+
+                row.innerHTML = `
+                    <div class="account-col">
+                        <span class="member-id" onclick="copyMemberId('${realId}')" style="direction: ltr; font-size:11px;">${realId} <i class="fa-regular fa-copy"></i></span>
+                    </div>
+                    <span style="color: #fcd535; font-size:11px; font-weight: 700; text-align: center;" data-ar="${arText}" data-en="${enText}">${arText}</span>
+                    <span class="member-date" style="font-size:11px; text-align: center;">${regDateStr}</span>
+                    <span style="color:#0ecb81; font-weight:800; direction:ltr; text-align: center;">+${contributionAmount}</span>
+                `;
+            }
+
+            listContainer.appendChild(row);
+        });
+
+        if(window.updateLanguage) window.updateLanguage();
+    };
+
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            onSnapshot(doc(db, "users", user.uid), (docSnap) => {
+                if (docSnap.exists()) {
+                    const myData = docSnap.data();
+                    const totalRewards = parseFloat(myData.totalTeamRewards || 0).toFixed(2);
+                    document.getElementById('total-revenue').innerText = totalRewards;
+                }
+            });
+
+            const startOfDay = new Date();
+            startOfDay.setHours(0, 0, 0, 0);
+
+            const todayRewardsQuery = query(
+                collection(db, "transactions"), 
+                where("userId", "==", user.uid),
+                where("type", "==", "team_reward"), 
+                where("createdAt", ">=", startOfDay)
+            );
+
+            onSnapshot(todayRewardsQuery, (snapshot) => {
+                let todaySum = 0;
+                snapshot.forEach(doc => {
+                    todaySum += parseFloat(doc.data().amount || 0);
+                });
+                document.getElementById('today-rewards').innerText = todaySum.toFixed(2);
+            });
+
+            const teamQuery = query(collection(db, "users"), where("referredByUid", "==", user.uid));
+            onSnapshot(teamQuery, (snapshot) => {
+                rawTeamMembers = [];
+                todaySignupsGlobalCount = 0;
+                const todayStr = new Date().toDateString();
+
+                document.getElementById('total-people').innerText = snapshot.size;
+
+                snapshot.forEach((doc) => {
+                    const data = doc.data();
+                    rawTeamMembers.push(data);
+                    
+                    if (data.createdAt) {
+                        const dateObj = new Date(data.createdAt.seconds * 1000);
+                        if (dateObj.toDateString() === todayStr) {
+                            todaySignupsGlobalCount++;
+                        }
+                    }
+                });
+
+                document.getElementById('today-signups').innerText = todaySignupsGlobalCount;
+                document.getElementById('section-dynamic-title-count').innerText = todaySignupsGlobalCount;
+                
+                filterAndRender();
+            });
+
+        } else {
+            window.location.href = "login.html";
+        }
+    });
+</script>
+
+<!-- استدعاء ملف اللغة الخارجي -->
+<script src="language.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,18 @@
+{
+  "name": "ED-Ai Admin Panel",
+  "short_name": "ED-Ai الآدمن",
+  "description": "لوحة تحكم وإدارة منصة ED-Ai المستقلة",
+  "start_url": "admin.html",
+  "display": "standalone",
+  "background-color": "#0b0e11",
+  "theme_color": "#fcd535",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/6024/6024190.png",
+      "sizes": "512512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

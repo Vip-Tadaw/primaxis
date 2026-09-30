@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>سحب الرصيد - Withdraw</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-main: #05050f;
+            --neon-blue: #0055ff;
+            --neon-light-blue: #00d2ff;
+            --neon-purple: #8a2be2;
+            --card-bg: rgba(15, 20, 45, 0.6);
+            --card-border: rgba(100, 150, 255, 0.3);
+            --text-main: #ffffff;
+            --text-muted: #8b9bb4;
+            --success: #0ecb81;
+            --warning: #fcd535;
+            --danger: #f6465d;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Cairo', sans-serif; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            background-color: var(--bg-main);
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(138,43,226,0.15) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(0,210,255,0.1) 0%, transparent 40%);
+            color: var(--text-main);
+            display: flex; justify-content: center; min-height: 100vh;
+            padding-bottom: 20px; /* تم تعديله ليتناسب مع اختفاء الشريط السفلي */
+            user-select: none;
+        }
+
+        .app-container {
+            width: 100%; max-width: 480px; position: relative;
+            padding: 15px; display: flex; flex-direction: column; gap: 15px;
+            overflow-x: hidden;
+        }
+
+        /* --- Header --- */
+        .top-header { display: flex; justify-content: flex-start; align-items: center; padding: 10px 0; }
+        .back-btn { width: 35px; height: 35px; background: rgba(255,255,255,0.05); border-radius: 50%; display: flex; justify-content: center; align-items: center; border: 1px solid rgba(255,255,255,0.1); cursor: pointer; color: #fff; transition: 0.3s; }
+        .back-btn:active { transform: scale(0.9); background: rgba(255,255,255,0.1); }
+
+        /* --- Main Balance Card --- */
+        .balance-card { background: var(--card-bg); backdrop-filter: blur(10px); border: 1px solid rgba(0, 210, 255, 0.4); border-radius: 20px; padding: 20px; box-shadow: 0 0 20px rgba(0, 85, 255, 0.2), inset 0 0 15px rgba(138, 43, 226, 0.15); display: flex; justify-content: space-between; align-items: center; position: relative; overflow: hidden; }
+        .b-left { display: flex; align-items: center; gap: 15px; z-index: 2; }
+        .wallet-img { width: 50px; height: 50px; object-fit: contain; filter: drop-shadow(0 0 8px rgba(38, 161, 123, 0.5)); }
+        .b-text h3 { font-size: 13px; color: var(--text-muted); margin: 0 0 5px; font-weight: normal; display: flex; align-items: center; gap: 5px; }
+        .b-amount { font-size: 28px; font-weight: 800; color: var(--warning); direction: ltr; text-align: left; transition: color 0.3s; margin: 0; line-height: 1; text-shadow: 0 0 10px rgba(252, 213, 53, 0.3); }
+        .b-amount span { font-size: 14px; font-weight: 600; color: #fff; }
+        .b-text p { font-size: 11px; color: var(--text-muted); margin: 5px 0 0; }
+        
+        .b-right { display: flex; flex-direction: column; gap: 10px; align-items: flex-end; z-index: 2; }
+        .badge-24h { background: linear-gradient(90deg, rgba(0,85,255,0.2), rgba(0,210,255,0.2)); border: 1px solid var(--neon-light-blue); padding: 5px 10px; border-radius: 20px; font-size: 10px; font-weight: bold; color: var(--neon-light-blue); display: flex; align-items: center; gap: 5px; }
+        .process-box { background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 10px 15px; text-align: center; min-width: 120px; position: relative; }
+        .process-box h4 { font-size: 10px; color: var(--text-muted); margin: 0 0 5px; }
+        .process-box .val { font-size: 14px; font-weight: bold; color: var(--warning); direction: ltr; }
+        .clock-icon { position: absolute; right: -8px; top: -8px; background: var(--bg-main); border-radius: 50%; color: var(--neon-light-blue); font-size: 14px; }
+
+        /* --- Quick Links --- */
+        .quick-links { display: flex; gap: 10px; }
+        .q-item { flex: 1; background: var(--card-bg); border: 1px solid rgba(255,255,255,0.1); border-radius: 15px; padding: 15px 10px; display: flex; align-items: center; gap: 10px; cursor: pointer; transition: 0.3s; }
+        .q-item:nth-child(1) { border-color: rgba(0, 85, 255, 0.4); box-shadow: 0 0 10px rgba(0, 85, 255, 0.1); }
+        .q-item:nth-child(2) { border-color: rgba(138, 43, 226, 0.4); box-shadow: 0 0 10px rgba(138, 43, 226, 0.1); }
+        .q-icon { width: 30px; height: 30px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 14px; }
+        .q-item:nth-child(1) .q-icon { background: rgba(0, 85, 255, 0.1); color: var(--neon-light-blue); }
+        .q-item:nth-child(2) .q-icon { background: rgba(138, 43, 226, 0.1); color: var(--neon-purple); }
+        .q-text { display: flex; flex-direction: column; }
+        .q-text span { font-size: 11px; font-weight: bold; color: #fff; }
+        .q-text small { font-size: 8px; color: var(--text-muted); }
+        .q-item i.fa-chevron-left { margin-right: auto; font-size: 10px; color: var(--text-muted); }
+
+        /* --- Section Title --- */
+        .section-title { font-size: 15px; font-weight: 800; display: flex; align-items: center; gap: 8px; margin-top: 5px; }
+        .section-title i { color: var(--neon-light-blue); filter: drop-shadow(0 0 5px var(--neon-light-blue)); }
+
+        /* --- Withdraw Methods --- */
+        .methods-container { display: flex; flex-direction: column; gap: 10px; }
+        .method-box { background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 15px; display: flex; align-items: center; gap: 15px; cursor: pointer; transition: 0.3s; opacity: 0.6; }
+        .method-box.active { opacity: 1; border-color: var(--neon-light-blue); background: rgba(0, 210, 255, 0.05); box-shadow: 0 0 15px rgba(0, 210, 255, 0.1); }
+        .method-box.active .check-icon { color: var(--neon-light-blue) !important; text-shadow: 0 0 10px var(--neon-light-blue); }
+        .binance-logo { width: 38px; height: 38px; object-fit: contain; border-radius: 8px; }
+        .method-info { display: flex; flex-direction: column; flex: 1; }
+        .method-info strong { font-size: 14px; color: #fff; }
+        .method-info span { font-size: 11px; color: var(--text-muted); direction: ltr; text-align: right; }
+        .check-icon { font-size: 20px; color: transparent; transition: 0.3s; }
+
+        /* --- Forms --- */
+        .form-group { background: var(--card-bg); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 15px; display: flex; flex-direction: column; gap: 10px; position: relative; margin-bottom: 5px; }
+        .form-group.focused { border-color: var(--neon-light-blue); box-shadow: 0 0 10px rgba(0, 210, 255, 0.15); }
+        .group-label { font-size: 13px; font-weight: bold; display: flex; align-items: center; gap: 8px; }
+        .group-label .icon-bg { background: rgba(255,255,255,0.1); padding: 5px; border-radius: 5px; font-size: 12px; color: var(--neon-magenta); }
+        .group-label.lock .icon-bg { color: var(--neon-purple); }
+        
+        .input-wrapper { position: relative; display: flex; align-items: center; background: rgba(0,0,0,0.3); border-radius: 10px; padding: 5px 15px; border: 1px solid rgba(255,255,255,0.05); }
+        .input-wrapper input { width: 100%; background: transparent; border: none; color: #fff; font-size: 15px; padding: 10px 0; outline: none; }
+        .input-wrapper input::placeholder { color: rgba(255,255,255,0.2); }
+        
+        .currency-tag { display: flex; align-items: center; gap: 6px; font-weight: bold; font-size: 13px; color: #fff; }
+        .currency-tag img { width: 22px; height: 22px; object-fit: contain; }
+        
+        .eye-btn { color: var(--text-muted); cursor: pointer; font-size: 16px; padding: 5px; margin-right: auto; }
+        
+        .form-hint { font-size: 10px; color: var(--text-muted); display: flex; align-items: center; gap: 5px; justify-content: center; }
+        .form-hint i { color: var(--neon-light-blue); }
+
+        /* --- Receipt Box --- */
+        .receipt-box { background: rgba(0, 85, 255, 0.05); border: 1px solid rgba(0, 85, 255, 0.3); border-radius: 16px; padding: 15px; position: relative; }
+        .receipt-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .receipt-title { font-size: 13px; font-weight: bold; display: flex; align-items: center; gap: 8px; }
+        .receipt-title i { color: var(--neon-purple); font-size: 18px; }
+        .fee-badge { font-size: 10px; color: var(--text-muted); display: flex; flex-direction: column; align-items: flex-end; }
+        .fee-badge span { background: rgba(255,255,255,0.1); padding: 2px 8px; border-radius: 10px; color: #fff; font-weight: bold; }
+        
+        .receipt-values { display: flex; justify-content: space-around; align-items: center; font-size: 18px; font-weight: 800; color: var(--neon-light-blue); direction: ltr; }
+        
+        /* --- Submit Button --- */
+        .submit-btn { background: linear-gradient(90deg, var(--neon-purple), var(--neon-blue)); border: none; border-radius: 30px; padding: 16px; color: #fff; font-size: 16px; font-weight: 800; cursor: pointer; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 5px 20px rgba(138,43,226,0.4); transition: 0.3s; width: 100%; margin-top: 5px; }
+        .submit-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+        .submit-btn:active { transform: scale(0.98); }
+
+        /* --- Notes Section --- */
+        .notes-section { background: rgba(252, 213, 53, 0.05); border: 1px solid rgba(252, 213, 53, 0.2); border-radius: 16px; padding: 15px; position: relative; overflow: hidden; margin-bottom: 5px; }
+        .notes-bg-icon { position: absolute; left: -20px; bottom: -20px; font-size: 120px; color: rgba(252, 213, 53, 0.05); z-index: 0; }
+        .notes-title { color: var(--warning); font-size: 14px; font-weight: bold; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; position: relative; z-index: 1; }
+        .notes-list { list-style: none; padding-right: 15px; margin: 0; position: relative; z-index: 1; }
+        .notes-list li { color: var(--text-muted); font-size: 11px; margin-bottom: 8px; position: relative; }
+        .notes-list li::before { content: "•"; color: var(--neon-light-blue); position: absolute; right: -15px; font-size: 16px; top: -3px; }
+        .disclaimer { background: rgba(246, 70, 93, 0.1); border: 1px solid var(--danger); border-radius: 8px; padding: 8px 12px; display: flex; align-items: center; gap: 10px; margin-top: 10px; position: relative; z-index: 1; }
+        .disclaimer i { color: var(--danger); font-size: 16px; }
+        .disclaimer p { margin: 0; font-size: 10px; color: var(--danger); font-weight: bold; }
+
+        /* Toast */
+        #custom-toast { visibility: hidden; min-width: 250px; background-color: rgba(20,20,30,0.95); backdrop-filter: blur(10px); color: #fff; text-align: center; border-radius: 12px; padding: 15px; position: fixed; z-index: 10000; left: 50%; bottom: 30px; transform: translateX(-50%); border: 1px solid #333b45; font-size: 14px; font-weight: bold; box-shadow: 0 4px 15px rgba(0,0,0,0.6); transition: 0.3s; opacity: 0; }
+        #custom-toast.show { visibility: visible; opacity: 1; bottom: 50px; }
+        #custom-toast.success { border-bottom: 3px solid var(--success); box-shadow: 0 5px 15px rgba(14,203,129,0.3); }
+        #custom-toast.error { border-bottom: 3px solid var(--danger); box-shadow: 0 5px 15px rgba(246,70,93,0.3); }
+    </style>
+</head>
+<body>
+
+    <div id="custom-toast"></div>
+
+    <div class="app-container">
+        <!-- Header (فقط زر الرجوع) -->
+        <div class="top-header">
+            <div class="back-btn" onclick="history.back()">
+                <i class="fa-solid fa-arrow-right"></i>
+            </div>
+        </div>
+
+        <!-- Balance Card -->
+        <div class="balance-card">
+            <div class="b-left">
+                <!-- شعار USDT رسمي وحقيقي عالي الجودة -->
+                <img src="photo_٢٠٢٦-٠٩-٣٠_٠٠-٤١-٣٧.jpg" alt="USDT" class="wallet-img">
+                <div class="b-text">
+                    <h3><i class="fa-regular fa-eye"></i> رصيدك الحالي</h3>
+                    <!-- ID الخاص بالرصيد -->
+                    <div class="b-amount" id="display-balance">0.00<span> USDT</span></div>
+                    <p>متاح للسحب</p>
+                </div>
+            </div>
+            <div class="b-right">
+                <div class="badge-24h"><i class="fa-solid fa-bolt"></i> سحب 24 ساعة</div>
+                <div class="process-box">
+                    <i class="fa-regular fa-clock clock-icon"></i>
+                    <h4>المبلغ المراد معالجته</h4>
+                    <!-- ID الخاص بالمبلغ المعالج -->
+                    <div class="val" id="display-processing">0.00 USDT</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Links -->
+        <div class="quick-links">
+            <div class="q-item" onclick="window.location.href='activity.html'">
+                <div class="q-icon"><i class="fa-solid fa-clock-rotate-left"></i></div>
+                <div class="q-text">
+                    <span>سجل السحب</span>
+                    <small>عرض جميع المعاملات</small>
+                </div>
+                <i class="fa-solid fa-chevron-left"></i>
+            </div>
+            <div class="q-item" onclick="window.location.href='wellt.html'">
+                <div class="q-icon"><i class="fa-solid fa-wallet"></i></div>
+                <div class="q-text">
+                    <span>ربط المحفظة</span>
+                    <small>إدارة حساب السحب</small>
+                </div>
+                <i class="fa-solid fa-chevron-left"></i>
+            </div>
+        </div>
+
+        <!-- Section Title -->
+        <div class="section-title">
+            <i class="fa-solid fa-asterisk"></i> طريقة السحب
+        </div>
+
+        <!-- Network Selection Boxes (بايننس أو OKX) -->
+        <div class="methods-container">
+            <div class="method-box active" data-network="Binance (BEP20)" onclick="selectMethod(this)">
+                <!-- شعار منصة Binance الرسمي عالي الجودة -->
+                <img src="https://assets.coingecko.com/coins/images/825/large/bnb-icon2_2x.png" alt="Binance" class="binance-logo">
+                <div class="method-info">
+                    <strong>Binance</strong>
+                    <span>BNB Smart Chain (BEP20)</span>
+                </div>
+                <i class="fa-solid fa-circle-check check-icon"></i>
+            </div>
+            
+            <div class="method-box" data-network="OKX (TRC20)" onclick="selectMethod(this)">
+                <!-- شعار منصة OKX الرسمي عالي الجودة -->
+<img src="https://cryptologos.cc/logos/okb-okb-logo.png" alt="OKX" class="binance-logo">
+                <div class="method-info">
+                    <strong>OKX</strong>
+                    <span>Tron Network (TRC20)</span>
+                </div>
+                <i class="fa-solid fa-circle-check check-icon"></i>
+            </div>
+        </div>
+
+        <!-- Amount Input -->
+        <div class="form-group">
+            <div class="group-label">
+                <div class="icon-bg"><i class="fa-solid fa-coins"></i></div> المبلغ المراد سحبه
+            </div>
+            <div class="input-wrapper">
+                <!-- ID الخاص بمبلغ السحب -->
+                <input type="number" id="amount-input" placeholder="أدخل المبلغ">
+                <div class="currency-tag">
+                    USDT <img src="https://raw.githubusercontent.com/tethercoin/brand-assets/main/USDT/USDT_Symbol.svg" alt="USDT">
+                </div>
+            </div>
+            <div class="form-hint">
+                <i class="fa-solid fa-circle-info"></i> الحد الأدنى للسحب 3.00 USDT | الحد الأقصى 9999999.00 USDT
+            </div>
+        </div>
+
+        <!-- Password Input -->
+        <div class="form-group">
+            <div class="group-label lock">
+                <div class="icon-bg"><i class="fa-solid fa-lock"></i></div> كلمة المرور الأمنية (السحب)
+            </div>
+            <div class="input-wrapper">
+                <!-- ID الخاص بالباسوورد الأمني -->
+                <input type="password" id="sec-password" placeholder="أدخل كلمة المرور">
+                <i class="fa-regular fa-eye-slash eye-btn" id="eye-icon" onclick="togglePassword()"></i>
+            </div>
+            <div class="form-hint">تأكد من إدخال كلمة المرور الصحيحة لإتمام عملية السحب</div>
+        </div>
+
+        <!-- Receipt Box -->
+        <div class="receipt-box">
+            <div class="receipt-header">
+                <div class="receipt-title">
+                    <i class="fa-solid fa-file-invoice-dollar"></i> إجمالي المبلغ المستلم
+                </div>
+                <div class="fee-badge">
+                    <span>5%</span> الرسوم الإدارية تُخصم تلقائياً
+                </div>
+            </div>
+            <div class="receipt-values">
+                <!-- ID الخاص بالإيصال (الصافي) -->
+                <div id="display-receipt" style="width: 100%; text-align: center;">0.00 USDT</div>
+            </div>
+        </div>
+
+        <!-- Submit Button -->
+        <button class="submit-btn" id="btn-submit" onclick="submitWithdraw()">
+            <i class="fa-solid fa-chevron-right"></i>
+            <span style="display: flex; align-items: center; gap: 10px;"><i class="fa-solid fa-paper-plane"></i> تأكيد السحب</span>
+            <i class="fa-solid fa-chevron-left"></i>
+        </button>
+
+        <!-- Notes -->
+        <div class="notes-section">
+            <i class="fa-brands fa-usps notes-bg-icon"></i>
+            <div class="notes-title"><i class="fa-solid fa-shield-halved"></i> ملاحظات هامة</div>
+            <ul class="notes-list">
+                <li>أوقات المعالجة: السحب متاح على مدار 24 ساعة. وقت الوصول المتوقع من (1 إلى 10 دقائق).</li>
+                <li>تأكد من مطابقة الشبكة: سيتم السحب تلقائياً للمحفظة الأمنية التي قمت بربطها مسبقاً.</li>
+                <li>الحد الأدنى الفعلي: أقل كمية يسمح بسحبها هي 3 USDT.</li>
+                <li>الرسوم التلقائية: تخضع عمليات السحب لخصم رسوم شبكة ثابتة بنسبة 5% تغطي تكلفة غاز البلوكتشين.</li>
+            </ul>
+            <div class="disclaimer">
+                <i class="fa-solid fa-circle-exclamation"></i>
+                <p>إخلاء مسؤولية تام: تخلي المنصة مسؤوليتها القانونية عن أي خسائر ناتجة عن ربط عناوين محافظ غير صحيحة من قبل المستخدم.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- كود الجافاسكربت الخاص باختيار الشبكة -->
+    <script>
+        window.selectedNetworkName = "Binance (BEP20)"; // الشبكة الافتراضية
+        
+        function selectMethod(element) {
+            document.querySelectorAll('.method-box').forEach(box => {
+                box.classList.remove('active');
+            });
+            element.classList.add('active');
+            window.selectedNetworkName = element.getAttribute('data-network');
+        }
+
+        window.togglePassword = function() {
+            let passInput = document.getElementById('sec-password');
+            let eyeIcon = document.getElementById('eye-icon');
+            if (passInput.type === "password") {
+                passInput.type = "text";
+                eyeIcon.classList.remove('fa-eye-slash');
+                eyeIcon.classList.add('fa-eye');
+            } else {
+                passInput.type = "password";
+                eyeIcon.classList.remove('fa-eye');
+                eyeIcon.classList.add('fa-eye-slash');
+            }
+        };
+    </script>
+
+    <!-- الأكواد البرمجية (السكربت) للفايربيس لم يتم المساس بعملياتها نهائياً -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getFirestore, doc, onSnapshot, collection, runTransaction, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCa3nVSth5Jhhuhvblw23w0uxzR1VJHLOo",
+            authDomain: "yaqoout-b4c83.firebaseapp.com",
+            projectId: "yaqoout-b4c83",
+            storageBucket: "yaqoout-b4c83.firebasestorage.app",
+            messagingSenderId: "21558070357",
+            appId: "1:21558070357:web:6237dcf59b162b5dae18dc"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        let userBalance = 0;
+        let currentMinAmount = 3.00;
+        let currentUserData = null;
+        let userId = null;
+        const FEE_PERCENTAGE = 5;
+
+        window.showPlatformToast = function(message, type = "error") {
+            const toast = document.getElementById("custom-toast");
+            toast.innerText = message;
+            toast.className = "show " + type;
+            setTimeout(() => { toast.className = ""; }, 4000);
+        }
+
+        // المراقبة اللحظية للرصيد والمحفظة من السيرفر
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                userId = user.uid;
+                onSnapshot(doc(db, "users", userId), (docSnap) => {
+                    if(docSnap.exists()) {
+                        currentUserData = docSnap.data();
+                        userBalance = parseFloat(currentUserData.balance || 0);
+                        updateUIBalance();
+                    }
+                });
+            } else {
+                window.showPlatformToast("يرجى تسجيل الدخول أولاً!", "error");
+                setTimeout(() => { window.location.href = "index.html"; }, 1500);
+            }
+        });
+
+        function updateUIBalance() {
+            document.getElementById('display-balance').innerHTML = userBalance.toFixed(2) + '<span> USDT</span>';
+        }
+
+        // حساب الرسوم تلقائياً في الإيصال
+        document.getElementById('amount-input').addEventListener('input', function(e) {
+            let val = parseFloat(e.target.value);
+            if (isNaN(val) || val < 0) val = 0;
+
+            let feeAmount = val * (FEE_PERCENTAGE / 100);
+            let netReceipt = val - feeAmount;
+            if (netReceipt < 0) netReceipt = 0;
+
+            document.getElementById('display-processing').innerText = val.toFixed(2) + ' USDT';
+            
+            document.getElementById('display-receipt').innerText = netReceipt.toFixed(2) + ' USDT';
+            
+            if (val > userBalance) {
+                document.getElementById('display-balance').style.color = '#f6465d';
+            } else {
+                document.getElementById('display-balance').style.color = '#fcd535';
+            }
+        });
+
+        // معالجة عملية تقديم السحب المؤمنة
+        window.submitWithdraw = async function() {
+            let amountInput = parseFloat(document.getElementById('amount-input').value);
+            let passInput = document.getElementById('sec-password').value.trim();
+
+            if (!userId || !currentUserData) return;
+
+            let addressInput = currentUserData.walletAddress ? currentUserData.walletAddress.trim() : "";
+
+            if (addressInput === "") return window.showPlatformToast("يرجى ربط المحفظة من صفحة (أنا) أولاً!", "error");
+            if (isNaN(amountInput) || amountInput <= 0) return window.showPlatformToast("يرجى إدخال مبلغ صحيح للسحب!", "error"); 
+            if (passInput === "") return window.showPlatformToast("يرجى إدخال كلمة المرور الأمنية!", "error"); 
+
+            const btnSubmit = document.getElementById("btn-submit");
+            btnSubmit.disabled = true;
+            btnSubmit.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري الفحص الأمني...';
+
+            try {
+                const userRef = doc(db, "users", userId);
+                let finalNet = 0;
+                let finalFee = 0;
+
+                await runTransaction(db, async (transaction) => {
+                    const sfDoc = await transaction.get(userRef);
+                    if (!sfDoc.exists()) throw "خطأ: المستخدم غير موجود!";
+                    
+                    let data = sfDoc.data();
+                    let currentBal = parseFloat(data.balance || 0);
+
+                    if (!data.withdrawPassword) {
+                        throw "لم تقم بإنشاء كلمة مرور أمان! اذهب لصفحة (أنا) وأنشئها أولاً.";
+                    }
+                    if (data.withdrawPassword !== passInput) {
+                        throw "كلمة المرور الأمنية خاطئة! محاولة غير مصرح بها.";
+                    }
+
+                    if (data.isWithdrawLocked === true) {
+                        let msg = data.withdrawMessage || "تم إيقاف السحب مؤقتاً لحسابك. يرجى التواصل مع الدعم.";
+                        throw msg; 
+                    }
+
+                    if (amountInput < currentMinAmount) throw `الحد الأدنى للسحب هو ${currentMinAmount} USDT`;
+                    if (currentBal < amountInput) throw "رصيدك الفعلي غير كافٍ لإتمام هذه العملية!";
+
+                    finalFee = amountInput * (FEE_PERCENTAGE / 100);
+                    finalNet = amountInput - finalFee;
+
+                    let updates = { 
+                        balance: currentBal - amountInput
+                    };
+
+                    transaction.update(userRef, updates);
+
+                    const newWithdrawRef = doc(collection(db, "withdraws"));
+                    transaction.set(newWithdrawRef, {
+                        userId: userId,
+                        userEmail: auth.currentUser.email || "بدون إيميل",
+                        amount: amountInput,
+                        netAmount: finalNet,
+                        fee: finalFee,
+                        address: addressInput,
+                        network: window.selectedNetworkName, // استخدام الشبكة المحددة من الواجهة
+                        status: "pending",
+                        userNotification: "قيد المعالجة",
+                        timestamp: serverTimestamp()
+                    });
+                });
+
+                // إرسال التقرير السري والفوري لتليجرام المدير
+                let currentDateTime = new Date().toLocaleString('ar-EG', { hour12: true });
+                const message = `💸 طلب سحب رصيد مؤمن جديد!\n👤 الـ ID: ${userId}\n📧 الإيميل: ${auth.currentUser.email || "بدون إيميل"}\n----------------------------------\n💰 رصيده المتبقي: ${(userBalance - amountInput).toFixed(2)} USDT\n📤 إجمالي المخصوم: ${amountInput} USDT\n💵 الصافي المطلوب تحويله: ${finalNet.toFixed(2)} USDT\n📌 العنوان المربوط بالسيرفر: ${addressInput}\n🌐 الشبكة المختارة: ${window.selectedNetworkName}\n⏰ الوقت: ${currentDateTime}`;
+
+                const url = `https://api.telegram.org/bot8970185207:AAEI9QHtuUVWmPulbJ-Pe8e0_viXYOPavRY/sendMessage?chat_id=1459094404&text=${encodeURIComponent(message)}`;
+                fetch(url).catch(e => console.log("Telegram Error"));
+
+                window.showPlatformToast("تم تقديم طلب السحب بنجاح وهو قيد المراجعة!", "success");
+                
+                document.getElementById('amount-input').value = '';
+                document.getElementById('sec-password').value = '';
+                document.getElementById('display-processing').innerText = '0.00 USDT';
+                document.getElementById('display-receipt').innerText = '0.00 USDT';
+
+            } catch (error) {
+                window.showPlatformToast(error.toString(), "error");
+            } finally {
+                btnSubmit.disabled = false;
+                btnSubmit.innerHTML = '<i class="fa-solid fa-chevron-right"></i><span style="display: flex; align-items: center; gap: 10px;"><i class="fa-solid fa-paper-plane"></i> تأكيد السحب</span><i class="fa-solid fa-chevron-left"></i>';
+            }
+        };
+    </script>
+    <script src="language.js"></script>
+
+</body>
+</html>

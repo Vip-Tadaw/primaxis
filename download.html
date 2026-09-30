@@ -1,0 +1,180 @@
+ <!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tadawulx- تحميل التطبيق</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #000000;
+            color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            user-select: none;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 400px;
+            height: 100vh;
+            background-color: #141517;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        /* الهيدر العلوي */
+        .top-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            font-size: 16px;
+            font-weight: bold;
+            border-bottom: 1px solid #1e2329;
+            background-color: #141517;
+        }
+        .top-header i { cursor: pointer; font-size: 18px; }
+
+        /* محتوى صفحة التحميل */
+        .download-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .app-logo {
+            width: 90px;
+            height: 90px;
+            background-color: #1e2329;
+            border: 2px solid #fcd535;
+            border-radius: 22px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 32px;
+            font-weight: bold;
+            color: #fcd535;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 20px rgba(252, 213, 53, 0.15);
+        }
+
+        .app-name {
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .app-version {
+            font-size: 13px;
+            color: #848e9c;
+            margin-bottom: 35px;
+        }
+
+        /* أزرار التحميل الاحترافية */
+        .download-buttons {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .btn-download {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            width: 100%;
+            padding: 14px 0;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: bold;
+            text-decoration: none;
+            transition: transform 0.2s, background-color 0.2s;
+            box-sizing: border-box;
+        }
+
+        .btn-download:active {
+            transform: scale(0.98);
+        }
+
+        /* زر الأندرويد الأساسي */
+        .btn-android {
+            background-color: #fcd535;
+            color: #000000;
+        }
+
+        /* زر الآيفون */
+        .btn-ios {
+            background-color: #1e2329;
+            color: #ffffff;
+            border: 1px solid #333;
+        }
+
+        .btn-download i {
+            font-size: 22px;
+        }
+
+        .btn-text-wrapper {
+            text-align: right;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .btn-subtitle {
+            font-size: 10px;
+            font-weight: normal;
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        
+        <div class="top-header">
+            <i class="fa-solid fa-chevron-right" onclick="history.back()"></i>
+            <span>تحميل التطبيق</span>
+            <div></div>
+        </div>
+ <div class="download-content">
+            <div class="app-logo">lx</div>
+            
+            <div class="app-name">Tadawulx Mobile</div>
+            <div class="app-version">إصدار v1.0.2 (أحدث نسخة مستقرة)</div>
+
+            <div class="download-buttons">
+                
+                <a href="downloads/app-release.apk" target="_blank" class="btn-download btn-android">
+                    <i class="fa-brands fa-android"></i>
+                    <div class="btn-text-wrapper">
+                        <span class="btn-subtitle">تحميل مباشر لأجهزة</span>
+                        <span>Android (APK)</span>
+                    </div>
+                </a>
+
+                <a href="#" class="btn-download btn-ios" onclick="alert('تطبيق iOS قيد المراجعة في متجر App Store حالياً!')">
+                    <i class="fa-brands fa-apple"></i>
+                    <div class="btn-text-wrapper">
+                        <span class="btn-subtitle">قريباً على متجر</span>
+                        <span>App Store (iOS)</span>
+                    </div>
+                </a>
+
+            </div>
+        </div>
+
+    </div>
+
+</body>
+</html>

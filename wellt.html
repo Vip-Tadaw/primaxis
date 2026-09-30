@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" id="html-root">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title data-ar="Tadawulx - إعدادات السحب" data-en="Tadawulx - Withdrawal Settings">Tadawulx - إعدادات السحب</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-main: #03040c;
+            --card-bg: rgba(10, 14, 35, 0.75);
+            --card-border: rgba(0, 140, 255, 0.35);
+            --neon-blue: #00d2ff;
+            --neon-purple: #8a2be2;
+            --btn-grad: linear-gradient(90deg, #0055ff, #8a2be2);
+            --text-main: #ffffff;
+            --text-muted: #848e9c;
+            --success: #0ecb81;
+            --danger: #f6465d;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Cairo', sans-serif; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            background-color: var(--bg-main);
+            background-image: 
+                radial-gradient(circle at 50% 10%, rgba(138, 43, 226, 0.25) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(0, 210, 255, 0.15) 0%, transparent 40%);
+            color: var(--text-main);
+            display: flex; justify-content: center; min-height: 100vh;
+            padding-bottom: 30px;
+            user-select: none;
+        }
+
+        .app-container {
+            width: 100%; max-width: 480px; position: relative;
+            padding: 15px; display: flex; flex-direction: column; gap: 15px;
+        }
+
+        /* --- Top Header --- */
+        .top-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; }
+        .back-btn { width: 36px; height: 36px; background: rgba(255,255,255,0.05); border-radius: 50%; display: flex; justify-content: center; align-items: center; border: 1px solid rgba(255,255,255,0.1); cursor: pointer; color: #fff; transition: 0.2s; }
+        .back-btn:active { transform: scale(0.9); background: rgba(255,255,255,0.15); }
+        html[dir="ltr"] .back-btn i { transform: rotate(180deg); }
+        
+        .header-title-box { text-align: right; flex: 1; padding: 0 12px; }
+        html[dir="ltr"] .header-title-box { text-align: left; }
+        .header-title-box h2 { font-size: 22px; font-weight: 800; color: #00d2ff; text-shadow: 0 0 10px rgba(0,210,255,0.3); margin: 0; }
+        .header-title-box p { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+        .header-graphic { width: 60px; height: 60px; background: radial-gradient(circle, rgba(0,210,255,0.2) 0%, rgba(138,43,226,0.3) 100%); border-radius: 20px; display: flex; justify-content: center; align-items: center; border: 1px solid var(--neon-blue); box-shadow: 0 0 15px rgba(0,210,255,0.3); position: relative; }
+        .header-graphic i { font-size: 26px; color: #fff; filter: drop-shadow(0 0 8px var(--neon-blue)); }
+
+        /* --- Section Container --- */
+        .section-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 18px;
+            box-shadow: 0 0 20px rgba(0, 140, 255, 0.15);
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .section-header { border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 10px; }
+        .sec-title-group { display: flex; flex-direction: column; }
+        .sec-title { font-size: 16px; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 8px; }
+        .sec-title i { color: var(--neon-blue); font-size: 16px; }
+        .sec-desc { font-size: 11px; color: var(--text-muted); margin-top: 4px; line-height: 1.4; }
+
+        /* --- Network Selector Tabs --- */
+        .field-label { font-size: 12px; font-weight: bold; color: #c9d1d9; display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+        .field-label span { display: flex; align-items: center; gap: 6px; }
+
+        .methods-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
+        .method-item {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 14px;
+            padding: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .method-item.active {
+            border-color: var(--neon-blue);
+            background: rgba(0, 210, 255, 0.08);
+            box-shadow: 0 0 12px rgba(0, 210, 255, 0.2);
+        }
+        .method-brand { display: flex; align-items: center; gap: 10px; font-weight: bold; font-size: 13px; }
+        .method-brand img, .method-brand svg { width: 24px; height: 24px; flex-shrink: 0; }
+        .net-tag { font-size: 10px; color: var(--neon-blue); background: rgba(0, 210, 255, 0.1); padding: 2px 6px; border-radius: 4px; margin-right: 4px; font-weight: normal; }
+        .method-check { font-size: 14px; color: transparent; transition: 0.3s; }
+        .method-item.active .method-check { color: var(--neon-blue); }
+
+        /* --- Input Fields --- */
+        .input-box {
+            background: rgba(0, 0, 0, 0.35);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 12px;
+            padding: 8px 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: 0.3s;
+        }
+        .input-box:focus-within { border-color: var(--neon-blue); box-shadow: 0 0 10px rgba(0,210,255,0.2); }
+        .input-box input {
+            width: 100%;
+            background: transparent;
+            border: none;
+            color: #fff;
+            font-size: 13px;
+            outline: none;
+            padding: 6px 0;
+        }
+        .input-box input::placeholder { color: rgba(255,255,255,0.25); }
+        .input-box i.action-icon { color: var(--text-muted); cursor: pointer; font-size: 14px; }
+
+        /* --- Save Button --- */
+        .save-btn {
+            background: var(--btn-grad);
+            border: none;
+            border-radius: 25px;
+            padding: 13px;
+            color: #fff;
+            font-size: 15px;
+            font-weight: 800;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 15px rgba(0, 85, 255, 0.4);
+            transition: 0.3s;
+            margin-top: 5px;
+        }
+        .save-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+        .save-btn:active { transform: scale(0.98); }
+
+        /* --- Saved Cards List --- */
+        .saved-item-card {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 16px;
+            padding: 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .saved-item-card:last-child { margin-bottom: 0; }
+        
+        .saved-main-info { display: flex; align-items: center; gap: 12px; flex: 1; }
+        .saved-logo-box { width: 42px; height: 42px; background: rgba(255,255,255,0.05); border-radius: 12px; display: flex; justify-content: center; align-items: center; flex-shrink: 0; }
+        .saved-logo-box img, .saved-logo-box svg { width: 28px; height: 28px; }
+
+        .saved-content-grid { display: flex; flex-direction: column; gap: 6px; flex: 1; }
+        .saved-top-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+        .saved-brand-name { font-size: 14px; font-weight: 800; color: #fff; }
+        .saved-net-badge { font-size: 9px; background: rgba(0, 210, 255, 0.12); color: var(--neon-blue); padding: 1px 6px; border-radius: 4px; font-weight: bold; border: 1px solid rgba(0,210,255,0.2); }
+        .saved-status-badge { background: rgba(14, 203, 129, 0.15); color: var(--success); border: 1px solid rgba(14,203,129,0.3); font-size: 9px; padding: 1px 6px; border-radius: 6px; font-weight: bold; }
+
+        .saved-data-columns { display: flex; align-items: center; gap: 20px; font-size: 11px; }
+        .saved-col { display: flex; flex-direction: column; gap: 2px; }
+        .saved-col-title { color: var(--text-muted); font-size: 10px; }
+        .saved-col-val { color: #fff; font-family: monospace; display: flex; align-items: center; gap: 5px; font-weight: 600; }
+        .saved-col-val i { color: var(--neon-blue); cursor: pointer; font-size: 11px; }
+
+        .saved-actions-side { display: flex; flex-direction: column; gap: 6px; }
+        .action-btn-sm { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #fff; font-size: 11px; padding: 5px 12px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: 0.2s; }
+        .action-btn-sm:hover { background: rgba(255,255,255,0.15); }
+        .action-btn-sm.del { color: var(--danger); border-color: rgba(246, 70, 93, 0.3); }
+
+        /* --- Footnote --- */
+        .security-footnote { background: rgba(0, 210, 255, 0.05); border: 1px solid rgba(0, 210, 255, 0.2); border-radius: 12px; padding: 10px; display: flex; align-items: center; gap: 10px; font-size: 11px; color: var(--text-muted); }
+        .security-footnote i { color: var(--neon-blue); font-size: 16px; flex-shrink: 0; }
+
+        /* Toast Notification */
+        #custom-toast { visibility: hidden; min-width: 250px; background-color: rgba(20,20,30,0.95); backdrop-filter: blur(10px); color: #fff; text-align: center; border-radius: 12px; padding: 12px 18px; position: fixed; z-index: 10000; left: 50%; bottom: 30px; transform: translateX(-50%); border: 1px solid #333b45; font-size: 13px; font-weight: bold; box-shadow: 0 4px 15px rgba(0,0,0,0.6); transition: 0.3s; opacity: 0; }
+        #custom-toast.show { visibility: visible; opacity: 1; bottom: 45px; }
+        #custom-toast.success { border-bottom: 3px solid var(--success); box-shadow: 0 5px 15px rgba(14,203,129,0.3); }
+        #custom-toast.error { border-bottom: 3px solid var(--danger); box-shadow: 0 5px 15px rgba(246,70,93,0.3); }
+    </style>
+</head>
+<body>
+
+    <div id="custom-toast"></div>
+
+    <div class="app-container">
+        <!-- Top Header -->
+        <div class="top-header">
+            <!-- زر الرجوع للملف/الصفحة السابقة -->
+            <div class="back-btn" onclick="goBack()" title="رجوع">
+                <i class="fa-solid fa-chevron-right"></i>
+            </div>
+            <div class="header-title-box">
+                <h2 data-ar="إعدادات السحب" data-en="Withdrawal Settings">إعدادات السحب</h2>
+                <p data-ar="احفظ بياناتك لتسريع عمليات السحب" data-en="Save your data to speed up withdrawals">احفظ بياناتك لتسريع عمليات السحب</p>
+            </div>
+            <div class="header-graphic">
+                <i class="fa-solid fa-wallet"></i>
+            </div>
+        </div>
+
+        <!-- Section 1: Save Form -->
+        <div class="section-card">
+            <div class="section-header">
+                <div class="sec-title-group">
+                    <div class="sec-title">
+                        <i class="fa-solid fa-shield-halved"></i>
+                        <span data-ar="حفظ بيانات السحب" data-en="Save Withdrawal Data">حفظ بيانات السحب</span>
+                    </div>
+                    <div class="sec-desc" data-ar="اختر طريقة السحب وأدخل بيانات المحفظة وكلمة المرور لحفظها واستخدامها لاحقاً بسرعة." data-en="Select withdraw method, enter wallet data & password to save for quick usage.">
+                        اختر طريقة السحب وأدخل بيانات المحفظة وكلمة المرور لحفظها واستخدامها لاحقاً بسرعة.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Withdraw Method Selector -->
+            <div>
+                <div class="field-label">
+                    <span><i class="fa-solid fa-wallet" style="color:var(--neon-purple)"></i> <span data-ar="طريقة السحب والشبكة" data-en="Withdrawal Method & Network">طريقة السحب والشبكة</span></span>
+                </div>
+                <div class="methods-grid">
+                    <!-- Binance Method with Real Binance Icon -->
+                    <div class="method-item active" id="tab-binance" onclick="selectMethodTab('Binance')">
+                        <div class="method-brand">
+                            <svg viewBox="0 0 32 32" width="24" height="24">
+                                <path fill="#F3BA2F" d="M16 0l-5.8 5.8 2.3 2.3L16 4.6l3.5 3.5 2.3-2.3L16 0zm-8.2 8.2L2 14l2.3 2.3 3.5-3.5 3.5 3.5 2.3-2.3-5.8-5.8zm16.4 0l-5.8 5.8 2.3 2.3 3.5-3.5 3.5 3.5 2.3-2.3-5.8-5.8zM16 11.4l-4.6 4.6 2.3 2.3 2.3-2.3 2.3 2.3 2.3-2.3L16 11.4zM2 18l5.8 5.8 2.3-2.3L6.6 18l3.5-3.5-2.3-2.3L2 18zm22 0l-5.8-5.8-2.3 2.3 3.5 3.5-3.5 3.5 2.3 2.3L24 18zm-8 6.6l-3.5-3.5-2.3 2.3 5.8 5.8 5.8-5.8-2.3-2.3-3.5 3.5z"/>
+                            </svg>
+                            <span>Binance <span class="net-tag">BNB Smart Chain (BEP20)</span></span>
+                        </div>
+                        <i class="fa-solid fa-circle-check method-check"></i>
+                    </div>
+
+                    <!-- OKX Method -->
+                    <div class="method-item" id="tab-okx" onclick="selectMethodTab('OKX')">
+                        <div class="method-brand">
+                            <svg viewBox="0 0 100 100" width="24" height="24">
+                                <rect width="100" height="100" rx="20" fill="#ffffff"/>
+                                <rect x="20" y="20" width="20" height="20" fill="#000"/>
+                                <rect x="60" y="20" width="20" height="20" fill="#000"/>
+                                <rect x="40" y="40" width="20" height="20" fill="#000"/>
+                                <rect x="20" y="60" width="20" height="20" fill="#000"/>
+                                <rect x="60" y="60" width="20" height="20" fill="#000"/>
+                            </svg>
+                            <span>OKX <span class="net-tag">Tron Network (TRC20)</span></span>
+                        </div>
+                        <i class="fa-solid fa-circle-check method-check"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Wallet Address Input -->
+            <div>
+                <div class="field-label">
+                    <span><i class="fa-solid fa-link" style="color:var(--neon-blue)"></i> <span data-ar="عنوان المحفظة" data-en="Wallet Address">عنوان المحفظة</span></span>
+                </div>
+                <div class="input-box">
+                    <input type="text" id="input-address" placeholder="أدخل عنوان محفظة Binance (BEP20)" data-ar-placeholder="أدخل عنوان محفظة Binance (BEP20)" data-en-placeholder="Enter Binance (BEP20) wallet address">
+                    <i class="fa-solid fa-qrcode action-icon" title="Scan" onclick="pasteFromClipboard()"></i>
+                </div>
+            </div>
+
+            <!-- Withdrawal Password Input -->
+            <div>
+                <div class="field-label">
+                    <span><i class="fa-solid fa-lock" style="color:var(--neon-purple)"></i> <span data-ar="كلمة مرور السحب" data-en="Withdrawal Password">كلمة مرور السحب</span></span>
+                </div>
+                <div class="input-box">
+                    <input type="password" id="input-password" placeholder="أدخل كلمة مرور السحب" data-ar-placeholder="أدخل كلمة مرور السحب" data-en-placeholder="Enter withdrawal password">
+                    <i class="fa-regular fa-eye-slash action-icon" id="eye-toggle" onclick="togglePassVisibility()"></i>
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <button class="save-btn" id="btn-save" onclick="saveWithdrawData()">
+                <i class="fa-solid fa-chevron-left"></i>
+                <span data-ar="حفظ البيانات" data-en="Save Data">حفظ البيانات</span>
+                <i class="fa-solid fa-floppy-disk"></i>
+            </button>
+        </div>
+
+        <!-- Section 2: Saved Data List -->
+        <div class="section-card">
+            <div class="section-header">
+                <div class="sec-title-group">
+                    <div class="sec-title">
+                        <i class="fa-solid fa-database"></i>
+                        <span data-ar="البيانات المحفوظة" data-en="Saved Data">البيانات المحفوظة</span>
+                    </div>
+                    <div class="sec-desc" data-ar="يمكنك تعديل أو حذف بياناتك المحفوظة في أي وقت." data-en="You can edit or delete your saved data at any time.">
+                        يمكنك تعديل أو حذف بياناتك المحفوظة في أي وقت.
+                    </div>
+                </div>
+            </div>
+
+            <div id="saved-cards-container">
+                <!-- Data populated dynamically from Firebase -->
+            </div>
+        </div>
+
+        <!-- Security Footnote -->
+        <div class="security-footnote">
+            <i class="fa-solid fa-shield-check"></i>
+            <span data-ar="بياناتك محفوظة بشكل آمن ومشفّر، ولن يتم استخدامها إلا لعمليات السحب." data-en="Your data is securely stored & encrypted, used only for withdrawals.">
+                بياناتك محفوظة بشكل آمن ومشفّر، ولن يتم استخدامها إلا لعمليات السحب.
+            </span>
+        </div>
+    </div>
+
+    <!-- UI Utility Scripts -->
+    <script>
+        let currentSelectedMethod = 'Binance';
+
+        function goBack() {
+            if (window.history.length > 1) {
+                window.history.back();
+            } else {
+                window.location.href = "index.html";
+            }
+        }
+
+        function selectMethodTab(methodName) {
+            currentSelectedMethod = methodName;
+            document.getElementById('tab-binance').classList.toggle('active', methodName === 'Binance');
+            document.getElementById('tab-okx').classList.toggle('active', methodName === 'OKX');
+            
+            const addrInput = document.getElementById('input-address');
+            if(methodName === 'Binance') {
+                addrInput.setAttribute('placeholder', 'أدخل عنوان محفظة Binance (BEP20)');
+                addrInput.setAttribute('data-ar-placeholder', 'أدخل عنوان محفظة Binance (BEP20)');
+                addrInput.setAttribute('data-en-placeholder', 'Enter Binance (BEP20) wallet address');
+            } else {
+                addrInput.setAttribute('placeholder', 'أدخل عنوان محفظة OKX (TRC20)');
+                addrInput.setAttribute('data-ar-placeholder', 'أدخل عنوان محفظة OKX (TRC20)');
+                addrInput.setAttribute('data-en-placeholder', 'Enter OKX (TRC20) wallet address');
+            }
+            if(window.updateLanguage) window.updateLanguage();
+        }
+
+        function togglePassVisibility() {
+            const passInput = document.getElementById('input-password');
+            const eyeIcon = document.getElementById('eye-toggle');
+            if (passInput.type === "password") {
+                passInput.type = "text";
+                eyeIcon.className = "fa-regular fa-eye action-icon";
+            } else {
+                passInput.type = "password";
+                eyeIcon.className = "fa-regular fa-eye-slash action-icon";
+            }
+        }
+
+        async function pasteFromClipboard() {
+            try {
+                if (navigator.clipboard && navigator.clipboard.readText) {
+                    const text = await navigator.clipboard.readText();
+                    if(text) document.getElementById('input-address').value = text;
+                }
+            } catch (err) {
+                console.log("Clipboard read restricted");
+            }
+        }
+    </script>
+
+    <!-- Firebase Integration Module -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getFirestore, doc, onSnapshot, setDoc, updateDoc, deleteField } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCa3nVSth5Jhhuhvblw23w0uxzR1VJHLOo",
+            authDomain: "yaqoout-b4c83.firebaseapp.com",
+            projectId: "yaqoout-b4c83",
+            storageBucket: "yaqoout-b4c83.firebasestorage.app",
+            messagingSenderId: "21558070357",
+            appId: "1:21558070357:web:6237dcf59b162b5dae18dc"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        let currentUser = null;
+        let userData = {};
+
+        function showToast(msg, type = "error") {
+            const toast = document.getElementById("custom-toast");
+            toast.innerText = msg;
+            toast.className = "show " + type;
+            setTimeout(() => { toast.className = ""; }, 3500);
+        }
+
+        function checkOnlineStatus() {
+            if (!navigator.onLine) {
+                showToast("لا يوجد اتصال بالإنترنت! يرجى الاتصال بالشبكة.", "error");
+                document.getElementById('btn-save').disabled = true;
+            } else {
+                document.getElementById('btn-save').disabled = false;
+            }
+        }
+        window.addEventListener('online', checkOnlineStatus);
+        window.addEventListener('offline', checkOnlineStatus);
+
+        onAuthStateChanged(auth, (user) => {
+            checkOnlineStatus();
+            if (user) {
+                currentUser = user;
+                onSnapshot(doc(db, "users", user.uid), (docSnap) => {
+                    if (docSnap.exists()) {
+                        userData = docSnap.data();
+                        renderSavedDataUI();
+                    } else {
+                        userData = {};
+                        renderSavedDataUI();
+                    }
+                });
+            } else {
+                showToast("يرجى تسجيل الدخول أولاً!", "error");
+                setTimeout(() => { window.location.href = "index.html"; }, 1500);
+            }
+        });
+
+        // رندر القائمة بتصميم مطابق للصورة المرفقة
+        function renderSavedDataUI() {
+            const container = document.getElementById('saved-cards-container');
+            container.innerHTML = "";
+
+            const savedWallets = userData.savedWallets || {};
+
+            if (!savedWallets.Binance && userData.walletAddress && (!userData.walletNetwork || userData.walletNetwork.includes('Binance'))) {
+                savedWallets.Binance = {
+                    address: userData.walletAddress,
+                    password: userData.withdrawPassword || '',
+                    network: 'BNB Smart Chain (BEP20)'
+                };
+            }
+            if (!savedWallets.OKX && userData.walletAddress && userData.walletNetwork && userData.walletNetwork.includes('OKX')) {
+                savedWallets.OKX = {
+                    address: userData.walletAddress,
+                    password: userData.withdrawPassword || '',
+                    network: 'Tron Network (TRC20)'
+                };
+            }
+
+            const keys = Object.keys(savedWallets);
+
+            if (keys.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; color: var(--text-muted); padding: 20px; font-size: 12px;" data-ar="لا توجد بيانات محفوظة حالياً" data-en="No saved data currently">
+                        لا توجد بيانات محفوظة حالياً
+                    </div>`;
+                if(window.updateLanguage) window.updateLanguage();
+                return;
+            }
+
+            keys.forEach(netKey => {
+                const item = savedWallets[netKey];
+                const maskAddr = item.address.length > 12 ? `${item.address.substring(0, 6)}...${item.address.substring(item.address.length - 4)}` : item.address;
+                
+                const isOKX = netKey.includes('OKX');
+                const netTag = isOKX ? 'Tron Network (TRC20)' : 'BNB Smart Chain (BEP20)';
+                
+                const logoSvg = isOKX 
+                    ? `<svg viewBox="0 0 100 100" width="28" height="28"><rect width="100" height="100" rx="20" fill="#ffffff"/><rect x="20" y="20" width="20" height="20" fill="#000"/><rect x="60" y="20" width="20" height="20" fill="#000"/><rect x="40" y="40" width="20" height="20" fill="#000"/><rect x="20" y="60" width="20" height="20" fill="#000"/><rect x="60" y="60" width="20" height="20" fill="#000"/></svg>`
+                    : `<svg viewBox="0 0 32 32" width="28" height="28"><path fill="#F3BA2F" d="M16 0l-5.8 5.8 2.3 2.3L16 4.6l3.5 3.5 2.3-2.3L16 0zm-8.2 8.2L2 14l2.3 2.3 3.5-3.5 3.5 3.5 2.3-2.3-5.8-5.8zm16.4 0l-5.8 5.8 2.3 2.3 3.5-3.5 3.5 3.5 2.3-2.3-5.8-5.8zM16 11.4l-4.6 4.6 2.3 2.3 2.3-2.3 2.3 2.3 2.3-2.3L16 11.4zM2 18l5.8 5.8 2.3-2.3L6.6 18l3.5-3.5-2.3-2.3L2 18zm22 0l-5.8-5.8-2.3 2.3 3.5 3.5-3.5 3.5 2.3 2.3L24 18zm-8 6.6l-3.5-3.5-2.3 2.3 5.8 5.8 5.8-5.8-2.3-2.3-3.5 3.5z"/></svg>`;
+
+                const card = document.createElement('div');
+                card.className = "saved-item-card";
+                card.innerHTML = `
+                    <div class="saved-main-info">
+                        <div class="saved-logo-box">
+                            ${logoSvg}
+                        </div>
+                        <div class="saved-content-grid">
+                            <div class="saved-top-row">
+                                <span class="saved-brand-name">${netKey}</span>
+                                <span class="saved-net-badge">${netTag}</span>
+                                <span class="saved-status-badge" data-ar="محفوظ" data-en="Saved">محفوظ</span>
+                            </div>
+                            <div class="saved-data-columns">
+                                <div class="saved-col">
+                                    <span class="saved-col-title" data-ar="عنوان المحفظة" data-en="Wallet Address">عنوان المحفظة</span>
+                                    <div class="saved-col-val">
+                                        <span>${maskAddr}</span>
+                                        <i class="fa-regular fa-copy" onclick="copyText('${item.address}')" title="نسخ"></i>
+                                    </div>
+                                </div>
+                                <div class="saved-col">
+                                    <span class="saved-col-title" data-ar="كلمة مرور السحب" data-en="Withdrawal Password"><i class="fa-solid fa-lock"></i> كلمة مرور السحب</span>
+                                    <div class="saved-col-val">
+                                        <span>••••••••</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="saved-actions-side">
+                        <button class="action-btn-sm" onclick="editSavedData('${netKey}', '${item.address}', '${item.password}')">
+                            <i class="fa-solid fa-pen-to-square"></i> <span data-ar="تعديل" data-en="Edit">تعديل</span>
+                        </button>
+                        <button class="action-btn-sm del" onclick="deleteSavedData('${netKey}')">
+                            <i class="fa-solid fa-trash"></i> <span data-ar="حذف" data-en="Delete">حذف</span>
+                        </button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+
+            if(window.updateLanguage) window.updateLanguage();
+        }
+
+        window.copyText = function(str) {
+            navigator.clipboard.writeText(str);
+            showToast("تم نسخ العنوان بنجاح!", "success");
+        };
+
+        window.editSavedData = function(netKey, addr, pass) {
+            selectMethodTab(netKey.includes('OKX') ? 'OKX' : 'Binance');
+            document.getElementById('input-address').value = addr;
+            document.getElementById('input-password').value = pass;
+            showToast("تم تحميل البيانات في النموذج للتعديل", "success");
+        };
+
+        window.saveWithdrawData = async function() {
+            if (!navigator.onLine) return showToast("لا يوجد اتصال بالإنترنت!", "error");
+            if (!currentUser) return showToast("غير مسجل الدخول!", "error");
+
+            const addressVal = document.getElementById('input-address').value.trim();
+            const passVal = document.getElementById('input-password').value.trim();
+
+            if (!addressVal) return showToast("يرجى إدخال عنوان المحفظة!", "error");
+            if (!passVal) return showToast("يرجى إدخال كلمة مرور السحب!", "error");
+
+            const btnSave = document.getElementById('btn-save');
+            btnSave.disabled = true;
+            btnSave.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري الحفظ...';
+
+            try {
+                const userRef = doc(db, "users", currentUser.uid);
+                const methodKey = currentSelectedMethod; 
+                const netName = methodKey === 'OKX' ? 'Tron Network (TRC20)' : 'BNB Smart Chain (BEP20)';
+
+                await setDoc(userRef, {
+                    walletAddress: addressVal,
+                    withdrawPassword: passVal,
+                    walletNetwork: `${methodKey} (${netName})`,
+                    savedWallets: {
+                        ...(userData.savedWallets || {}),
+                        [methodKey]: {
+                            address: addressVal,
+                            password: passVal,
+                            network: netName
+                        }
+                    }
+                }, { merge: true });
+
+                showToast("تم حفظ بيانات السحب بنجاح!", "success");
+                document.getElementById('input-address').value = "";
+                document.getElementById('input-password').value = "";
+            } catch (err) {
+                showToast("حدث خطأ أثناء الحفظ: " + err.message, "error");
+            } finally {
+                btnSave.disabled = false;
+                btnSave.innerHTML = '<i class="fa-solid fa-chevron-left"></i> <span data-ar="حفظ البيانات" data-en="Save Data">حفظ البيانات</span> <i class="fa-solid fa-floppy-disk"></i>';
+                if(window.updateLanguage) window.updateLanguage();
+            }
+        };
+
+        window.deleteSavedData = async function(netKey) {
+            if (!navigator.onLine) return showToast("لا يوجد اتصال بالإنترنت!", "error");
+            if (!currentUser) return;
+
+            if(!confirm(`هل أنت تأكد من رغبتك في حذف بيانات محفظة ${netKey}؟`)) return;
+
+            try {
+                const userRef = doc(db, "users", currentUser.uid);
+                const updatedWallets = { ...(userData.savedWallets || {}) };
+                delete updatedWallets[netKey];
+
+                const updates = { savedWallets: updatedWallets };
+
+                if (userData.walletNetwork && userData.walletNetwork.includes(netKey)) {
+                    updates.walletAddress = deleteField();
+                    updates.withdrawPassword = deleteField();
+                    updates.walletNetwork = deleteField();
+                }
+
+                await updateDoc(userRef, updates);
+                showToast("تم حذف المحفظة بنجاح!", "success");
+            } catch (err) {
+                showToast("حدث خطأ أثناء الحذف: " + err.message, "error");
+            }
+        };
+    </script>
+
+    <!-- Language support script -->
+    <script src="language.js"></script>
+
+</body>
+</html>
