@@ -1123,9 +1123,15 @@
    <!-- JavaScript البرمجي الآمن والمعالج بالكامل -->
 <script>
     // 1. إعدادات Firebase
-    const firebaseConfig = {
-        databaseURL: "https://trading-app-task-default-rtdb.firebaseio.com/"
-    };
+ const firebaseConfig = {
+          apiKey: "AIzaSyCa3nVSth5Jhhuhvblw23w0uxzR1VJHLOo",
+          authDomain: "yaqoout-b4c83.firebaseapp.com",
+          projectId: "yaqoout-b4c83",
+          storageBucket: "yaqoout-b4c83.firebasestorage.app",
+          messagingSenderId: "21558070357",
+          appId: "1:21558070357:web:6237dcf59b162b5dae18dc"
+      };
+
 
     if (!firebase.apps.length) {
         firebase.initializeApp(firebaseConfig);
@@ -1239,19 +1245,22 @@
     }
 
     // 4. إدارة المصادقة والمزامنة السحابية
-    function initAuthAndLoadData(onSuccess) {
-        auth.onAuthStateChanged((user) => {
-            if (user) {
-                userId = user.uid;
-                loadUserData(onSuccess);
-            } else {
-                auth.signInAnonymously().catch((error) => {
-                    console.error("Firebase Auth Error:", error);
-                    showToast(getText('authError'), true);
-                });
-            }
-        });
-    }
+   function initAuthAndLoadData(onSuccess) {
+    auth.onAuthStateChanged((user) => {
+        if (user) {
+            userId = user.uid;
+            loadUserData(onSuccess);
+        } else {
+            auth.signInAnonymously().catch((error) => {
+                console.error("Firebase Auth Error:", error);
+                showToast("حدث خطأ بالاتصال، تم تشغيل الوضع المحلي", true);
+                
+                // الحل هنا: إجبار التطبيق على إكمال التحميل حتى لو فشل الفايربيس
+                if (onSuccess) onSuccess(); 
+            });
+        }
+    });
+}
 
     function syncDataToCloud() {
         if (!userId) return;
