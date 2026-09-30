@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
@@ -515,6 +514,7 @@
         .vip-subtext { font-size: 10px; color: var(--text-muted); margin-top: -6px; }
         .vip-price { font-size: 15px; font-weight: 900; color: #ffffff; margin: 2px 0; }
         .vip-btn { width: 100%; padding: 8px 0; border-radius: 8px; font-size: 12px; font-weight: 800; cursor: pointer; transition: all 0.25s ease; }
+        .vip-btn:disabled { cursor: not-allowed; opacity: 0.8; }
 
         .benefits-card {
             background: linear-gradient(145deg, rgba(2, 10, 20, 0.95), rgba(0, 243, 166, 0.05));
@@ -1123,7 +1123,7 @@
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
     import { getAuth, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
-    import { getFirestore, doc, onSnapshot, updateDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+    import { getFirestore, doc, onSnapshot, updateDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
     // 1. إعدادات Firebase
     const firebaseConfig = {
@@ -1140,6 +1140,9 @@
     const db = getFirestore(app);
 
     let userId = null;
+    let isSubmitting = false;
+    let isChangingPlan = false;
+    window.serverTimeOffset = 0; // الفرق بالفروقات الزمنية بين هاتف العميل وسيرفر قاعدة البيانات
 
     // دوال الأمان الحسابي لمنع مشاكل الفواصل العشرية
     function safeAdd(a, b) {
@@ -1150,13 +1153,22 @@
         return Math.round((Number(a) - Number(b)) * 10000) / 10000;
     }
 
+    // الاعتماد الكامل على وقت خادم قاعدة البيانات لمنع التلاعب بساعة الهاتف
+    function getServerNow() {
+        return new Date(Date.now() + (window.serverTimeOffset || 0));
+    }
+
     function getTodayDateString() {
-        return new Date().toISOString().split('T')[0];
+        const d = getServerNow();
+        const year = d.getUTCFullYear();
+        const month = String(d.getUTCMonth() + 1).padStart(2, '0');
+        const day = String(d.getUTCDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
     }
 
     function getNextUTCMidnightTimestamp() {
-        const now = new Date();
-        return Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1, 0, 0, 0, 0);
+        const d = getServerNow();
+        return Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate() + 1, 0, 0, 0, 0);
     }
 
     // 2. تشفير الإجابات
@@ -1221,7 +1233,7 @@
         return translations['ar'][key];
     }
 
-    // 4. المزامنة السحابية مع Firestore
+    // 4. المزامنة السحابية مع Firestore مع تحديث timestamp الخادم
     async function syncDataToCloud() {
         if (!userId) return;
         
@@ -1231,7 +1243,8 @@
             solvedToday: appData.solvedToday,
             todayEarned: appData.todayEarned || 0,
             lastDate: appData.lastDate,
-            qIndex: appData.qIndex
+            qIndex: appData.qIndex,
+            lastServerTime: serverTimestamp() // يُجبر السيرفر على حفظ وقته الحقيقي
         };
 
         if (navigator.onLine) {
@@ -1257,7 +1270,7 @@
         return false;
     }
 
-    // 5. إحصائيات الباقات الحسابية الدقيقة
+    // 5. إحصائيات الباقات الحسابية الدقيقة وتجميع الباقات المفعّلة
     function getAggregatedStats() {
         const keys = Object.keys(appData.activePlans || {});
         if (keys.length === 0) {
@@ -1317,7 +1330,7 @@
         const stats = getAggregatedStats();
         
         document.getElementById('val-level').innerText = stats.levelText;
-        document.getElementById('val-balance').innerText = parseFloat(appData.balance.toFixed(4));
+        document.getElementById('val-balance').innerText = parseFloat((appData.balance || 0).toFixed(4));
         document.getElementById('val-reward').innerText = parseFloat(stats.currentReward.toFixed(3));
         document.getElementById('val-qs').innerText = `${appData.solvedToday} / ${stats.totalLimit}`;
         document.getElementById('q-total').innerText = stats.totalLimit || "0";
@@ -1341,6 +1354,9 @@
                     btn.innerText = "مفعل حالياً";
                     btn.style.background = "rgba(0,243,166,0.3)";
                     btn.style.color = "#fff";
+                    btn.disabled = true; // تعطيل الزر لمنع تكرار تفعيل الباقة المفعّلة
+                } else {
+                    btn.disabled = false;
                 }
             }
         });
@@ -1415,48 +1431,55 @@
         document.getElementById('options-box').innerHTML = html;
     };
 
-    // 8. التأكيد والتحقق الحسابي الدقيق
-    window.submitAnswer = function() {
-        checkDailyReset();
-        const stats = getAggregatedStats();
-        if (appData.solvedToday >= stats.totalLimit || stats.totalLimit === 0) return;
-        
-        if (appData.selectedOpt === null) {
-            showToast(getText('selectAns'), true);
-            return;
-        }
+    // 8. التأكيد والتحقق الحسابي الدقيق مع قفل الأمان لمنع الضغط المكرر
+    window.submitAnswer = async function() {
+        if (isSubmitting) return; // منع الضغط المكرر
+        isSubmitting = true;
 
-        const curr = questionsList[appData.qIndex % questionsList.length];
-        const selectedValue = curr.opts[appData.selectedOpt];
-        const computedHash = getAnsHash(curr.q, selectedValue);
+        try {
+            checkDailyReset();
+            const stats = getAggregatedStats();
+            if (appData.solvedToday >= stats.totalLimit || stats.totalLimit === 0) return;
+            
+            if (appData.selectedOpt === null) {
+                showToast(getText('selectAns'), true);
+                return;
+            }
 
-        if (computedHash === curr.ansHash) {
-            clearInterval(appData.timerInterval);
-            
-            // تحديد الربح المستحق لهذه المهمة بالذات
-            const earnedReward = stats.taskRewards[appData.solvedToday] || stats.currentReward;
-            
-            appData.balance = safeAdd(appData.balance, earnedReward);
-            appData.todayEarned = safeAdd(appData.todayEarned || 0, earnedReward);
-            appData.solvedToday++;
-            
-            document.getElementById('result-earned').innerText = `+ ${earnedReward} USDT`;
-            document.getElementById('streak-val').innerText = `+ ${appData.todayEarned} USDT`;
-            
-            showToast(`${getText('correctAns')} +${earnedReward} USDT`, false);
+            const curr = questionsList[appData.qIndex % questionsList.length];
+            const selectedValue = curr.opts[appData.selectedOpt];
+            const computedHash = getAnsHash(curr.q, selectedValue);
 
-            document.getElementById('question-view').style.display = 'none';
-            document.getElementById('wrong-view').style.display = 'none';
-            document.getElementById('result-view').style.display = 'flex';
-            
-            syncDataToCloud();
-            renderDashboard();
-        } else {
-            clearInterval(appData.timerInterval);
-            document.getElementById('question-view').style.display = 'none';
-            document.getElementById('result-view').style.display = 'none';
-            document.getElementById('wrong-view').style.display = 'flex';
-            document.getElementById('hint-box').style.display = 'none';
+            if (computedHash === curr.ansHash) {
+                clearInterval(appData.timerInterval);
+                
+                // تحديد الربح المستحق لهذه المهمة بالذات
+                const earnedReward = stats.taskRewards[appData.solvedToday] || stats.currentReward;
+                
+                appData.balance = safeAdd(appData.balance, earnedReward);
+                appData.todayEarned = safeAdd(appData.todayEarned || 0, earnedReward);
+                appData.solvedToday++;
+                
+                document.getElementById('result-earned').innerText = `+ ${earnedReward} USDT`;
+                document.getElementById('streak-val').innerText = `+ ${appData.todayEarned} USDT`;
+                
+                showToast(`${getText('correctAns')} +${earnedReward} USDT`, false);
+
+                document.getElementById('question-view').style.display = 'none';
+                document.getElementById('wrong-view').style.display = 'none';
+                document.getElementById('result-view').style.display = 'flex';
+                
+                await syncDataToCloud();
+                renderDashboard();
+            } else {
+                clearInterval(appData.timerInterval);
+                document.getElementById('question-view').style.display = 'none';
+                document.getElementById('result-view').style.display = 'none';
+                document.getElementById('wrong-view').style.display = 'flex';
+                document.getElementById('hint-box').style.display = 'none';
+            }
+        } finally {
+            isSubmitting = false;
         }
     };
 
@@ -1515,9 +1538,9 @@
         const el = document.getElementById('val-reset-timer');
 
         appData.resetTimerInterval = setInterval(() => {
-            const now = new Date().getTime();
+            const nowMs = getServerNow().getTime();
             const targetMidnight = getNextUTCMidnightTimestamp();
-            let diffSec = Math.floor((targetMidnight - now) / 1000);
+            let diffSec = Math.floor((targetMidnight - nowMs) / 1000);
 
             if (diffSec <= 0 || checkDailyReset()) {
                 renderDashboard();
@@ -1533,40 +1556,48 @@
         }, 1000);
     }
 
-    // 10. تفعيل الباقات بخصم دقيق وموثوق
+    // 10. تفعيل الباقات بخصم دقيق وموثوق والفتح الفوري للأسئلة
     window.changePlan = async function(planKey, levelName, limit, rewardVal, price) {
-        if (appData.activePlans && appData.activePlans[planKey]) {
-            showToast(getText('alreadySub'), true);
-            return;
+        if (isChangingPlan) return;
+        isChangingPlan = true;
+
+        try {
+            if (appData.activePlans && appData.activePlans[planKey]) {
+                showToast(getText('alreadySub'), true);
+                return;
+            }
+
+            if (price > 0 && appData.balance < price) {
+                showToast(getText('noBalance'), true);
+                return;
+            }
+
+            if (price > 0) {
+                appData.balance = safeSub(appData.balance, price);
+            }
+            
+            if (!appData.activePlans) appData.activePlans = {};
+
+            appData.activePlans[planKey] = {
+                id: planKey,
+                name: levelName,
+                limit: limit,
+                reward: rewardVal,
+                price: price
+            };
+
+            // إظهار واجهة السؤال فوراً بعد التفعيل
+            document.getElementById('result-view').style.display = 'none';
+            document.getElementById('wrong-view').style.display = 'none';
+            document.getElementById('question-view').style.display = 'flex';
+
+            await syncDataToCloud();
+            renderDashboard();
+            renderQuestion(); // فتح الأسئلة المتاحة فوراً
+            showToast(`${getText('activated')} (${levelName})`, false);
+        } finally {
+            isChangingPlan = false;
         }
-
-        if (price > 0 && appData.balance < price) {
-            showToast(getText('noBalance'), true);
-            return;
-        }
-
-        if (price > 0) {
-            appData.balance = safeSub(appData.balance, price);
-        }
-        
-        if (!appData.activePlans) appData.activePlans = {};
-
-        appData.activePlans[planKey] = {
-            id: planKey,
-            name: levelName,
-            limit: limit,
-            reward: rewardVal,
-            price: price
-        };
-
-        document.getElementById('result-view').style.display = 'none';
-        document.getElementById('wrong-view').style.display = 'none';
-        document.getElementById('question-view').style.display = 'flex';
-
-        await syncDataToCloud();
-        renderDashboard();
-        renderQuestion();
-        showToast(`${getText('activated')} (${levelName})`, false);
     };
 
     // 11. التنبيهات
@@ -1589,7 +1620,7 @@
         }
     };
 
-    // 12. الاتصال اللحظي بـ Firestore مع معالجة المؤقت الخفي
+    // 12. الاتصال اللحظي بـ Firestore مع مزامنة وقت السيرفر
     onAuthStateChanged(auth, (user) => {
         if (user) {
             userId = user.uid;
@@ -1599,6 +1630,12 @@
                 if (docSnap.exists()) {
                     const data = docSnap.data();
                     
+                    // حساب فرق الوقت بين هاتف العميل والسيرفر لمنع التلاعب
+                    if (data.lastServerTime && typeof data.lastServerTime.toMillis === 'function') {
+                        const serverMs = data.lastServerTime.toMillis();
+                        window.serverTimeOffset = serverMs - Date.now();
+                    }
+
                     appData.balance = data.balance !== undefined ? parseFloat(data.balance) : appData.balance;
                     appData.activePlans = data.activePlans || appData.activePlans;
                     appData.solvedToday = data.solvedToday !== undefined ? data.solvedToday : appData.solvedToday;
@@ -1622,8 +1659,6 @@
     });
 
 </script>
-
-
 
 </body>
 </html>
