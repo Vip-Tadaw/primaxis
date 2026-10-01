@@ -1109,7 +1109,7 @@
         </a> 
         <a href="quantify.html" class="nav-item active"> 
             <i class="fa-solid fa-bolt"></i> 
-            <span data-ar="المهام" data-en="Quantify">المهام</span> 
+            <span data-ar="تحديد الكمية" data-en="Quantify">تحديد الكمية</span> 
         </a> 
         <a href="invite.html" class="nav-item"> 
             <i class="fa-solid fa-share-from-square"></i> 
@@ -1159,8 +1159,12 @@
         return new Date(Date.now() + (window.serverTimeOffset || 0));
     }
 
+    // إضافة فرق التوقيت الخاص ببغداد (3 ساعات)
+    const BAGHDAD_OFFSET = 3 * 60 * 60 * 1000;
+
     function getTodayDateString() {
-        const d = getServerNow();
+        // نجلب وقت السيرفر ونضيف عليه 3 ساعات لنحصل على يوم بغداد الحالي
+        const d = new Date(getServerNow().getTime() + BAGHDAD_OFFSET);
         const year = d.getUTCFullYear();
         const month = String(d.getUTCMonth() + 1).padStart(2, '0');
         const day = String(d.getUTCDate()).padStart(2, '0');
@@ -1168,10 +1172,12 @@
     }
 
     function getNextUTCMidnightTimestamp() {
-        const d = getServerNow();
-        return Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate() + 1, 0, 0, 0, 0);
+        // نحسب متى سيكون منتصف الليل بتوقيت بغداد
+        const d = new Date(getServerNow().getTime() + BAGHDAD_OFFSET);
+        const nextMidnightBaghdad = Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate() + 1, 0, 0, 0, 0);
+        // نطرح الـ 3 ساعات لنرجع الطابع الزمني العالمي الحقيقي لفايربيس
+        return nextMidnightBaghdad - BAGHDAD_OFFSET;
     }
-
     // 2. تشفير الإجابات
     const HASH_SALT = "TaskApp_Secure_2026_xKey";
 
@@ -1271,7 +1277,7 @@
         return false;
     }
 
-    // 5. إحصائيات الباقات الحسابية الدقيقة وتجميع الباقات المفعّلة
+   // 5. إحصائيات الباقات الحسابية الدقيقة وتجميع الباقات المفعّلة (مُعدّلة لحساب الأرباح حسب أسبقية التفعيل)
     function getAggregatedStats() {
         const keys = Object.keys(appData.activePlans || {});
         if (keys.length === 0) {
@@ -1284,13 +1290,19 @@
             };
         }
 
-        const planOrder = ['free', 'vip1', 'vip2', 'vip3', 'vip4', 'vip5'];
+        // ترتيب الباقات المفعّلة حسب وقت تفعيلها (من الأقدم إلى الأحدث)
+        const sortedKeys = keys.sort((a, b) => {
+            const tA = appData.activePlans[a].activatedAt || 0;
+            const tB = appData.activePlans[b].activatedAt || 0;
+            return tA - tB;
+        });
+
         let totalLimit = 0;
         let totalPotentialProfit = 0;
         let planNames = [];
         let taskRewards = [];
 
-        planOrder.forEach(k => {
+        sortedKeys.forEach(k => {
             const p = appData.activePlans[k];
             if (p) {
                 totalLimit += p.limit;
@@ -1298,20 +1310,6 @@
                 planNames.push(p.name);
                 for (let i = 0; i < p.limit; i++) {
                     taskRewards.push(p.reward);
-                }
-            }
-        });
-
-        keys.forEach(k => {
-            if (!planOrder.includes(k)) {
-                const p = appData.activePlans[k];
-                if (p) {
-                    totalLimit += p.limit;
-                    totalPotentialProfit = safeAdd(totalPotentialProfit, p.limit * p.reward);
-                    planNames.push(p.name);
-                    for (let i = 0; i < p.limit; i++) {
-                        taskRewards.push(p.reward);
-                    }
                 }
             }
         });
@@ -1324,7 +1322,6 @@
 
         return { totalLimit, taskRewards, currentReward, totalPotentialProfit, levelText };
     }
-
     // 6. عرض البيانات
     function renderDashboard() {
         checkDailyReset();
@@ -1557,7 +1554,7 @@ document.getElementById('val-reward').innerText = parseFloat(stats.totalPotentia
         }, 1000);
     }
 
-    // 10. تفعيل الباقات بخصم دقيق وموثوق والفتح الفوري للأسئلة
+   // 10. تفعيل الباقات بخصم دقيق وموثوق والفتح الفوري للأسئلة
     window.changePlan = async function(planKey, levelName, limit, rewardVal, price) {
         if (isChangingPlan) return;
         isChangingPlan = true;
@@ -1579,12 +1576,14 @@ document.getElementById('val-reward').innerText = parseFloat(stats.totalPotentia
             
             if (!appData.activePlans) appData.activePlans = {};
 
+            // حفظ الباقة مع تسجيل وقت تفعيلها بدقة
             appData.activePlans[planKey] = {
                 id: planKey,
                 name: levelName,
                 limit: limit,
                 reward: rewardVal,
-                price: price
+                price: price,
+                activatedAt: getServerNow().getTime() // تسجيل وقت التفعيل
             };
 
             // إظهار واجهة السؤال فوراً بعد التفعيل
